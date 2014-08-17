@@ -50,7 +50,7 @@
     }
 
     /**
-     * export namespace to global object.
+     * 向全局对象导出命名空间.
      * "a.b.c" -> a = {};a.b={};a.b.c={};
      * @param {string} name eg: a.b.c.
      * @param {*=} opt_object (optional) exporting object.
@@ -60,17 +60,10 @@
         var parts = name.split('.');
         var cur = global;
 
-        // Internet Explorer exhibits strange behavior when throwing errors from
-        // methods externed in this manner.
+        // todo
         if (!(parts[0] in cur) && cur.execScript) {
             cur.execScript('var ' + parts[0]);
         }
-
-        // Some Browsers can not parse the code: for((a in b); c;);
-        // This pattern of code is produced by the JavaScript Compiler when
-        // it collapses the statement above into the conditional loop below.
-        // To prevent this from happening, use a for-loop and reserve the init
-        // logic as below.
 
         // Parentheses added to eliminate strict JS warning in FireFox.
         for (var part; parts.length && (part = parts.shift());) {
@@ -85,12 +78,7 @@
     }
 
     /**
-     * Wrapper function fallback to do a global export if users do not import
-     * KernelJS as their module loader. We can provide single logic module for
-     * any page, any user. But generally, we expect use KernelJS to load js file.
-     * I hate use a CMD way to load module in browser side, such as sync xhr solution
-     * or write script tag into document.
-     *
+     * 包裹器函数在没有AMD loader(KernelJS)的情况下降级地去向全局对象导出命名空间规则的对象.
      * @param {string} name
      * @param {array} deps
      * @param {function} factory
