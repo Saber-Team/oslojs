@@ -1,4 +1,4 @@
 SogouJS
 =======
 
-Basic JavaScript Library
+Sogou JavaScript Library
