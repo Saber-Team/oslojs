@@ -33,9 +33,9 @@
     }
 
     /**
-     * Check for whether objects needed exist, this only done in
-     * non-loader environment.
-     * @param {array|string} deps
+	 * 轮训检查依赖项是否都存在, 只在不存在模块加载器的环境中执行. 返回依赖
+	 * 模块的数组.
+     * @param {Array|String} deps
      * @return {Array}
      */
     function checkDependency(deps) {
