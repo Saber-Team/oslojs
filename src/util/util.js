@@ -35,7 +35,7 @@
      */
     function bindNative_(fn, selfObj, var_args) {
         // fn.bind.call(fn,selfObj,var_args)的一个变体就是
-        // fn.call(fn.bind, arguments)
+        // fn.call(fn.bind, fn, selfObj, war_args)
         return /** @type {!Function} */ (fn.call.apply(fn.bind, arguments));
     }
 
@@ -52,7 +52,7 @@
         if (arguments.length > 2) {
             var boundArgs = AP.slice.call(arguments, 2);
             return function() {
-                // Prepend the bound arguments to the current arguments.
+                // 将之前保留的形参插入到新参数之前.
                 var newArgs = AP.slice.call(arguments);
                 AP.unshift.apply(newArgs, boundArgs);
                 return fn.apply(selfObj, newArgs);
@@ -74,11 +74,9 @@
     }
 
     /**
-     * Returns true if the object looks like an array. To qualify as array like
-     * the value needs to be either a NodeList or an object with a Number length
-     * property.
-     * @param {*} val Variable to test.
-     * @return {boolean} Whether variable is an array.
+     * 判断对象是否类数组. NodeList或者一个带有length属性的对象都会通过测试.
+     * @param {*} val 测试的对象.
+     * @return {boolean} 该对象是否类数组.
      */
     function isArrayLike(val) {
         var type = typeof val;
@@ -89,7 +87,7 @@
      * Like bind(), except that a 'this object' is not required. Useful when the
      * target function is already bound.
      *
-     * Usage:
+     * 用法:
      * var g = partial(f, arg1, arg2);
      * g(arg3, arg4);
      *
@@ -101,7 +99,7 @@
     function partial(fn, var_args) {
         var args = AP.slice.call(arguments, 1);
         return function() {
-            // Prepend the bound arguments to the current arguments.
+            // 将之前保留的形参插入到新参数之前.
             var newArgs = AP.slice.call(arguments);
             newArgs.unshift.apply(newArgs, args);
             return fn.apply(this, newArgs);
@@ -139,7 +137,7 @@
          * Remaining arguments specified at call-time are appended to the pre-specified
          * ones.
          *
-         * Usage:
+         * 用法:
          * <pre>var barMethBound = bind(myFunction, myObj, 'arg1', 'arg2');
          * barMethBound('arg3', 'arg4');</pre>
          *
@@ -248,8 +246,8 @@
         removeUid: function(obj) {
             if (obj === null) throw new Error('Can not remove a uid from null');
 
-            // IE中，DOM节点并非是Object的实例并且delete dom节点的属性会抛出异常。
-            // 所以要用removeAttribute。
+            // IE中, DOM节点并非是Object的实例并且delete dom节点的属性会抛出异常.
+            // 所以要用removeAttribute.
             if ('removeAttribute' in obj)
                 obj.removeAttribute(UID_PROP);
             /** @preserveTry */
@@ -272,9 +270,8 @@
             sub.prototype.constructor = sub;
         },
         /**
-         * Calls {@code dispose} on the argument if it supports it. If obj is not an
-         *     object with a dispose() method, this is a no-op.
-         * @param {*} obj The object to dispose of.
+         * 若一个对象含有dispose()则析构该对象.
+         * @param {*} obj
          */
         dispose: function(obj) {
             if (obj && typeof obj.dispose == 'function') {
