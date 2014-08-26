@@ -132,6 +132,20 @@
         }
 
         /**
+         * 在数组中搜索符合条件的第一个项.
+         * @param {Array.<T>|ArrayLike} arr 要遍历的对象.
+         * @param {?function(this:S, T, number, ?) : boolean} f 匹配函数.有3个形参(the element, the index and the array)
+         *     返回布尔值.
+         * @param {S=} opt_obj 函数执行上下文.
+         * @return {T} 第一个通过测试的项,也可能是null.
+         * @template T,S
+         */
+        function find(arr, f, opt_obj) {
+            var i = findIndex(arr, f, opt_obj);
+            return i < 0 ? null : util.isString(arr) ? arr.charAt(i) : arr[i];
+        }
+
+        /**
          * 在数组中搜索符合条件的第一个项的索引.
          * @param {Array.<T>|ArrayLike} arr 要遍历的对象.
          * @param {?function(this:S, T, number, ?) : boolean} f 匹配函数.有3个形参(the element, the index and the array)
@@ -418,6 +432,7 @@
         return {
             indexOf: indexOf,
             lastIndexOf: lastIndexOf,
+            find: find,
             findIndex: findIndex,
             findIndexRight: findIndexRight,
             forEach: forEach,
