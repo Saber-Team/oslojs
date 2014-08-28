@@ -16,11 +16,6 @@ module.exports = {
             src: ['*.js', '*/**.js'],
             dest: 'build',
             ext: '.js'
-            /*    
-            function(path) {
-                console.log(path)
-                return '../build/' + path.replace('-debug', '')
-            }*/
         }]
         /*
         options: {
