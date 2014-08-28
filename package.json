@@ -1,0 +1,11 @@
+{
+  "name": "SogouJS",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-cssmin": "~0.6.2",
+    "grunt-contrib-csslint": "~0.1.2"
+  }
+}
