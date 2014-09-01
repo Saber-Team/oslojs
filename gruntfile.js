@@ -1,10 +1,12 @@
+
+
 module.exports = function(grunt) {
 
     // 项目配置信息
 	grunt.initConfig({
-        // 检查源代码中的语法错误
-        // jshint: require('./scripts/jshint.js'),
-        // 合并js文件操作
+        // 检查源代码
+        jshint: require('./scripts/jshint.js'),
+        // 合并js文件
         uglify: require('./scripts/uglify.js')
         // 检查css
         //csslint: require('./scripts/csslint.js'),
@@ -20,6 +22,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
 
 
+    // 执行lib的代码检查
+    grunt.registerTask('jshint', function() {
+        grunt.task.run(['jshint']);
+    });
+
     // 执行lib的代码压缩
     grunt.registerTask('jsmin', function() {
         grunt.task.run(['uglify']);
@@ -28,7 +35,7 @@ module.exports = function(grunt) {
 
     // 默认执行所有项目的构建工作
     grunt.registerTask('default', function() {
-        grunt.task.run(['jsmin']);
+        grunt.task.run(['jshint', 'jsmin']);
     });
 
 };
