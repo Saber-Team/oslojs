@@ -2,13 +2,13 @@ var grunt = require('grunt');
 
 module.exports = {
     build: {
-        src: ['*.js', '*/**.js']
+        src: ['src/*.js', 'src/*/**.js']
     },
     filter: function (src) {
         return !/\/lib\/sogou\//i.test(src);
     },
+    // options here to override JSHint defaults
     options: {
-        // options here to override JSHint defaults
         undef: true,
         unused: true,
         es3: true,
@@ -17,6 +17,9 @@ module.exports = {
             console: false,
             window: false,
             document: false
-        }
+        },
+        reporter: require('jshint-stylish'),
+        ignores: ['scripts/', 'build/'],
+        force: true
     }
 };
