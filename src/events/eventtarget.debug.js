@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Events.EventTarget',
+sogou('Sogou.Events.EventTarget',
     [
         'Sogou.Util',
         'Sogou.Disposable',
@@ -163,7 +163,7 @@
                 for (var i = 0; i < listenerArray.length; ++i) {
                     var listener = listenerArray[i];
                     // listener被标记为removed.
-                    if (listener && !listener.removed && listener.capture == capture) {
+                    if (listener && !listener.removed && listener.capture === capture) {
                         var listenerFn = listener.listener;
                         var listenerHandler = listener.handler || listener.src;
 
@@ -174,7 +174,7 @@
                     }
                 }
 
-                return rv && eventObject.returnValue_ != false;
+                return rv && eventObject.returnValue_ !== false;
             },
             /** @override */
             getListeners: function(type, capture) {
@@ -201,6 +201,7 @@
          */
         EventTarget.dispatchEventInternal_ = function(target, e, opt_ancestorsTree) {
             var type = e.type || /** @type {string} */ (e);
+            var i;
 
             // 如果接收的是个字符串, 基于EventBase创建事件对象, 保证preventDefault和stopPropagation
             // 两个方法可用.
@@ -218,7 +219,7 @@
 
             // 祖先树触发捕获阶段.
             if (opt_ancestorsTree) {
-                for (var i = opt_ancestorsTree.length - 1; !e.propagationStopped_ && i >= 0;
+                for (i = opt_ancestorsTree.length - 1; !e.propagationStopped_ && i >= 0;
                      i--) {
                     currentTarget = e.currentTarget = opt_ancestorsTree[i];
                     rv = currentTarget.fireListeners(type, true, e) && rv;

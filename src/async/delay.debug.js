@@ -6,7 +6,7 @@
  * @see ../demos/timers.html
  */
 
-;sogou('Sogou.Async.Delay',
+sogou('Sogou.Async.Delay',
     [
         'Sogou.Util',
         'Sogou.Disposable',
@@ -114,7 +114,7 @@
          * @return {boolean} 返回当前delay对象是否未被触发.
          */
         Delay.prototype.isActive = function() {
-            return this.id_ != 0;
+            return this.id_ !== 0;
         };
 
         /**

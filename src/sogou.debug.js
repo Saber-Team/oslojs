@@ -40,11 +40,14 @@
      */
     function checkDependency(deps) {
         var ret = [];
-        if (toString.call(deps) === '[object String]')
+        if (toString.call(deps) === '[object String]') {
             ret.push(check_(deps));
-        else if (toString.call(deps) === '[object Array]')
-            for (var i = 0; i < deps.length; ++i)
+        } else if (toString.call(deps) === '[object Array]') {
+            for (var i = 0; i < deps.length; ++i) {
                 ret.push(check_(deps[i]));
+            }
+                
+        }
 
         return ret;
     }
@@ -83,11 +86,11 @@
      * @param {array} deps
      * @param {function} factory
      */
-    if (typeof module != 'undefined' && module.exports) {
+    if (typeof module !== 'undefined' && module.exports) {
         global.sogou = function(name, deps, factory) {
             module.exports = factory();
         };
-    } else if (typeof global['define'] === 'function' && global['define'].amd) {
+    } else if (typeof global.define === 'function' && global.define.amd) {
         global.sogou = function(name, deps, factory) {
             define(name, deps, factory);
         };

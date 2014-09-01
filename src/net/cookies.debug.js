@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Net.Cookies',
+sogou('Sogou.Net.Cookies',
     ['Sogou.Util'],
     function(util) {
 
@@ -119,7 +119,7 @@
                 expiresStr = '';
 
             // Case 2: 使得cookie过期.
-            } else if (opt_maxAge == 0) {
+            } else if (opt_maxAge === 0) {
                 // Note: 不用Jan 1, 1970 是因为 NS 4.76 会试图转化成本地时间, 如果本地时间在Jan 1, 1970之前,
                 // 浏览器会完全忽略Expires attribute.
                 var pastDate = new Date(1970, 1 /*Feb*/, 1);  // Feb 1, 1970
@@ -146,11 +146,11 @@
             var parts = this.getParts_();
             for (var i = 0, part; part = parts[i]; i++) {
                 // startsWith
-                if (part.lastIndexOf(nameEq, 0) == 0) {
+                if (part.lastIndexOf(nameEq, 0) === 0) {
                     return part.substr(nameEq.length);
                 }
                 // 空cookie
-                if (part == name) {
+                if (part === name) {
                     return '';
                 }
             }
@@ -217,7 +217,7 @@
         };
 
         /**
-         * 是否存在给定值的cookie. (This is an O(n) operation.)
+         * 是否存在给定值的cookie. (复杂度O(n))
          * @param {string} value 给定值.
          * @return {boolean}
          */
@@ -225,7 +225,7 @@
             // this O(n) in any case so lets do the trivial thing.
             var values = this.getKeyValues_().values;
             for (var i = 0; i < values.length; i++) {
-                if (values[i] == value) {
+                if (values[i] === value) {
                     return true;
                 }
             }
@@ -280,7 +280,8 @@
                 index, part;
             for (var i = 0; part = parts[i]; i++) {
                 index = part.indexOf('=');
-                if (index == -1) { // empty name
+                // empty name
+                if (index === -1) { 
                     keys.push('');
                     values.push(part);
                 } else {

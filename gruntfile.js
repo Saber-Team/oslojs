@@ -23,7 +23,7 @@ module.exports = function(grunt) {
 
 
     // 执行lib的代码检查
-    grunt.registerTask('jshint', function() {
+    grunt.registerTask('hint', function() {
         grunt.task.run(['jshint']);
     });
 
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 
     // 默认执行所有项目的构建工作
     grunt.registerTask('default', function() {
-        grunt.task.run(['jshint', 'jsmin']);
+        grunt.task.run(['hint', 'jsmin']);
     });
 
 };

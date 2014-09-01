@@ -1,12 +1,12 @@
 /**
  * @fileoverview 操作数组的一些基本方法.我本意不要涉及字符串的操作,虽然很多方法类似,
- *   但是参数的类型和返回值的类型不注意很容易出错,对于弱类型语言应警惕.关于String的操作可以
- *   按需加载Sogou.String包下的模块进行处理。
+ *     但是参数的类型和返回值的类型不注意很容易出错,对于弱类型语言应警惕.关于String的操作可以
+ *     按需加载Sogou.String包下的模块进行处理。
  * @modified Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Array',
+sogou('Sogou.Array',
     ['Sogou.Util'],
     function(util) {
 
@@ -67,7 +67,7 @@
                 return AP.indexOf.call(arr, obj, opt_fromIndex);
             } :
             function(arr, obj, opt_fromIndex) {
-                var fromIndex = opt_fromIndex == null ?
+                var fromIndex = util.isNull(opt_fromIndex) ?
                     0 : (opt_fromIndex < 0 ?
                     Math.max(0, arr.length + opt_fromIndex) : opt_fromIndex);
 
@@ -90,11 +90,11 @@
             function(arr, obj, opt_fromIndex) {
                 // FireFox在没传第三个参数的时候表现正常.但若用户没传第三个参数,代理方法里却把undefined值
                 // (或者null)传给原生方法, FF会把它当做0从而导致返回值永远是-1. 测试31.0版本仍没修复此问题.
-                var fromIndex = opt_fromIndex == null ? arr.length - 1 : opt_fromIndex;
+                var fromIndex = util.isNull(opt_fromIndex) ? arr.length - 1 : opt_fromIndex;
                 return AP.lastIndexOf.call(arr, obj, fromIndex);
             } :
             function(arr, obj, opt_fromIndex) {
-                var fromIndex = opt_fromIndex == null ? arr.length - 1 : opt_fromIndex;
+                var fromIndex = util.isNull(opt_fromIndex) ? arr.length - 1 : opt_fromIndex;
                 if (fromIndex < 0) {
                     fromIndex = Math.max(0, arr.length + fromIndex);
                 }
@@ -114,7 +114,7 @@
          */
         function removeAt(arr, i) {
             // splice返回删除项数组
-            return AP.splice.call(arr, i, 1).length == 1;
+            return AP.splice.call(arr, i, 1).length === 1;
         }
 
         /**

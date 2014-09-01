@@ -1,11 +1,10 @@
 var grunt = require('grunt');
-var website_config = grunt.file.readJSON('config/website.json');
 
 
 module.exports = {
 
-    website: {
-        src: website_config['appIndex']['css']
+    build: {
+        src: []
     },
     options: {
         banner: '/* My linted css file */',

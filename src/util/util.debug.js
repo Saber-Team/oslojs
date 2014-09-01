@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Util', [], function() {
+sogou('Sogou.Util', [], function() {
 
     'use strict';
 
@@ -16,7 +16,7 @@
     var UID_PROP = 'sogou_uid_' + ((Math.random() * 1e9) >>> 0);
 
     /**
-     * UID计数，简单的整形递增
+     * UID计数, 简单的整形递增
      * @type {number}
      * @private
      */
@@ -80,19 +80,18 @@
      */
     function isArrayLike(val) {
         var type = typeof val;
-        return isArray(val) || type == 'object' && typeof val.length == 'number';
+        return isArray(val) || type === 'object' && typeof val.length === 'number';
     }
 
     /**
-     * Like bind(), except that a 'this object' is not required. Useful when the
-     * target function is already bound.
-     *
+     * 类型功能在bind方法里也有, 这个方法不需要'this object'. 
+     * 当目标函数已经绑定的时候很有用.
      * 用法:
      * var g = partial(f, arg1, arg2);
      * g(arg3, arg4);
      *
-     * @param {Function} fn A function to partially apply.
-     * @param {...*} var_args Additional arguments that are partially applied to fn.
+     * @param {Function} fn 函数.
+     * @param {...*} var_args 预提供的形参.
      * @return {!Function} A partially-applied form of the function bind() was
      *     invoked as a method of.
      */
@@ -110,17 +109,16 @@
      * 在脚本加载的时候判断应该使用的bind版本
      * @return {Function}
      */
-    var bind = (function() {
+    var bindFn = (function() {
         var fn;
-        // TODO: narrow the type signature.
-        // NOTE: Somebody pulled base.js into the default Chrome
-        // extension environment. This means that for Chrome extensions, they get
-        // the implementation of Function.prototype.bind that calls bind
+        // NOTE: 如果开发者在Chrome插件环境中引入了sogoujs,
+        // this means that for Chrome extensions, they get
+        // the implementation of Function.prototype.bind that calls util.bind
         // instead of the native one. Even worse, we don't want to introduce a
-        // circular dependency between bind and Function.prototype.bind, so
+        // circular dependency between util.bind and Function.prototype.bind, so
         // we have to hack this to make sure it works correctly.
         if (Function.prototype.bind &&
-            Function.prototype.bind.toString().indexOf('native code') != -1)
+            Function.prototype.bind.toString().indexOf('native code') !== -1)
             fn = bindNative_;
         else
             fn = bindJs_;
@@ -128,15 +126,10 @@
         return fn;
     })();
 
-    // export
     return {
         /**
-         * Partially applies this function to a particular 'this object' and zero or
-         * more arguments. The result is a new function with some arguments of the first
-         * function pre-filled and the value of this 'pre-specified'.
-         * Remaining arguments specified at call-time are appended to the pre-specified
-         * ones.
-         *
+         * 为要执行的函数提供上下文,同时也可以预提供一些形参. 返回一个spec函数.
+         * 调用时加的形参会附加在预提供形参的后面.
          * 用法:
          * <pre>var barMethBound = bind(myFunction, myObj, 'arg1', 'arg2');
          * barMethBound('arg3', 'arg4');</pre>
@@ -149,13 +142,11 @@
          * @template T
          */
         bind: function(fn, selfObj, var_args) {
-            return bind.apply(null, arguments);
+            return bindFn.apply(null, arguments);
         },
         partial: partial,
         /**
-         * Copies all the members of a source object to a target object. This method
-         * does not work on all browsers for all objects that contain keys such as
-         * toString or hasOwnProperty. Use Object.extend for this purpose.
+         * 简单的对象混入, 更多问题参考Object.extend方法.
          * @param {Object} target Target.
          * @param {Object} source Source.
          * @return {Object}
@@ -181,13 +172,11 @@
          */
         isNumber: function(val) { return typeof val === 'number'; },
         /**
-         * Returns true if the specified value is a string.
-         * @param {*} val Variable to test.
-         * @return {boolean} Whether variable is a string.
+         * 返回是否一个字符串. 这里调用Object.prototype.toString比较多余.
+         * @param {*} val 要测试的对象.
+         * @return {boolean}
          */
         isString: function(val) {
-            // give up using toString solution here because I think it's
-            // not necessary.
             return typeof val === 'string';
         },
         /**
@@ -196,16 +185,15 @@
          * 最终我选择function也算作对象，因为它本身可以存储属性。
          * 对于特殊对象arguments，同null的情况一样。
          * @param {*} val Variable to test.
-         * @return {boolean} Whether variable is an object.
+         * @return {boolean}
          */
         isObject: function(val) {
             var type = typeof val;
-            return type == 'object' && val != null || type == 'function';
-            // return Object(val) === val also works, but is slower, especially if val is
-            // not an object.
+            return type === 'object' && val !== null || type === 'function';
+            // 用Object(val) === val也能达到目的但性能较慢,特别是val不是个object的时候.
         },
         /**
-         * If obj is undefined or null
+         * 判断一个对象是否undefined或者null
          * @param val
          * @return {Boolean}
          */
@@ -213,35 +201,33 @@
             return val === (void 0) || val === null;
         },
         /**
-         * Returns true if the specified value is not undefined.
-         * WARNING: Do not use this to test if an object has a property. Use the in
-         * operator instead.  Additionally, this function assumes that the global
-         * undefined variable has not been redefined.
-         * @param {*} val Variable to test.
-         * @return {boolean} Whether variable is defined.
+         * 测试对象是否一个undefined值. 
+         * Note: 如果只是比较obj === undefined不可靠. 特别是如果一个对象的属性设为undefined
+         * 的时候, 这时候用in去判断比较好. 还有就是这些都是假设undefined并未被赋予其他值.
+         * @param {*} val 测试对象.
+         * @return {boolean}
          */
         isDef: function(val) {
             return val !== (void 0);
         },
         /**
-         * 取得对象上的UID。不同sessions间对象的UID会改变，因为是每次随机生成，不在当前JS
-         * 生命周期了。It is unsafe to generate unique ID for function prototypes.
-         * @param {Object} obj The object to get the unique ID for.
-         * @return {number} The unique ID for the object.
+         * 取得对象上的UID. 不同sessions间对象的UID会改变,因为是每次随机生成,不在当前JS
+         * 生命周期了. 在函数的原型上生成UID不安全.
+         * @param {Object} obj 对象.
+         * @return {number} UID.
          */
         getUid: function(obj) {
-            if (obj === null) throw new Error('Can not get uid from null');
+            if (obj === null) 
+                throw new Error('Can not get uid from null');
 
-            // In Opera window.hasOwnProperty exists but always returns false so we avoid
-            // using it. As a consequence the unique ID generated for BaseClass.prototype
+            // Opera中有window.hasOwnProperty方法但永远返回false. 所以我们不用这个方法检测. 
+            // As a consequence the unique ID generated for BaseClass.prototype
             // and SubClass.prototype will be the same.
             return obj[UID_PROP] || (obj[UID_PROP] = ++uidCounter_);
         },
         /**
-         * Removes the unique ID from an object. This is useful if the object was
-         * previously mutated using {@code getUid} in which case the mutation is
-         * undone.
-         * @param {Object} obj The object to remove the unique ID field from.
+         * 移除对象上的UID. 如果该对象之前用的getUid,此处相当于undo这个操作.
+         * @param {Object} obj 要移除属性的对象.
          */
         removeUid: function(obj) {
             if (obj === null) throw new Error('Can not remove a uid from null');
@@ -262,10 +248,10 @@
          */
         inherits: function(sub, sup) {
             /** @constructor */
-            function tempCtor() {}
-            tempCtor.prototype = sup.prototype;
+            function TempCtor() {}
+            TempCtor.prototype = sup.prototype;
             sub.superClass_ = sup.prototype;
-            sub.prototype = new tempCtor();
+            sub.prototype = new TempCtor();
             /** @override */
             sub.prototype.constructor = sub;
         },
@@ -274,7 +260,7 @@
          * @param {*} obj
          */
         dispose: function(obj) {
-            if (obj && typeof obj.dispose == 'function') {
+            if (obj && typeof obj.dispose === 'function') {
                 obj.dispose();
             }
         },
@@ -296,13 +282,12 @@
          */
         global: this,
         /**
-         * @return {number} An integer value representing the number of milliseconds
-         *     between midnight, January 1, 1970 and the current time.
+         * @return {number} 返回1970年1月1日0时至今的毫秒数.
          */
-        now: (Date.now) || (function() {
+        now: Date.now || function() {
             // Unary plus operator converts its operand to a number which in the case of
             // a date is done by calling getTime().
             return +new Date();
-        })
+        }
     };
 });

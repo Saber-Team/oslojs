@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Disposable',
+sogou('Sogou.Disposable',
     ['Sogou.Util'],
     function(util) {
 
@@ -22,7 +22,7 @@
      * @return {boolean}
      */
     Disposable.isDisposed = function(obj) {
-        if (obj && typeof obj.isDisposed == 'function') {
+        if (obj && typeof obj.isDisposed === 'function') {
             return obj.isDisposed();
         }
         return false;
