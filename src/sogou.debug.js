@@ -91,9 +91,7 @@
             module.exports = factory();
         };
     } else if (typeof global.define === 'function' && global.define.amd) {
-        global.sogou = function(name, deps, factory) {
-            define(name, deps, factory);
-        };
+        global.sogou = global.define;
     } else {
         global.sogou = function(name, deps, factory) {
             var dList = checkDependency(deps);
