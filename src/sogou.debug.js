@@ -46,7 +46,6 @@
             for (var i = 0; i < deps.length; ++i) {
                 ret.push(check_(deps[i]));
             }
-                
         }
 
         return ret;
