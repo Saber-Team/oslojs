@@ -1,0 +1,337 @@
+<!--
+	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.*</title>
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/sogou.debug.js"></script>
+    <script src="../../src/util/util.debug.js"></script>
+</head>
+<body>
+    <div id="elem">
+        <span>One</span>
+        <span id="text">Two</span>
+        <span>Three</span>
+    </div>
+
+    <iframe name="f1" id="f1" src=""></iframe>
+    <iframe name="f2" id="f2" src=""></iframe>
+
+    <!-- include spec files here... -->
+    <script>
+
+        describe('Sogou.Util模块', function() {
+
+            var global = window;
+            var f1 = document.getElementById('f1'),
+                f2 = document.getElementById('f2');
+
+            var util = Sogou.Util;
+
+            function getFramedVars(name) {
+                var w = window.frames[name];
+                var doc = w.document;
+                doc.open();
+                doc.write('<script>' +
+                    'var a = [0, 1, 2];' +
+                    'var o = {a: 0, b: 1};' +
+                    'var n = 10e-2;' +
+                    'var b = true;' +
+                    'var s = "hello";' +
+                    'var nv = null;' +
+                    'var u = undefined;' +
+                    'var fv = function(){};' +
+                    '</' + 'script>');
+                doc.close();
+                return {
+                    'a': w.a,
+                    'o': w.o,
+                    'n': w.n,
+                    'b': w.b,
+                    's': w.s,
+                    'fv': w.fv,
+                    'nv': w.nv,
+                    'u': w.u
+                };
+            }
+
+            var framedVars = getFramedVars('f1');
+            var framedVars2 = getFramedVars('f2');
+            // remove iframe
+            var iframeElement = document.getElementById('f2');
+            iframeElement.parentNode.removeChild(iframeElement);
+
+
+            describe('类型判断', function() {
+
+                it('isArray判断是否一个数组', function() {
+
+                    var array = [1, 2, 3];
+                    var arrayWithLengthSet = [1, 2, 3];
+                    arrayWithLengthSet.length = 2;
+                    var objWithArrayFunctions = {slice: function() {}, length: 0};
+                    var object = {a: 1, b: 2, c: 3};
+                    var nullVar = null;
+                    var notDefined;
+                    var elem = document.getElementById('elem');
+                    var text = document.getElementById('text').firstChild;
+                    var impostor = document.body.getElementsByTagName('BOGUS');
+                    impostor.push = Array.prototype.push;
+                    impostor.pop = Array.prototype.pop;
+                    impostor.slice = Array.prototype.slice;
+                    impostor.splice = Array.prototype.splice;
+
+                    expect(util.isArray(array)).toBe(true);
+                    expect(util.isArray(arrayWithLengthSet)).toBe(true);
+                    expect(util.isArray(objWithArrayFunctions)).toBe(false);
+                    expect(util.isArray(object)).toBe(false);
+                    expect(util.isArray(nullVar)).toBe(false);
+                    expect(util.isArray(notDefined)).toBe(false);
+                    expect(util.isArray(elem.childNodes)).toBe(false);
+                    expect(util.isArray(text)).toBe(false);
+                    expect(util.isArray([elem.firstChild, elem.lastChild])).toBe(true);
+                    expect(util.isArray(impostor)).toBe(false);
+
+
+
+                    expect(util.isArray(framedVars.a)).toBe(true);
+                    expect(util.isArray(framedVars.o)).toBe(false);
+                    expect(util.isArray(framedVars.n)).toBe(false);
+                    expect(util.isArray(framedVars.b)).toBe(false);
+                    expect(util.isArray(framedVars.s)).toBe(false);
+                    expect(util.isArray(framedVars.nv)).toBe(false);
+                    expect(util.isArray(framedVars.u)).toBe(false);
+                    expect(util.isArray(framedVars.fv)).toBe(false);
+
+
+                    expect(util.isArray(framedVars2.a)).toBe(true);
+                    expect(util.isArray(framedVars2.o)).toBe(false);
+                    expect(util.isArray(framedVars2.n)).toBe(false);
+                    expect(util.isArray(framedVars2.b)).toBe(false);
+                    expect(util.isArray(framedVars2.s)).toBe(false);
+                    expect(util.isArray(framedVars2.nv)).toBe(false);
+                    expect(util.isArray(framedVars2.u)).toBe(false);
+                    expect(util.isArray(framedVars2.fv)).toBe(false);
+
+                });
+
+                it('isArrayLike判断是否类数组', function() {
+
+                    var array = [1, 2, 3];
+                    var objectWithNumericLength = {length: 2};
+                    var objectWithNonNumericLength = {length: 'a'};
+                    var object = {a: 1, b: 2};
+                    var nullVar = null;
+                    var notDefined;
+                    var elem = document.getElementById('elem');
+                    var text = document.getElementById('text').firstChild;
+
+                    expect(util.isArrayLike(array)).toBe(true);
+                    expect(util.isArrayLike(objectWithNumericLength)).toBe(true);
+                    expect(util.isArrayLike(objectWithNonNumericLength)).toBe(false);
+                    expect(util.isArrayLike(object)).toBe(false);
+                    expect(util.isArrayLike(nullVar)).toBe(false);
+                    expect(util.isArrayLike(notDefined)).toBe(false);
+                    expect(util.isArrayLike(elem.childNodes)).toBe(true);
+                    /*expect(util.isArrayLike(text)).toBe(false);*/
+                    expect(util.isArrayLike([elem.firstChild, elem.lastChild])).toBe(true);
+
+
+                    expect(util.isArrayLike(framedVars.a)).toBe(true);
+                    expect(util.isArrayLike(framedVars.o)).toBe(false);
+                    expect(util.isArrayLike(framedVars.n)).toBe(false);
+                    expect(util.isArrayLike(framedVars.b)).toBe(false);
+                    expect(util.isArrayLike(framedVars.s)).toBe(false);
+                    expect(util.isArrayLike(framedVars.nv)).toBe(false);
+                    expect(util.isArrayLike(framedVars.u)).toBe(false);
+                    expect(util.isArrayLike(framedVars.fv)).toBe(false);
+
+
+                    expect(util.isArrayLike(framedVars2.a)).toBe(true);
+                    expect(util.isArrayLike(framedVars2.o)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.n)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.b)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.s)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.nv)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.u)).toBe(false);
+                    expect(util.isArrayLike(framedVars2.fv)).toBe(false);
+                });
+
+                it('isObject判断是否对象', function() {
+
+                    var object = {a: 1, b: 2};
+                    var string = 'b';
+                    var nullVar = null;
+                    var notDefined;
+                    var array = [0, 1, 2];
+                    var fun = function() {};
+                    var elem = document.getElementById('elem');
+                    var text = document.getElementById('text').firstChild;
+
+                    expect(util.isObject(object)).toBe(true);
+                    expect(util.isObject(array)).toBe(true);
+                    expect(util.isObject(fun)).toBe(true);
+                    expect(util.isObject(string)).toBe(false);
+                    expect(util.isObject(nullVar)).toBe(false);
+                    expect(util.isObject(notDefined)).toBe(false);
+                    expect(util.isObject(elem)).toBe(true);
+                    expect(util.isObject(elem.childNodes)).toBe(true);
+                    expect(util.isObject(text)).toBe(true);
+
+
+                    expect(util.isObject(framedVars.a)).toBe(true);
+                    expect(util.isObject(framedVars.o)).toBe(true);
+                    expect(util.isObject(framedVars.n)).toBe(false);
+                    expect(util.isObject(framedVars.b)).toBe(false);
+                    expect(util.isObject(framedVars.s)).toBe(false);
+                    expect(util.isObject(framedVars.nv)).toBe(false);
+                    expect(util.isObject(framedVars.u)).toBe(false);
+                    expect(util.isObject(framedVars.fv)).toBe(true);
+
+
+                    expect(util.isObject(framedVars2.a)).toBe(true);
+                    expect(util.isObject(framedVars2.o)).toBe(true);
+                    expect(util.isObject(framedVars2.n)).toBe(false);
+                    expect(util.isObject(framedVars2.b)).toBe(false);
+                    expect(util.isObject(framedVars2.s)).toBe(false);
+                    expect(util.isObject(framedVars2.nv)).toBe(false);
+                    expect(util.isObject(framedVars2.u)).toBe(false);
+                    expect(util.isObject(framedVars2.fv)).toBe(true);
+                });
+
+                it('isNull判断是否null', function() {
+
+                    var notNull = 'foo';
+                    var nullVar = null;
+                    var notDefined;
+
+                    expect(util.isNull(notNull)).toBe(false);
+                    expect(util.isNull(nullVar)).toBe(true);
+                    expect(util.isNull(notDefined)).toBe(true);
+
+
+                    expect(util.isNull(framedVars.a)).toBe(false);
+                    expect(util.isNull(framedVars.o)).toBe(false);
+                    expect(util.isNull(framedVars.n)).toBe(false);
+                    expect(util.isNull(framedVars.b)).toBe(false);
+                    expect(util.isNull(framedVars.s)).toBe(false);
+                    expect(util.isNull(framedVars.nv)).toBe(true);
+                    expect(util.isNull(framedVars.u)).toBe(true);
+                    expect(util.isNull(framedVars.fv)).toBe(false);
+
+
+                    expect(util.isNull(framedVars2.a)).toBe(false);
+                    expect(util.isNull(framedVars2.o)).toBe(false);
+                    expect(util.isNull(framedVars2.n)).toBe(false);
+                    expect(util.isNull(framedVars2.b)).toBe(false);
+                    expect(util.isNull(framedVars2.s)).toBe(false);
+                    expect(util.isNull(framedVars2.nv)).toBe(true);
+                    expect(util.isNull(framedVars2.u)).toBe(true);
+                    expect(util.isNull(framedVars2.fv)).toBe(false);
+                });
+
+                it('isDef判断是否未定义', function() {
+
+                    var defined = 'foo';
+                    var nullVar = null;
+                    var notDefined;
+
+                    expect(util.isDef(defined)).toBe(true);
+                    expect(util.isDef(nullVar)).toBe(true);
+                    expect(util.isDef(notDefined)).toBe(false);
+
+
+                    expect(util.isDef(framedVars.a)).toBe(true);
+                    expect(util.isDef(framedVars.o)).toBe(true);
+                    expect(util.isDef(framedVars.n)).toBe(true);
+                    expect(util.isDef(framedVars.b)).toBe(true);
+                    expect(util.isDef(framedVars.s)).toBe(true);
+                    expect(util.isDef(framedVars.nv)).toBe(true);
+                    expect(util.isDef(framedVars.u)).toBe(false);
+                    expect(util.isDef(framedVars.fv)).toBe(true);
+
+
+                    expect(util.isDef(framedVars2.a)).toBe(true);
+                    expect(util.isDef(framedVars2.o)).toBe(true);
+                    expect(util.isDef(framedVars2.n)).toBe(true);
+                    expect(util.isDef(framedVars2.b)).toBe(true);
+                    expect(util.isDef(framedVars2.s)).toBe(true);
+                    expect(util.isDef(framedVars2.nv)).toBe(true);
+                    expect(util.isDef(framedVars2.u)).toBe(false);
+                    expect(util.isDef(framedVars2.fv)).toBe(true);
+                });
+
+            });
+
+
+
+            it('依赖模块不存在时抛出异常', function() {
+
+                var f = function() {
+                    sogou('T',['A'],function(a) {});
+                };
+
+                expect(f).toThrow();
+            });
+
+
+            it('依赖的模块以形参传入', function() {
+
+                global.A = {
+                    B: {
+                        name: 'zmike'
+                    }
+                };
+
+                sogou('A',['A.B'],
+                    function(a) {
+
+                        expect(a).toBe(A.B);
+                        expect(a).toBe(global.A.B);
+
+                    });
+
+            });
+
+
+            it('依赖的模块按顺序传入', function() {
+
+                global.A = {
+                    B: {
+                        name: 'zmike'
+                    }
+                };
+
+                global.C = 100;
+
+                var o = {
+                    f: function(a, c) {}
+                };
+
+                spyOn(o, 'f');
+
+                sogou('A', ['A.B', 'C'], o.f);
+
+                expect(o.f).toHaveBeenCalled();
+                expect(o.f).toHaveBeenCalledWith(A.B, C);
+
+            });
+
+        });
+
+    </script>
+</body>
+</html>

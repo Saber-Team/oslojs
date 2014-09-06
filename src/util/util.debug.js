@@ -79,8 +79,25 @@ sogou('Sogou.Util', [], function() {
      * @return {boolean} 该对象是否类数组.
      */
     function isArrayLike(val) {
+        if (!val)
+            return false;
         var type = typeof val;
         return isArray(val) || type === 'object' && typeof val.length === 'number';
+    }
+
+    /**
+     * 判断给定值是否一个对象. typeof对于null也会返回'object'所以要剔除.
+     * 同理Object.prototype.toString.call对于undefined和null在IE678中也返回'[object Object]'.
+     * 最终我选择function也算作对象, 因为它本身可以存储属性.
+     * Element和NodeList的原因同上, 因为也可以绑定js变量为属性所以isObject返回true.
+     * 对于特殊对象arguments，同null的情况一样。
+     * @param {*} val 测试对象.
+     * @return {boolean}
+     */
+    function isObject(val) {
+        var type = typeof val;
+        return type === 'object' && val !== null || type === 'function';
+        // 用Object(val) === val也能达到目的但性能较慢,特别是val不是个object的时候.
     }
 
     /**
@@ -179,27 +196,13 @@ sogou('Sogou.Util', [], function() {
         isString: function(val) {
             return typeof val === 'string';
         },
-        /**
-         * 判断给定值是否一个对象。typeof对于null也会返回'object'所以要剔除。
-         * 同理Object.prototype.toString.call对于undefined和null在IE678中也返回'[object Object]'。
-         * 最终我选择function也算作对象，因为它本身可以存储属性。
-         * 对于特殊对象arguments，同null的情况一样。
-         * @param {*} val Variable to test.
-         * @return {boolean}
-         */
-        isObject: function(val) {
-            var type = typeof val;
-            return type === 'object' && val !== null || type === 'function';
-            // 用Object(val) === val也能达到目的但性能较慢,特别是val不是个object的时候.
-        },
+        isObject: isObject,
         /**
          * 判断一个对象是否undefined或者null
          * @param val
          * @return {Boolean}
          */
-        isNull: function(val) {
-            return val === (void 0) || val === null;
-        },
+        isNull: function(val) { return val === (void 0) || val === null; },
         /**
          * 测试对象是否一个undefined值. 
          * Note: 如果只是比较obj === undefined不可靠. 特别是如果一个对象的属性设为undefined
