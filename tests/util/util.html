@@ -27,8 +27,8 @@
         <span>Three</span>
     </div>
 
-    <iframe name="f1" id="f1" src=""></iframe>
-    <iframe name="f2" id="f2" src=""></iframe>
+    <iframe name="f1" id="f1" src="" style="width: 0; height: 0;"></iframe>
+    <iframe name="f2" id="f2" src="" style="width: 0; height: 0;"></iframe>
 
     <!-- include spec files here... -->
     <script>
@@ -41,41 +41,61 @@
 
             var util = Sogou.Util;
 
-            function getFramedVars(name) {
-                var w = window.frames[name];
-                var doc = w.document;
-                doc.open();
-                doc.write('<script>' +
-                    'var a = [0, 1, 2];' +
-                    'var o = {a: 0, b: 1};' +
-                    'var n = 10e-2;' +
-                    'var b = true;' +
-                    'var s = "hello";' +
-                    'var nv = null;' +
-                    'var u = undefined;' +
-                    'var fv = function(){};' +
-                    '</' + 'script>');
-                doc.close();
-                return {
-                    'a': w.a,
-                    'o': w.o,
-                    'n': w.n,
-                    'b': w.b,
-                    's': w.s,
-                    'fv': w.fv,
-                    'nv': w.nv,
-                    'u': w.u
-                };
-            }
+            it('测试util.global', function() {
+                expect(util.global).toBe(global);
+            });
 
-            var framedVars = getFramedVars('f1');
-            var framedVars2 = getFramedVars('f2');
-            // remove iframe
-            var iframeElement = document.getElementById('f2');
-            iframeElement.parentNode.removeChild(iframeElement);
+            it('测试util.now', function() {
+                var toleranceMilliseconds = 10;
+                var now1 = new Date().getTime();
+                var now2 = util.now();
 
+                expect(Math.abs(now1 - now2) < toleranceMilliseconds).toBe(true);
+            });
 
-            describe('类型判断', function() {
+            it('测试util.mixin', function() {
+                var ori = {};
+                var tar = {a:1,b:{}};
+
+                util.mixin(ori, tar);
+                expect(ori.a).toBe(tar.a);
+                expect(ori.b).toBe(tar.b);
+            });
+
+            describe('测试类型判断相关方法', function() {
+
+                function getFramedVars(name) {
+                    var w = window.frames[name];
+                    var doc = w.document;
+                    doc.open();
+                    doc.write('<script>' +
+                        'var a = [0, 1, 2];' +
+                        'var o = {a: 0, b: 1};' +
+                        'var n = 10e-2;' +
+                        'var b = true;' +
+                        'var s = "hello";' +
+                        'var nv = null;' +
+                        'var u = undefined;' +
+                        'var fv = function(){};' +
+                        '</' + 'script>');
+                    doc.close();
+                    return {
+                        'a': w.a,
+                        'o': w.o,
+                        'n': w.n,
+                        'b': w.b,
+                        's': w.s,
+                        'fv': w.fv,
+                        'nv': w.nv,
+                        'u': w.u
+                    };
+                }
+
+                var framedVars = getFramedVars('f1');
+                var framedVars2 = getFramedVars('f2');
+                // remove iframe
+                var iframeElement = document.getElementById('f2');
+                iframeElement.parentNode.removeChild(iframeElement);
 
                 it('isArray判断是否一个数组', function() {
 
@@ -212,7 +232,7 @@
                     expect(util.isObject(framedVars2.fv)).toBe(true);
                 });
 
-                it('isNull判断是否null', function() {
+                it('isNull判断是否null或者undefined', function() {
 
                     var notNull = 'foo';
                     var nullVar = null;
@@ -274,59 +294,338 @@
                     expect(util.isDef(framedVars2.fv)).toBe(true);
                 });
 
+                it('isString判断是否字符串', function() {
+
+                    var string = 'foo';
+                    var number = 2;
+                    var nullVar = null;
+                    var notDefined;
+
+                    expect(util.isString(string)).toBe(true);
+                    expect(util.isString(number)).toBe(false);
+                    expect(util.isString(nullVar)).toBe(false);
+                    expect(util.isString(notDefined)).toBe(false);
+
+
+                    expect(util.isString(framedVars.a)).toBe(false);
+                    expect(util.isString(framedVars.o)).toBe(false);
+                    expect(util.isString(framedVars.n)).toBe(false);
+                    expect(util.isString(framedVars.b)).toBe(false);
+                    expect(util.isString(framedVars.s)).toBe(true);
+                    expect(util.isString(framedVars.nv)).toBe(false);
+                    expect(util.isString(framedVars.u)).toBe(false);
+                    expect(util.isString(framedVars.fv)).toBe(false);
+
+
+                    expect(util.isString(framedVars2.a)).toBe(false);
+                    expect(util.isString(framedVars2.o)).toBe(false);
+                    expect(util.isString(framedVars2.n)).toBe(false);
+                    expect(util.isString(framedVars2.b)).toBe(false);
+                    expect(util.isString(framedVars2.s)).toBe(true);
+                    expect(util.isString(framedVars2.nv)).toBe(false);
+                    expect(util.isString(framedVars2.u)).toBe(false);
+                    expect(util.isString(framedVars2.fv)).toBe(false);
+                });
+
             });
 
+            describe('测试bind方法', function() {
 
+                function getFoo(arg1, arg2) {
+                    return {foo: this.foo, arg1: arg1, arg2: arg2};
+                }
 
-            it('依赖模块不存在时抛出异常', function() {
-
-                var f = function() {
-                    sogou('T',['A'],function(a) {});
-                };
-
-                expect(f).toThrow();
-            });
-
-
-            it('依赖的模块以形参传入', function() {
-
-                global.A = {
-                    B: {
-                        name: 'zmike'
+                function add(var_args) {
+                    var sum = Number(this) || 0;
+                    for (var i = 0; i < arguments.length; i++) {
+                        sum += arguments[i];
                     }
-                };
+                    return sum;
+                }
 
-                sogou('A',['A.B'],
-                    function(a) {
+                beforeEach(function() {
+                    global.foo = 'global';
+                    global.obj = {foo: 'obj'};
+                });
 
-                        expect(a).toBe(A.B);
-                        expect(a).toBe(global.A.B);
+                afterEach(function() {
+                    global.foo = null;
+                    global.obj = null;
+                });
 
-                    });
+
+                it('没有上下文', function() {
+                    if (Function.prototype.bind) {
+                        expect(foo).toBe(getFoo.bind()().foo);
+                    }
+                });
+
+                it('有上下文', function() {
+                    if (Function.prototype.bind) {
+                        expect(obj.foo).toBe(getFoo.bind(obj)().foo);
+                    }
+                });
+
+                it('null作为上下文', function() {
+                    if (Function.prototype.bind) {
+                        expect(foo).toBe(getFoo.bind(null)().foo);
+                        //assertEquals(foo, getFoo.bind()().foo);
+                    }
+                });
+
+                it('绑定静态参数', function() {
+                    if (Function.prototype.bind) {
+                        var fooprime = getFoo.bind(obj, 'hot', 'dog');
+                        var res = fooprime();
+                        expect(obj.foo).toEqual(res.foo);
+                        expect(res.arg1).toEqual('hot');
+                        expect(res.arg2).toEqual('dog');
+                    }
+                });
+
+                it('绑定动态参数', function() {
+                    if (Function.prototype.bind) {
+                        var res = getFoo.bind(obj)('hot', 'dog');
+                        expect(obj.foo).toEqual(res.foo);
+                        expect(res.arg1).toEqual('hot');
+                        expect(res.arg2).toEqual('dog');
+                    }
+                });
+
+                it('绑定科里化参数', function() {
+                    if (Function.prototype.bind) {
+                        var res = getFoo.bind(obj, 'hot')('dog');
+                        expect(obj.foo).toEqual(res.foo);
+                        expect(res.arg1).toEqual('hot');
+                        expect(res.arg2).toEqual('dog');
+                    }
+                });
+
+                it('绑定两次', function() {
+                    var getFooP = util.bind(getFoo, obj, 'hot');
+                    var getFooP2 = util.bind(getFooP, null, 'dog');
+
+                    var res = getFooP2();
+                    expect(res.arg1).toEqual('hot');
+                    expect(res.arg2).toEqual('dog');
+                });
+
+                it('绑定后调用call', function() {
+                    var obj = {};
+                    var obj2 = {};
+                    var f = function() {
+                        expect(this).toBe(obj);
+                    };
+                    var b = util.bind(f, obj);
+                    b.call(null);
+                    b.call(obj2);
+                });
+
+                it('默认bind方法', function() {
+                    expect(util.bind(add, {valueOf: function() { return 1; }})())
+                        .toBe(1);
+
+                    expect(util.bind(add, null, 1, 2)()).toBe(3);
+                });
+
+            });
+
+            describe('测试partial方法', function() {
+
+                function getFoo(arg1, arg2) {
+                    return {foo: this.foo, arg1: arg1, arg2: arg2};
+                }
+
+                beforeEach(function() {
+                    global.foo = 'global';
+                    global.obj = {foo: 'obj'};
+                });
+
+                afterEach(function() {
+                    global.foo = null;
+                    global.obj = null;
+                });
+
+                it('partial方法', function testPartial() {
+                    var f = function(x, y) {
+                        return x + y;
+                    };
+                    var g = util.partial(f, 1);
+                    expect(g(2)).toBe(3);
+
+                    var h = util.partial(f, 1, 2);
+                    expect(h()).toBe(3);
+
+                    var i = util.partial(f);
+                    expect(i(1, 2)).toBe(3);
+                });
+
+                it('用global对象', function testPartialUsesGlobal() {
+                    var f = function(x, y) {
+                        expect(util.global).toEqual(this);
+                        return x + y;
+                    };
+                    var g = util.partial(f, 1);
+                    var h = util.partial(g, 2);
+
+                    expect(h()).toBe(3);
+                });
+
+                it('调用call方法', function testPartialWithCall() {
+                    var obj = {};
+                    var f = function(x, y) {
+                        expect(obj).toEqual(this);
+                        return x + y;
+                    };
+                    var g = util.partial(f, 1);
+                    var h = util.partial(g, 2);
+
+                    expect(h.call(obj)).toBe(3);
+                });
+
+                it('先partial后bind', function testPartialAndBind() {
+                    // This ensures that this "survives" through a partial.
+                    var p = util.partial(getFoo, 'hot');
+                    var b = util.bind(p, obj, 'dog');
+
+                    var res = b();
+
+                    expect(obj.foo).toBe(res.foo);
+                    expect(res.arg1).toBe('hot');
+                    expect(res.arg2).toBe('dog');
+                });
+
+                it('先bind后partial', function testBindAndPartial() {
+                    // This ensures that this "survives" through a partial.
+                    var b = util.bind(getFoo, obj, 'hot');
+                    var p = util.partial(b, 'dog');
+                    var res = p();
+
+                    expect(res.foo).toBe(obj.foo);
+                    expect(res.arg1).toBe('hot');
+                    expect(res.arg2).toBe('dog');
+                });
+
+            });
+
+            describe('测试UID相关方法', function() {
+
+                it('getUid方法', function testGetUid() {
+                    var a = {};
+                    var b = {};
+                    var c = {};
+
+                    var uid1 = util.getUid(a);
+                    var uid2 = util.getUid(b);
+                    var uid3 = util.getUid(c);
+
+                    expect(uid1).not.toEqual(uid2);
+                    expect(uid1).not.toEqual(uid3);
+                    expect(uid2).not.toEqual(uid3);
+                });
+
+                it('从简单对象调用removeUid方法', function testRemoveUidFromPlainObject() {
+                    var a = {};
+                    var uid = util.getUid(a);
+                    util.removeUid(a);
+
+                    expect(util.getUid(a)).not.toBe(uid);
+                });
+
+                it('从没有uid的对象调用removeUid方法' ,function testRemoveUidFromObjectWithoutUid() {
+
+                    var f = function() {
+                        var a = {};
+                        // Removing a unique ID should not fail even if it did not exist
+                        util.removeUid(a);
+                    };
+
+                    expect(f).not.toThrow();
+
+                });
+
+                it('从node调用removeUid', function testRemoveUidFromNode() {
+                    var node = document.createElement('div');
+                    var nodeUid = util.getUid(node);
+                    util.removeUid(node);
+
+                    expect(util.getUid(node)).not.toEqual(nodeUid);
+                });
+
+                it('测试构造函数的uid', function testConstructorUid() {
+                    function BaseClass() {}
+                    function SubClass() {}
+                    util.inherits(SubClass, BaseClass);
+
+                    var baseClassUid = util.getUid(BaseClass);
+                    var subClassUid = util.getUid(SubClass);
+
+                    expect(typeof baseClassUid).toBe('number');
+                    expect(typeof subClassUid).toBe('number');
+                    expect(baseClassUid).not.toEqual(subClassUid);
+                    expect(util.getUid(new BaseClass)).not.toEqual(util.getUid(new SubClass));
+                    expect(util.getUid(BaseClass.prototype)).toEqual(util.getUid(SubClass.prototype));
+
+                    /*
+                    assertEquals('Unique IDs of BaseClass.prototype and SubClass.prototype ' +
+                        'should differ, but to keep the implementation simple, we do not ' +
+                        'handle this edge case.');*/
+                });
+
+                /**
+                 * Tests against Chrome bug where the re-created element will have the uid
+                 * property set but undefined. See bug 1252508.
+                 */
+                it('新生成的dom的uid不是undefined', function testUidNotUndefinedOnReusedElement() {
+                    var div = document.createElement('DIV');
+                    document.body.appendChild(div);
+                    div.innerHTML = '<form id="form"></form>';
+                    var span = div.getElementsByTagName('FORM')[0];
+                    var uid = util.getUid(span);
+
+                    div.innerHTML = '<form id="form"></form>';
+                    var span2 = div.getElementsByTagName('FORM')[0];
+
+                    expect(util.getUid(span2)).not.toBeUndefined();
+                    expect(util.getUid(span2)).not.toEqual(uid);
+                });
+
+                it('测试window对象的uid', function testWindowUid() {
+                    var uid = util.getUid(window);
+
+                    expect(util.isNumber(uid)).toBe(true);
+                    expect(util.getUid(window)).toEqual(uid);
+
+                    util.removeUid(window);
+                    expect(util.getUid(window)).not.toEqual(uid);
+                });
 
             });
 
 
-            it('依赖的模块按顺序传入', function() {
+//=== tests for inherits ===
 
-                global.A = {
-                    B: {
-                        name: 'zmike'
-                    }
-                };
+            describe('测试继承', function() {
 
-                global.C = 100;
+                it('测试实例', function testInherits() {
+                    function Foo() {}
+                    function Bar() {}
+                    util.inherits(Bar, Foo);
+                    var bar = new Bar();
 
-                var o = {
-                    f: function(a, c) {}
-                };
+                    expect(bar instanceof Bar).toBe(true);
+                    expect(bar instanceof Foo).toBe(true);
+                });
 
-                spyOn(o, 'f');
+                it('测试构造函数', function testInherits_constructor() {
+                    function Foo() {}
+                    function Bar() {}
+                    util.inherits(Bar, Foo);
+                    var bar = new Bar();
 
-                sogou('A', ['A.B', 'C'], o.f);
-
-                expect(o.f).toHaveBeenCalled();
-                expect(o.f).toHaveBeenCalledWith(A.B, C);
+                    expect(bar.constructor).toBe(Bar);
+                    expect(Bar.superClass_.constructor).toBe(Foo);
+                });
 
             });
 
