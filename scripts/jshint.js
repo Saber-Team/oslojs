@@ -2,7 +2,7 @@ var grunt = require('grunt');
 
 module.exports = {
     build: {
-        src: ['src/*.debug.js', 'src/*/**.debug.js']
+        src: ['src/*.js', 'src/*/**.js']
     },
     // options here to override JSHint defaults
     options: {
