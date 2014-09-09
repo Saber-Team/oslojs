@@ -1,0 +1,113 @@
+<!--
+	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>SogouJS单元测试集 - Sogou.*</title>
+	<link rel="shortcut icon" type="image/png" href="../lib/jasmine-2.0.3/jasmine_favicon.png">
+	<link rel="stylesheet" type="text/css" href="../lib/jasmine-2.0.3/jasmine.css">
+
+	<script type="text/javascript" src="../lib/jasmine-2.0.3/jasmine.js"></script>
+	<script type="text/javascript" src="../lib/jasmine-2.0.3/jasmine-html.js"></script>
+	<script type="text/javascript" src="../lib/jasmine-2.0.3/boot.js"></script>
+
+	<!-- include source files here... -->
+	<script src="../src/sogou.debug.js"></script>
+</head>
+<body>
+	<!-- include spec files here... -->
+	<script>
+
+        describe('Sogou全局对象', function() {
+
+            var global = window;
+
+            beforeEach(function() {
+                global.module = null;
+                global.define = null;
+            });
+
+            afterEach(function() {
+                global.A = null;
+                global.C = null;
+            });
+
+
+            it('是一个全局方法', function() {
+                expect(global.sogou).toEqual(sogou);
+                expect(typeof sogou).toBe('function');
+            });
+
+
+            it('无模块加载器时,通过sogou声明空间', function() {
+
+                sogou('A.B', [], function() {});
+
+                expect(A.B).toBeTruthy();
+                expect(A.B).toBe(global.A.B);
+            });
+
+
+            it('依赖模块不存在时抛出异常', function() {
+
+                var f = function() {
+                    sogou('T',['A'],function(a) {});
+                };
+
+                expect(f).toThrow();
+            });
+
+
+            it('依赖的模块以形参传入', function() {
+
+                global.A = {
+                    B: {
+                        name: 'zmike'
+                    }
+                };
+
+                sogou('A',['A.B'],
+                    function(a) {
+
+                        expect(a).toBe(A.B);
+                        expect(a).toBe(global.A.B);
+
+                    });
+
+            });
+
+
+            it('依赖的模块按顺序传入', function() {
+
+                global.A = {
+                    B: {
+                        name: 'zmike'
+                    }
+                };
+
+                global.C = 100;
+
+                var o = {
+                    f: function(a, c) {}
+                };
+
+                spyOn(o, 'f');
+
+                sogou('A', ['A.B', 'C'], o.f);
+
+                expect(o.f).toHaveBeenCalled();
+                expect(o.f).toHaveBeenCalledWith(A.B, C);
+
+            });
+
+        });
+	
+	</script>
+
+</body>
+</html>
