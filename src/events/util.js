@@ -1,11 +1,11 @@
 /**
- * @fileoverview 一个总览原生浏览器事件和自定义js事件的事件管理器，提供了经过抽象的事件体系。
+ * @fileoverview 一个总览原生浏览器事件和自定义js事件的事件管理器,提供了经过抽象的事件体系.
  * @modified Leo.Zhang
  * @email zmike86@gmail.com
  *
- * 这个文件还提供了模拟IE9以下浏览器在W3C标准事件模型中缺失的事件捕获阶段。
- * 警告: 这种模拟的效果对于绕过events系统而直接绑定在dom上的句柄不生效。
- * 所有句柄函数都会接收形参的事件对象，是个跨浏览器的封装对象。
+ * 这个文件还提供了模拟IE9以下浏览器在W3C标准事件模型中缺失的事件捕获阶段.
+ * 警告: 这种模拟的效果对于绕过events系统而直接绑定在dom上的句柄不生效.
+ *       所有句柄函数都会接收形参的事件对象,是个跨浏览器的封装对象.
  *
  * 示例:
  * <pre>
@@ -39,7 +39,7 @@
 //       back in the tree
 //   sources_: src uid -> [Listener]
 
-;sogou('Sogou.Events.Util',
+sogou('Sogou.Events.Util',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserEvent',
@@ -83,7 +83,7 @@
         var listenerTree_ = {};
 
         /**
-         * 为了快速查找某个对象的绑定句柄。key是对象的全局uid，value是句柄对象的数组.
+         * 为了快速查找某个对象的绑定句柄. key是对象的全局uid,value是句柄对象的数组.
          * @private
          * @type {Object}
          */
@@ -91,7 +91,7 @@
 
         /**
          * Container for storing event listeners and their proxies
-         * key是句柄的key属性，值是句柄的代理
+         * key是句柄的key属性, 值是句柄的代理
          * @private {!Object.<Listener.Key>}
          */
         var listeners_ = {};
@@ -104,24 +104,23 @@
         var onString_ = 'on';
 
         /**
-         * Map of computed "on<eventname>" strings for IE event types. Caching
-         * this removes an extra object allocation in events.listen which
-         * improves IE6 performance.
+         * 专门为IE6做的缓存对象, 不必每次events.listen的时候都重新分配内存空间.
+         * IE6下性能会有一些提升.
          * @type {Object}
          * @private
          */
         var onStringMap_ = {};
 
         /**
-         * 标记IE event我们就可以不传递两次冒泡事件。
+         * 标记IE event我们就可以不传递两次冒泡事件.
          * @param {Event} e IE浏览器事件。
          * @private
          */
         function markIeEvent_(e) {
             // 只有keyCode和returnValue属性可以被改变. 不是键盘事件我们就用keyCode标记.
-            // e.returnValue有一定的欺骗性, 默认是undefined, false会阻止默认行为。
-            // 在window.onbeforeunload中returnValue不是undefined会被警告。
-            // 然而我们只对键盘事件修改returnValue。
+            // e.returnValue有一定的欺骗性, 默认是undefined, false会阻止默认行为.
+            // 在window.onbeforeunload中returnValue不是undefined会被警告.
+            // 然而我们只对键盘事件修改returnValue.
             // 这样做也有致命缺陷：若其他框架改变了event对象的keyCode或者returnValue就败了
             var useReturnValue = false;
             // 不是键盘事件
@@ -249,7 +248,7 @@
 
         /**
          * 其实这个函数listen相关方法中多次被用到
-         * 现在才清楚其中目地主要用于返回对象的handleEvent方法作为响应函数
+         * 其中目地主要用于返回对象的handleEvent方法作为响应函数
          * @param {Object|Function} listener 一个事件响应函数或者一个包含handleEvent方法的对象.
          * @return {!Function} Either the original function or a function that
          *     calls obj.handleEvent. If the same listener is passed to this
@@ -588,7 +587,7 @@
         function listenOnce(src, type, listener, opt_capt, opt_context) {
             if (util.isArray(type)) {
                 for (var i = 0; i < type.length; i++)
-                    listenOnce(src, type[i], listener, opt_capt, opt_handler);
+                    listenOnce(src, type[i], listener, opt_capt, opt_context);
                 return null;
             }
 

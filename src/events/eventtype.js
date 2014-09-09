@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Events.EventType',
+sogou('Sogou.Events.EventType',
     ['Sogou.UA.Util'],
     function(ua) {
 
@@ -34,9 +34,8 @@
         FOCUS: 'focus',
         DEACTIVATE: 'deactivate', // IE only
         // 注意: 以下两个事件在跨浏览器方面表现并不稳定.
-        //     WebKit和Opera实现了DOMFocusIn/Out.IE实现了 focusin/out.
-        //     Gecko两者都没实现 see bug at
-        //     https://bugzilla.mozilla.org/show_bug.cgi?id=396927.
+        //     WebKit和Opera实现了DOMFocusIn/Out.IE实现了focusin/out.
+        //     Gecko两者都没实现 see bug at https://bugzilla.mozilla.org/show_bug.cgi?id=396927.
         // The DOM Events Level 3 Draft deprecates DOMFocusIn in favor of focusin:
         //     http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
         // You can use FOCUS in Capture phase until implementations converge.
@@ -86,9 +85,7 @@
         PAGESHOW: 'pageshow',
         POPSTATE: 'popstate',
 
-        // Copy and Paste
-        // Support is limited. Make sure it works on your favorite browser
-        // before using.
+        // 复制粘贴事件使用有限. 需要确认在目标浏览器上支持这些事件.
         // http://www.quirksmode.org/dom/events/cutcopypaste.html
         COPY: 'copy',
         PASTE: 'paste',

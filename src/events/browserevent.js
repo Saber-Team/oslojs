@@ -1,10 +1,10 @@
 /**
  * @fileoverview 包含浏览器event的标准化实现
- * @author Leo.Zhang
+ * @modified Leo.Zhang
  * @email zmike86@gmail.com
  *
  * <pre>
- * The patched event object contains the following members:
+ * 分发的事件对象包含如下成员属性:
  * - type           {string}    Event type, e.g. 'click'
  * - timestamp      {Date}      A date object for when the event was fired
  * - target         {Object}    The element that actually triggered the event
@@ -25,13 +25,12 @@
  * - defaultPrevented {boolean} Whether the default action has been prevented
  * - state          {Object}    History state object
  *
- * NOTE: The keyCode member contains the raw browser keyCode. For normalized
- * key and character code use {@link events.KeyHandler}.
+ * 注意: 事件对象的keyCode是浏览器原始的keyCode. 用events.KeyHandler模块进行标准化.
  * </pre>
  *
  */
 
-;sogou('Sogou.Events.BrowserEvent',
+sogou('Sogou.Events.BrowserEvent',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserFeature',
@@ -44,8 +43,8 @@
         'use strict';
 
         /**
-         * 接收一个浏览器事件然后对其进行包装，返回跨浏览器的标准对象。
-         * 如果没有事件传入，标准事件对象的各个属性不会被初始化，这样的时候init()需要被另外调用.
+         * 接收一个浏览器事件然后对其进行包装, 返回跨浏览器的标准对象.
+         * 如果没有事件传入, 标准事件对象的各个属性不会被初始化, 这样的时候init()需要被另外调用.
          * @param {Event=} opt_e 浏览器事件对象.
          * @param {EventTarget=} opt_currentTarget 可选的currentTarget.
          * @constructor
@@ -59,7 +58,7 @@
         util.inherits(BrowserEvent, EventBase);
 
         /**
-         * Normalized button constants for the mouse.
+         * 鼠标按键标准化后的常量值.
          * @enum {number}
          */
         BrowserEvent.MouseButton = {
@@ -69,7 +68,7 @@
         };
 
         /**
-         * Static data for mapping mouse buttons.
+         * IE下左中右的键值有所不同,传递标准值映射出IE下的值.
          * @type {Array.<number>}
          */
         BrowserEvent.IEButtonMap = [
@@ -92,7 +91,7 @@
              */
             currentTarget: null,
             /**
-             * For mouseover and mouseout events, the related object for the event.
+             * mouseover,mouseout事件用到的相关元素.
              * @type {Node}
              */
             relatedTarget: null,
@@ -127,19 +126,19 @@
              */
             screenY: 0,
             /**
-             * Which mouse button was pressed.
+             * 鼠标按下的键.
              * @type {number}
              */
             button: 0,
             /**
-             * IE只有keyCode属性，表示按键的ascii码。onkeydown会在任何情况下触发，但是keypress对于
-             * 功能键，后退键和方向键失效。keypress中的keyCode对应ascii码正常，keydown中的对应了大写
-             * 字母表或者一个虚拟键码。一般来讲keypress得到的keycode符合预期。
+             * IE只有keyCode属性,表示按键的ascii码.onkeydown会在任何情况下触发,但是keypress对于
+             * 功能键,后退键和方向键失效. keypress中的keyCode对应ascii码正常,keydown中的对应了大写
+             * 字母表或者一个虚拟键码.一般来讲keypress得到的keycode符合预期.
              * @type {number}
              */
             keyCode: 0,
             /**
-             * 非IE用charCode表示按键的ascii码，在keypress时可用。keydown时此值为0。
+             * 非IE用charCode表示按键的ascii码,在keypress时可用.keydown时此值为0
              * @type {number}
              */
             charCode: 0,
@@ -160,19 +159,19 @@
             shiftKey: false,
             /**
              * Whether the meta key was pressed at time of event.
+             * Windows上Meta键就是windows键, MAC上就是command键..
              * @type {boolean}
              */
             metaKey: false,
             /**
              * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
-             * History state object, only set for PopState events where it's a copy of the
-             * state object provided to pushState or replaceState.
+             * History事件对象, 只在PopState事件出现, 是pushState或者replaceState时提供的状态对象的一个copy.
              * @type {Object}
              */
             state: null,
             /**
              * Whether the default platform modifier key was pressed at time of event.
-             * (This is control for all platforms except Mac, where it's Meta.
+             * (除了MAC系统,其他系统上这个键都是ctrl, MAC上是Meta键.
              * @type {boolean}
              */
             platformModifierKey: false,
@@ -207,9 +206,9 @@
                     if (UA.isGECKO && !ret) {
                         relatedTarget = null;
                     }
-                } else if (type == EventType.MOUSEOVER) {
+                } else if (type === EventType.MOUSEOVER) {
                     relatedTarget = e.fromElement;
-                } else if (type == EventType.MOUSEOUT) {
+                } else if (type === EventType.MOUSEOUT) {
                     relatedTarget = e.toElement;
                 }
 
@@ -228,7 +227,7 @@
                 this.button = e.button;
 
                 this.keyCode = e.keyCode || 0;
-                this.charCode = e.charCode || (type == 'keypress' ? e.keyCode : 0);
+                this.charCode = e.charCode || (type === 'keypress' ? e.keyCode : 0);
                 this.ctrlKey = e.ctrlKey;
                 this.altKey = e.altKey;
                 this.shiftKey = e.shiftKey;
@@ -242,8 +241,8 @@
                 delete this.propagationStopped_;
             },
             /**
-             * 测试事件发生时按下的是哪个鼠标键。只在 IE and Gecko 核的浏览器有用。
-             * IE里，只对mousedown/mouseup 事件有用，因为click只会由左边的按键触发。
+             * 测试事件发生时按下的是哪个鼠标键. 只在IE和Gecko核的浏览器有用.
+             * IE里只对mousedown/mouseup事件有用, 因为click只会由左边的按键触发.
              *
              * Safari 2 only reports the left button being clicked, and uses the value '1'
              * instead of 0. Opera only reports a mousedown event for the middle button, and
@@ -252,18 +251,18 @@
              *
              * There's a nice table of this mess at http://www.unixpapa.com/js/mouse.html.
              *
-             * @param {BrowserEvent.MouseButton} button The button to test for.
+             * @param {BrowserEvent.MouseButton} button 测试提供的按键.
              * @return {boolean} True if button was pressed.
              */
             isButton: function(button) {
                 if (!BrowserFeature.HAS_W3C_BUTTON) {
-                    if (this.type == 'click') {
-                        return button == BrowserEvent.MouseButton.LEFT;
+                    if (this.type === 'click') {
+                        return button === BrowserEvent.MouseButton.LEFT;
                     } else {
                         return !!(this.event_.button & BrowserEvent.IEButtonMap[button]);
                     }
                 } else {
-                    return this.event_.button == button;
+                    return this.event_.button === button;
                 }
             },
             /**
@@ -303,8 +302,8 @@
                     if (BrowserFeature.SET_KEY_CODE_TO_PREVENT_DEFAULT) {
                         /** @preserveTry */
                         try {
-                            // Most keys can be prevented using returnValue. Some special keys
-                            // require setting the keyCode to -1 as well:
+                            // 大多数按键可以通过returnValue设置成false阻止. 
+                            // 少数需要同事设置keyCode = -1:
                             //
                             // In IE7:
                             // F3, F5, F10, F11, Ctrl+P, Crtl+O, Ctrl+F (these are taken from IE6)
@@ -331,7 +330,7 @@
                 }
             },
             /**
-             * @return {Event} The underlying browser event object.
+             * @return {Event} 返回原始浏览器事件.
              */
             getBrowserEvent: function() {
                 return this.event_;
