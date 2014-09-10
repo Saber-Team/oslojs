@@ -183,15 +183,15 @@ sogou('Sogou.Events.BrowserEvent',
             event_ : null,
             /**
              * 接收浏览器原生事件对象，转化成跨浏览器统一对象。
-             * @param {Event} e 浏览器事件对象.
+             * @param {Event} evt 浏览器事件对象.
              * @param {EventTarget=} opt_currentTarget 可选的currentEvent.
              */
-            init: function(e, opt_currentTarget) {
-                var type = this.type = e.type;
+            init: function(evt, opt_currentTarget) {
+                var type = this.type = evt.type;
                 EventBase.call(this, type);
-                this.target = /** @type {Node} */ (e.target) || e.srcElement;
+                this.target = /** @type {Node} */ (evt.target) || evt.srcElement;
                 this.currentTarget = /** @type {Node} */ (opt_currentTarget);
-                var relatedTarget = /** @type {Node} */ (e.relatedTarget);
+                var relatedTarget = /** @type {Node} */ (evt.relatedTarget);
                 if (relatedTarget) {
                     // There's a bug in FireFox where sometimes, relatedTarget will be a
                     // chrome element, and accessing any property of it will get a permission
@@ -202,40 +202,40 @@ sogou('Sogou.Events.BrowserEvent',
                     try {
                         util.nullFunction(relatedTarget['nodeName']);
                         ret = true;
-                    } catch (e) {}
+                    } catch (ex) {}
                     if (UA.isGECKO && !ret) {
                         relatedTarget = null;
                     }
                 } else if (type === EventType.MOUSEOVER) {
-                    relatedTarget = e.fromElement;
+                    relatedTarget = evt.fromElement;
                 } else if (type === EventType.MOUSEOUT) {
-                    relatedTarget = e.toElement;
+                    relatedTarget = evt.toElement;
                 }
 
                 this.relatedTarget = relatedTarget;
 
                 // Webkit emits a lame warning whenever layerX/layerY is accessed.
                 // http://code.google.com/p/chromium/issues/detail?id=101733
-                this.offsetX = (UA.isWEBKIT || e.offsetX !== undefined) ? e.offsetX : e.layerX;
-                this.offsetY = (UA.isWEBKIT || e.offsetY !== undefined) ? e.offsetY : e.layerY;
+                this.offsetX = (UA.isWEBKIT || evt.offsetX !== undefined) ? evt.offsetX : evt.layerX;
+                this.offsetY = (UA.isWEBKIT || evt.offsetY !== undefined) ? evt.offsetY : evt.layerY;
 
-                this.clientX = e.clientX !== undefined ? e.clientX : e.pageX;
-                this.clientY = e.clientY !== undefined ? e.clientY : e.pageY;
-                this.screenX = e.screenX || 0;
-                this.screenY = e.screenY || 0;
+                this.clientX = evt.clientX !== undefined ? evt.clientX : evt.pageX;
+                this.clientY = evt.clientY !== undefined ? evt.clientY : evt.pageY;
+                this.screenX = evt.screenX || 0;
+                this.screenY = evt.screenY || 0;
 
-                this.button = e.button;
+                this.button = evt.button;
 
-                this.keyCode = e.keyCode || 0;
-                this.charCode = e.charCode || (type === 'keypress' ? e.keyCode : 0);
-                this.ctrlKey = e.ctrlKey;
-                this.altKey = e.altKey;
-                this.shiftKey = e.shiftKey;
-                this.metaKey = e.metaKey;
-                this.platformModifierKey = UA.isMAC ? e.metaKey : e.ctrlKey;
-                this.state = e.state;
-                this.event_ = e;
-                if (e.defaultPrevented) {
+                this.keyCode = evt.keyCode || 0;
+                this.charCode = evt.charCode || (type === 'keypress' ? evt.keyCode : 0);
+                this.ctrlKey = evt.ctrlKey;
+                this.altKey = evt.altKey;
+                this.shiftKey = evt.shiftKey;
+                this.metaKey = evt.metaKey;
+                this.platformModifierKey = UA.isMAC ? evt.metaKey : evt.ctrlKey;
+                this.state = evt.state;
+                this.event_ = evt;
+                if (evt.defaultPrevented) {
                     this.preventDefault();
                 }
                 delete this.propagationStopped_;

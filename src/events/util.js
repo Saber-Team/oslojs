@@ -155,20 +155,19 @@ sogou('Sogou.Events.Util',
 
         /**
          * 这个方法用于句柄的代理, getProxy中调用.
+         * @param {EventTarget} src 触发事件的对象.
          * @param {Listener} listener 一个Listener的实例.
          * @param {Event=} opt_evt 在原始的处理器中传递的事件对象.
          * @return {boolean} Result of the event handler.
-         * @this {EventTarget} 触发事件的对象.
          * @private
          */
-        function handleBrowserEvent_(listener, opt_evt) {
+        function handleBrowserEvent_(src, listener, opt_evt) {
             if (listener.removed) 
                 return true;
 
             var type = listener.type;
             var map = listenerTree_;
             var ancestors;
-            var context = this;
 
             if (!(type in map)) 
                 return true;
@@ -193,7 +192,7 @@ sogou('Sogou.Events.Util',
 
                 // 用原生事件初始化系统的标准事件
                 var evt = new BrowserEvent();
-                evt.init(ieEvent, context);
+                evt.init(ieEvent, src);
                 retval = true;
                 try {
                     if (hasCapture) {
@@ -228,7 +227,7 @@ sogou('Sogou.Events.Util',
             } // IE
 
             // Caught a non-IE DOM event. 1 additional argument which is the event object
-            var be = new BrowserEvent(opt_evt, /** @type {EventTarget} */ (context));
+            var be = new BrowserEvent(opt_evt, /** @type {EventTarget} */ (src));
             retval = fireListener(listener, be);
             return retval;
         }
@@ -491,10 +490,10 @@ sogou('Sogou.Events.Util',
             // Use a local var f to prevent one allocation.
             var f = BrowserFeature.HAS_W3C_EVENT_SUPPORT ?
                 function(eventObject) {
-                    return handleBrowserEvent_.call(f.src, f.listener, eventObject);
+                    return handleBrowserEvent_(f.src, f.listener, eventObject);
                 } :
                 function(eventObject) {
-                    var v = handleBrowserEvent_.call(f.src, f.listener, eventObject);
+                    var v = handleBrowserEvent_(f.src, f.listener, eventObject);
                     // 注意: 在IE中我们模拟了捕获阶段. 但当有个后代元素有个inline绑定函数
                     // 试图阻止默认行为时(<a href="..." onclick="return false">...</a>)
                     // 如果句柄返回true默认行为会被改写, 因此我们返回undefined.
