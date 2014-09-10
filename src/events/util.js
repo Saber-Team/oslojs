@@ -124,7 +124,7 @@ sogou('Sogou.Events.Util',
             // 这样做也有致命缺陷：若其他框架改变了event对象的keyCode或者returnValue就败了
             var useReturnValue = false;
             // 不是键盘事件
-            if (e.keyCode == 0) {
+            if (+e.keyCode === 0) {
                 // We cannot change the keyCode in case that srcElement is input[type=file].
                 // We could test that that is the case but that would allocate 3 objects.
                 // If we use try/catch we will only allocate extra objects in the case of a
@@ -138,45 +138,45 @@ sogou('Sogou.Events.Util',
                 }
             }
 
-            if (useReturnValue ||
-            /** @type {boolean|undefined} */ (e.returnValue) == undefined) {
+            if (useReturnValue || /** @type {boolean|undefined} */ util.isNull(e.returnValue)) {
                 e.returnValue = true;
             }
         }
 
         /**
-         * 这个方法用于检查IE事件对象是否已经经过系统的处理。用于防止系统对这个事件做两次冒泡处理。
-         * @param {Event} e  IE浏览器事件。
-         * @return {boolean} 事件被处理过了就返回true。
+         * 这个方法用于检查IE事件对象是否已经经过系统的处理. 用于防止系统对这个事件做两次冒泡处理.
+         * @param {Event} e  IE浏览器事件
+         * @return {boolean} 事件被处理过了就返回true
          * @private
          */
         function isMarkedIeEvent_(e) {
-            return e.keyCode < 0 || e.returnValue != undefined;
+            return e.keyCode < 0 || !util.isNull(e.returnValue);
         }
 
         /**
-         * 这个方法用于句柄的封装getProxy中调用。
-         * Handles an event and dispatches it to the correct listeners. This
-         * function is a proxy for the real listener the user specified.
-         *
+         * 这个方法用于句柄的代理, getProxy中调用.
          * @param {Listener} listener 一个Listener的实例.
-         * @param {Event=} opt_evt Optional event object that gets passed in via the
-         *     native event handlers.
+         * @param {Event=} opt_evt 在原始的处理器中传递的事件对象.
          * @return {boolean} Result of the event handler.
          * @this {EventTarget} 触发事件的对象.
          * @private
          */
         function handleBrowserEvent_(listener, opt_evt) {
-            if (listener.removed) return true;
+            if (listener.removed) 
+                return true;
 
             var type = listener.type;
             var map = listenerTree_;
-            if (!(type in map)) return true;
+            var ancestors;
+            var context = this;
+
+            if (!(type in map)) 
+                return true;
 
             map = map[type];
             var retval, targetsMap;
-            // 如果浏览器不支持W3C标准事件模型就需要通过合成事件(Synthesize event)模拟捕获。
-            // IE9以下需执行这块代码。
+            // 如果浏览器不支持W3C标准事件模型就需要通过合成事件(Synthesize event)模拟捕获.
+            // IE9以下需执行这块代码.
             if (!BrowserFeature.HAS_W3C_EVENT_SUPPORT) {
                 var ieEvent = opt_evt ||/** @type {Event} */ window.event;
                 var i;
@@ -193,11 +193,11 @@ sogou('Sogou.Events.Util',
 
                 // 用原生事件初始化系统的标准事件
                 var evt = new BrowserEvent();
-                evt.init(ieEvent, this);
+                evt.init(ieEvent, context);
                 retval = true;
                 try {
                     if (hasCapture) {
-                        var ancestors = [];
+                        ancestors = [];
                         // 构建个祖先列表
                         for (var parent = evt.currentTarget; parent; parent = parent.parentNode) {
                             ancestors.push(parent);
@@ -221,13 +221,14 @@ sogou('Sogou.Events.Util',
                         retval = fireListener(listener, evt);
                     }
                 } finally {
-                    if (ancestors) ancestors.length = 0;
+                    if (ancestors) 
+                        ancestors.length = 0;
                 }
                 return retval;
             } // IE
 
             // Caught a non-IE DOM event. 1 additional argument which is the event object
-            var be = new BrowserEvent(opt_evt, /** @type {EventTarget} */ (this));
+            var be = new BrowserEvent(opt_evt, /** @type {EventTarget} */ (context));
             retval = fireListener(listener, be);
             return retval;
         }
@@ -247,13 +248,11 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 其实这个函数listen相关方法中多次被用到
+         * 这个函数listen相关方法中多次被用到.
          * 其中目地主要用于返回对象的handleEvent方法作为响应函数
          * @param {Object|Function} listener 一个事件响应函数或者一个包含handleEvent方法的对象.
-         * @return {!Function} Either the original function or a function that
-         *     calls obj.handleEvent. If the same listener is passed to this
-         *     function more than once, the same function is guaranteed to be
-         *     returned.
+         * @return {!Function} 如果传递的是一个函数则直接返回,否则返回一个匿名函数调用obj.handleEvent.
+         *     如果同样的函数被传递多次, 会返回同一个函数.
          * @private
          */
         function wrapListener_(listener) {
@@ -275,8 +274,8 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 为原生的事件目标添加指定的函数监听事件。一个函数只能添加一次, 如果是第二次添加会返回该句柄对象的Key。
-         * 注意一下, 一次性的句柄不会改变已存在的listener。反而正常的句柄会改变已存在的一次性句柄为长久性的。
+         * 为原生的事件目标添加指定的函数监听事件. 一个函数只能添加一次,如果是第二次添加会返回该句柄对象的Key.
+         * 注意: 一次性的句柄不会改变已存在的listener,反而正常的句柄会改变已存在的一次性句柄为长久性的.
          * @param {EventTarget} src 监听对象.
          * @param {?string} type 事件类型或事件类型数组.
          * @param {!Function} listener 监听函数.
@@ -287,11 +286,13 @@ sogou('Sogou.Events.Util',
          * @private
          */
         function listen_(src, type, listener, callOnce, opt_capt, opt_context) {
-            if (!type) throw Error('Invalid event type');
+            if (!type) 
+                throw Error('Invalid event type');
 
             var capture = !!opt_capt;
             var map = listenerTree_;
-            if (!(type in map)) map[type] = {count_: 0};
+            if (!(type in map)) 
+                map[type] = {count_: 0};
 
             map = map[type];
             if (!(capture in map)) {
@@ -303,7 +304,7 @@ sogou('Sogou.Events.Util',
             var srcUid = util.getUid(src);
             var listenerArray, listenerObj;
 
-            // Do not use srcUid in map here since that will cast the number to a
+            // Do not use `srcUid in map` here since that will cast the number to a
             // string which will allocate one string object.
             if (!map[srcUid]) {
                 listenerArray = map[srcUid] = [];
@@ -313,24 +314,26 @@ sogou('Sogou.Events.Util',
                 // 确定句柄之前没存在
                 for (var i = 0; i < listenerArray.length; i++) {
                     listenerObj = listenerArray[i];
-                    if (listenerObj.listener == listener && listenerObj.handler == opt_context) {
+                    if (listenerObj.listener === listener && listenerObj.handler === opt_context) {
                         // 如果句柄已经被移除了我们不该返回他
                         // 可以创建一个新的listenerObj因为被标示移除的不久后就会被清理.
-                        if (listenerObj.removed) break;
+                        if (listenerObj.removed) 
+                            break;
                         // 确保如果存在的句柄是一次性的, 则今后它不会再是一次性的了.
-                        if (!callOnce) listenerArray[i].callOnce = false;
+                        if (!callOnce) 
+                            listenerArray[i].callOnce = false;
                         // 返回listenerObj.
                         return listenerArray[i];
                     }
                 }
             }
 
-            // 这一步非常重要,这个代理函数消除了句柄的不同,允许IE下事件也能捕获
+            // 这一步非常重要,这个代理函数消除了句柄的不同, 允许IE下事件也能捕获
             var proxy = getProxy();
             listenerObj = new Listener(listener, proxy, src, type, capture, opt_context);
             listenerObj.callOnce = callOnce;
 
-            // 保存两个有用属性
+            // 保存两个有用属性, 在getProxy里面有用到
             proxy.src = src;
             proxy.listener = listenerObj;
 
@@ -342,7 +345,7 @@ sogou('Sogou.Events.Util',
             }
             sources_[srcUid].push(listenerObj);
 
-            // 通过类似浏览器的API把代理函数添加到监听对象上，绑的都是proxy
+            // 通过类似浏览器的API把代理函数添加到监听对象上.绑的都是proxy
             if (src.addEventListener) {
                 src.addEventListener(type, proxy, capture);
             } else {
@@ -359,9 +362,9 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * Gets the listeners for a given object, type and capture phase.
+         * 返回给定对象给定事件类型的句柄数组.
          * @param {Object} obj Object to get listeners for.
-         * @param {?string} type Event type.
+         * @param {?string} type 事件类型.
          * @param {boolean} capture Capture phase?.
          * @return {Array.<Listener>?} Array of listener objects.
          *     Returns null if object has no listeners of that type.
@@ -384,7 +387,7 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 给定对象，事件类型，是否捕获，得到所有符合条件的监听函数对象
+         * 给定对象,事件类型,是否捕获得到所有符合条件的监听函数对象
          * @param {Object} obj Object to get listeners for.
          * @param {string} type Event type.
          * @param {boolean} capture Capture phase?.
@@ -399,10 +402,10 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * Gets the Listener for the event or null if no such listener is in use.
+         * 获取句柄对象. 不存在返回null.
          *
          * @param {EventTarget} src The target from which to get listeners.
-         * @param {?string} type The name of the event without the 'on' prefix.
+         * @param {?string} type 事件类型没有'on'前缀.
          * @param {Function} listener The listener function to get.
          * @param {boolean=} opt_capt In DOM-compliant browsers, this determines
          *                            whether the listener is fired during the
@@ -423,10 +426,10 @@ sogou('Sogou.Events.Util',
                     // then the listener array won't get cleaned up and there might be
                     // 'removed' listeners in the list. Ignore those.
                     if (!listenerArray[i].removed &&
-                        listenerArray[i].listener == listener &&
-                        listenerArray[i].capture == capture &&
-                        listenerArray[i].handler == opt_context) {
-                        // We already have this listener. Return its key.
+                        listenerArray[i].listener === listener &&
+                        listenerArray[i].capture === capture &&
+                        listenerArray[i].handler === opt_context) {
+                        // 如果已经存在这个处理器. 返回该处理器.
                         return listenerArray[i];
                     }
                 }
@@ -470,8 +473,8 @@ sogou('Sogou.Events.Util',
                 } else {
                     // Iterate through the listeners for the event target to find a match.
                     return array.some(listeners, function(listener) {
-                        return (hasType && listener.type == opt_type) ||
-                            (hasCapture && listener.capture == opt_capture);
+                        return (hasType && listener.type === opt_type) ||
+                            (hasCapture && listener.capture === opt_capture);
                     });
                 }
             }
@@ -482,7 +485,7 @@ sogou('Sogou.Events.Util',
         /**
          * 取得代理函数.
          * 这里对代理函数的执行结果稍有不同IE9以下对于proxy的返回值很在乎
-         * @return {Function} A new or reused function object.
+         * @return {Function} 返回一个新的可被复用的匿名函数.
          */
         function getProxy() {
             // Use a local var f to prevent one allocation.
@@ -492,17 +495,18 @@ sogou('Sogou.Events.Util',
                 } :
                 function(eventObject) {
                     var v = handleBrowserEvent_.call(f.src, f.listener, eventObject);
-                    // NOTE(user): 在IE中，我们模拟了捕获阶段。但是当有个后代元素有个inline绑定函数
-                    // 试图阻止默认行为时 (<a href="..." onclick="return false">...</a>)
-                    // 如果句柄返回true默认行为会被改写，因此我们返回undefined。
-                    if (!v) return v;
+                    // 注意: 在IE中我们模拟了捕获阶段. 但当有个后代元素有个inline绑定函数
+                    // 试图阻止默认行为时(<a href="..." onclick="return false">...</a>)
+                    // 如果句柄返回true默认行为会被改写, 因此我们返回undefined.
+                    if (!v) 
+                        return v;
                 };
             return f;
         }
 
         /**
-         * 对dom元素或者EventTarget实例添加函数句柄。可以添加只调用一次的函数，
-         * 若再次被添加则直接返回Listener对象。Note that if the
+         * 对dom元素或者EventTarget实例添加函数句柄.可以添加只调用一次的函数,
+         * 若再次被添加则直接返回Listener对象.Note that if the
          * existing listener is a one-off listener(registered via listenOnce),
          * it will no longer be a one-off listener after a call to listen().
          *
@@ -511,7 +515,7 @@ sogou('Sogou.Events.Util',
          * @param {Function|Object} listener Callback method, or an object
          *     with a handleEvent function. WARNING: passing an Object is now
          *     softly deprecated.
-         * @param {boolean=} opt_capt 捕获阶段是否触发，默认false
+         * @param {boolean=} opt_capt 捕获阶段是否触发,默认false
          * @param {Object=} opt_context 函数上下文
          * @return {Listener} Unique key for the listener.
          */
@@ -530,7 +534,7 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 移除通过listen()加上的事件句柄。
+         * 移除通过listen()加上的事件句柄
          * @param {EventTarget} src The target to stop listening to events on.
          * @param {string|Array.<string>} type The name of the event without the 'on'
          *     prefix.
@@ -560,9 +564,9 @@ sogou('Sogou.Events.Util',
                 return false;
 
             for (i = 0; i < listenerArray.length; i++) {
-                if (listenerArray[i].listener == listener &&
-                    listenerArray[i].capture == capture &&
-                    listenerArray[i].handler == opt_context) {
+                if (listenerArray[i].listener === listener &&
+                    listenerArray[i].capture === capture &&
+                    listenerArray[i].handler === opt_context) {
                     return unlistenByKey(listenerArray[i]);
                 }
             }
@@ -571,9 +575,9 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 为监听对象或者dom元素添加事件处理器，触发过后处理器会被自动删除。
+         * 为监听对象或者dom元素添加事件处理器, 触发过后处理器会被自动删除.
          * 如果句柄已经存在, 此方法什么都不做. 如果之前是通过listen()注册的,
-         * listenOnce() 不会改变其属性成为一次性句柄. 相应如果存在的是一次性句柄,
+         * listenOnce()不会改变其属性成为一次性句柄. 相应如果存在的是一次性句柄,
          * listenOnce也不会改变它们
          *
          * @param {EventTarget} src The node to listen to events on.
@@ -605,16 +609,19 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 移除通过listen()加上的事件句柄。通过listen()返回的Listener对象
-         * @param {Listener} key 通过listen()返回的Listener对象。
-         * @return {boolean} 监听是否被成功移除。
+         * 移除通过listen()加上的事件句柄. 通过listen()返回的Listener对象
+         * @param {Listener} key 通过listen()返回的Listener对象.
+         * @return {boolean} 监听是否被成功移除.
          */
         function unlistenByKey(key) {
             // Remove this check when tests that rely on this are fixed.
-            if (util.isNumber(key)) return false;
+            if (util.isNumber(key)) 
+                return false;
             var listener = key;
-            if (!listener) return false;
-            if (listener.removed) return false;
+            if (!listener) 
+                return false;
+            if (listener.removed) 
+                return false;
 
             var src = listener.src;
             if (src instanceof EvtTarget) {
@@ -634,7 +641,7 @@ sogou('Sogou.Events.Util',
             if (sources_[srcUid]) {
                 var sourcesArray = sources_[srcUid];
                 array.remove(sourcesArray, listener);
-                if (sourcesArray.length == 0) {
+                if (sourcesArray.length === 0) {
                     delete sources_[srcUid];
                 }
             }
@@ -651,15 +658,15 @@ sogou('Sogou.Events.Util',
             var listenerArray = listenerTree_[type][capture][srcUid];
             if (listenerArray) {
                 array.remove(listenerArray, listener);
-                if (listenerArray.length == 0) {
+                if (listenerArray.length === 0) {
                     delete listenerTree_[type][capture][srcUid];
                     listenerTree_[type][capture].count_--;
                 }
-                if (listenerTree_[type][capture].count_ == 0) {
+                if (listenerTree_[type][capture].count_ === 0) {
                     delete listenerTree_[type][capture];
                     listenerTree_[type].count_--;
                 }
-                if (listenerTree_[type].count_ == 0) {
+                if (listenerTree_[type].count_ === 0) {
                     delete listenerTree_[type];
                 }
             }
@@ -740,17 +747,17 @@ sogou('Sogou.Events.Util',
         }
 
         /**
-         * 移除一个对象上的所有事件句柄。也可传入可选的type参数。
+         * 移除一个对象上的所有事件句柄. 也可传入可选的type参数.
          * @param {Object=} opt_obj Object to remove listeners from. Not
          *     specifying opt_obj is now DEPRECATED (it used to remove all
          *     registered listeners).
          * @param {string=} opt_type Type of event to, default is all types.
-         * @return {number} 共移除了多少事件。
+         * @return {number} 共移除了多少事件.
          */
         function removeAll(opt_obj, opt_type) {
             var count = 0;
-            var noObj = opt_obj == null;
-            var noType = opt_type == null;
+            var noObj = util.isNull(opt_obj);
+            var noType = util.isNull(opt_type);
 
             if (!noObj) {
                 if (opt_obj && (opt_obj instanceof EvtTarget)) {
@@ -761,7 +768,7 @@ sogou('Sogou.Events.Util',
                     var sourcesArray = sources_[srcUid];
                     for (var i = sourcesArray.length - 1; i >= 0; i--) {
                         var listener = sourcesArray[i];
-                        if (noType || opt_type == listener.type) {
+                        if (noType || opt_type === listener.type) {
                             unlistenByKey(listener);
                             count++;
                         }
