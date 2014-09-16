@@ -737,12 +737,36 @@ sogou('Sogou.Events.Util',
          */
         function fireListener(listener, eventObject) {
             var listenerFn = listener.listener;
-            var listenerHandler = listener.handler || listener.src;
+            var context = listener.handler || listener.src;
 
             if (listener.callOnce) {
                 unlistenByKey(listener);
             }
-            return listenerFn.call(listenerHandler, eventObject);
+            return listenerFn.call(context, eventObject);
+        }
+
+        /**
+         * 用一个特定的EventWrapper对象在Node节点或者EventTarget实例上添加事件监听.
+         * @param {EventTarget} src 监听对象.
+         * @param {EventWrapper} wrapper Event wrapper to use.
+         * @param {Function|Object} listener 处理器函数或者一个含有handleEvent方法的对象.
+         * @param {boolean=} opt_capt 是否捕获模式 (defaults to false).
+         * @param {Object=} opt_context 函数上下文.
+         */
+        function listenWithWrapper(src, wrapper, listener, opt_capt, opt_context) {
+            wrapper.listen(src, listener, opt_capt, opt_context);
+        }
+
+        /**
+         * 移除通过listenWithWrapper()添加的事件监听.
+         * @param {EventTarget} src 监听对象.
+         * @param {EventWrapper} wrapper Event wrapper to use.
+         * @param {Function|Object} listener The listener function to remove.
+         * @param {boolean=} opt_capt 是否捕获模式.
+         * @param {Object=} opt_context 函数上下文.
+         */
+        function unlistenWithWrapper(src, wrapper, listener, opt_capt, opt_context) {
+            wrapper.unlisten(src, listener, opt_capt, opt_context);
         }
 
         /**
@@ -808,6 +832,8 @@ sogou('Sogou.Events.Util',
             unlistenByKey: unlistenByKey,
             fireListeners: fireListeners,
             fireListener: fireListener,
+            listenWithWrapper: listenWithWrapper,
+            unlistenWithWrapper: unlistenWithWrapper,
             removeAll: removeAll,
             removeAllNativeListeners: removeAllNativeListeners
         };
