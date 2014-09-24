@@ -25,6 +25,62 @@ sogou('Sogou.Events.EventTarget',
         var MAX_ANCESTORS_ = 100;
 
         /**
+         * 在祖先树上依次触发事件.
+         * @param {!Object} target 分发事件的源.
+         * @param {EventBase|Object|string} e 事件对象.
+         * @param {Array.<EventTarget>=} opt_ancestorsTree 祖先事件源保存在一个数组里, 顺序由近至远.
+         *     无祖先就是Null.
+         * @return {boolean} 任何一个句柄里调用了preventDefault(或者任何句柄返回false)结果就是false.
+         * @private
+         */
+        var dispatchEventInternal_ = function(target, e, opt_ancestorsTree) {
+            var type = e.type || /** @type {string} */ (e);
+            var i;
+
+            // 如果接收的是个字符串, 基于EventBase创建事件对象,
+            // 保证preventDefault和stopPropagation两个方法可用.
+            if (util.isString(e)) {
+                e = new EventBase(e, target);
+            } else if (!(e instanceof EventBase)) {
+                var oldEvent = e;
+                e = new EventBase(type, target);
+                object.extend(e, oldEvent);
+            } else {
+                e.target = e.target || target;
+            }
+
+            var rv = true, currentTarget;
+
+            // 祖先树触发捕获阶段.
+            if (opt_ancestorsTree) {
+                for (i = opt_ancestorsTree.length - 1; !e.propagationStopped_ && i >= 0;
+                     i--) {
+                    currentTarget = e.currentTarget = opt_ancestorsTree[i];
+                    rv = currentTarget.fireListeners(type, true, e) && rv;
+                }
+            }
+
+            // 当前对象触发.
+            if (!e.propagationStopped_) {
+                currentTarget = e.currentTarget = target;
+                rv = currentTarget.fireListeners(type, true, e) && rv;
+                if (!e.propagationStopped_) {
+                    rv = currentTarget.fireListeners(type, false, e) && rv;
+                }
+            }
+
+            // 祖先树触发冒泡阶段.
+            if (opt_ancestorsTree) {
+                for (i = 0; !e.propagationStopped_ && i < opt_ancestorsTree.length; i++) {
+                    currentTarget = e.currentTarget = opt_ancestorsTree[i];
+                    rv = currentTarget.fireListeners(type, false, e) && rv;
+                }
+            }
+
+            return rv;
+        };
+
+        /**
          * EventTarget继承了Disposable.
          * 拥有W3C的EventTarget-like特性(捕获/冒泡机制, 停止冒泡和组织默认行为等)
          * 可以继承这个类,使得你的类也变成可监听的listenable
@@ -110,8 +166,7 @@ sogou('Sogou.Events.EventTarget',
                     }
                 }
                 // 这步是真正的分发事件, 前面只是构建了ancestorsTree
-                return EventTarget.dispatchEventInternal_(
-                    this.actualEventTarget_, e, ancestorsTree);
+                return dispatchEventInternal_(this.actualEventTarget_, e, ancestorsTree);
             },
             /**
              * 从当前对象移除所有句柄. EventTarget的子类可能需要重写此方法解除所有dom绑定
@@ -152,7 +207,7 @@ sogou('Sogou.Events.EventTarget',
             /** @override */
             fireListeners: function(type, capture, eventObject) {
                 // TODO: 这段代码在listenerArray为空的情况下不会创建数组.
-                // 这些优化可能微不足道, 可直接调用getListeners(type, capture), 简单些.
+                // 这些优化可能微不足道, 可直接调用getListeners(type, capture)简单些.
                 var listenerArray = this.eventTargetListeners_.listeners[type];
                 if (!listenerArray) {
                     return true;
@@ -190,61 +245,6 @@ sogou('Sogou.Events.EventTarget',
                 return this.eventTargetListeners_.hasListener(opt_type, opt_capture);
             }
         });
-
-        /**
-         * 在祖先树上依次触发事件.
-         * @param {!Object} target 分发事件的源.
-         * @param {EventBase|Object|string} e 事件对象.
-         * @param {Array.<EventTarget>=} opt_ancestorsTree 祖先事件源保存在一个数组里, 顺序由近至远. 无祖先就是Null.
-         * @return {boolean} 任何一个句柄里调用了preventDefault(或者任何句柄返回false)结果就是false.
-         * @private
-         */
-        EventTarget.dispatchEventInternal_ = function(target, e, opt_ancestorsTree) {
-            var type = e.type || /** @type {string} */ (e);
-            var i;
-
-            // 如果接收的是个字符串, 基于EventBase创建事件对象, 保证preventDefault和stopPropagation
-            // 两个方法可用.
-            if (util.isString(e)) {
-                e = new EventBase(e, target);
-            } else if (!(e instanceof EventBase)) {
-                var oldEvent = e;
-                e = new EventBase(type, target);
-                object.extend(e, oldEvent);
-            } else {
-                e.target = e.target || target;
-            }
-
-            var rv = true, currentTarget;
-
-            // 祖先树触发捕获阶段.
-            if (opt_ancestorsTree) {
-                for (i = opt_ancestorsTree.length - 1; !e.propagationStopped_ && i >= 0;
-                     i--) {
-                    currentTarget = e.currentTarget = opt_ancestorsTree[i];
-                    rv = currentTarget.fireListeners(type, true, e) && rv;
-                }
-            }
-
-            // 当前对象触发.
-            if (!e.propagationStopped_) {
-                currentTarget = e.currentTarget = target;
-                rv = currentTarget.fireListeners(type, true, e) && rv;
-                if (!e.propagationStopped_) {
-                    rv = currentTarget.fireListeners(type, false, e) && rv;
-                }
-            }
-
-            // 祖先树触发冒泡阶段.
-            if (opt_ancestorsTree) {
-                for (i = 0; !e.propagationStopped_ && i < opt_ancestorsTree.length; i++) {
-                    currentTarget = e.currentTarget = opt_ancestorsTree[i];
-                    rv = currentTarget.fireListeners(type, false, e) && rv;
-                }
-            }
-
-            return rv;
-        };
 
         return EventTarget;
     }

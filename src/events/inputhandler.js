@@ -81,9 +81,7 @@ sogou('Sogou.Events.InputHandler',
          * input handler触发的事件类型
          * @enum {string}
          */
-        InputHandler.EventType = {
-            INPUT: 'input'
-        };
+        InputHandler.EventType = { INPUT: 'input' };
 
         /**
          * 模拟模式下需要一定延时触发input event事件.
@@ -99,22 +97,18 @@ sogou('Sogou.Events.InputHandler',
         InputHandler.prototype.handleEvent = function(e) {
             // 标准input事件
             if (e.type === 'input') {
-                // This event happens after all the other events we listen to, so cancel
-                // an asynchronous event dispatch if we have it queued up.  Otherwise, we
-                // will end up firing an extra event.
+                // input事件会是所有事件中最后触发的(见构造函数),所以如果有异步触发的事件先取消否则会多触发一次.
                 this.cancelTimerIfSet_();
 
-                // Unlike other browsers, Opera fires an extra input event when an element
-                // is blurred after the user has input into it. Since Opera doesn't fire
-                // input event on drop, it's enough to check whether element still has focus
-                // to suppress bogus notification.
+                // Opera会在失去焦点后触发额外的一次input事件. Opera不会在drop时触发input事件,
+                // 由这两个条件可以通过检查元素是否有焦点去阻止不必要的事件分发.
                 if (!ua.isOPERA || this.element_ ===
                     dom.getOwnerDocument(this.element_).activeElement) {
                     this.dispatchEvent(this.createInputEvent_(e));
                 }
             // 模拟事件
             } else {
-                // Filter out key events that don't modify text.
+                // 有些键盘事件不会输出字符,过滤掉它们.
                 if (e.type === 'keydown' && !KeyCodes.isTextModifyingKeyEvent(e)) {
                     return;
                 }
