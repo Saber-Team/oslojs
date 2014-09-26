@@ -1,19 +1,12 @@
 /**
- * @fileoverview This file contains a class for working with keyboard events
- * that repeat consistently across browsers and platforms. It also unifies the
- * key code so that it is the same in all browsers and platforms.
- *
+ * @fileoverview 键盘事件封装类.
  * @modified Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../demos/keyhandler.html
  */
 
 sogou('Sogou.Events.KeyEvent',
-    [
-        'Sogou.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.KeyEventType'
-    ],
+    ['Sogou.Util','Sogou.Events.BrowserEvent','Sogou.Events.KeyEventType'],
     function(util, BrowserEvent, KeyEventType) {
 
         'use strict';

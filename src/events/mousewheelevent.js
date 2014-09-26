@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Events.MouseWheelEvent',
+sogou('Sogou.Events.MouseWheelEvent',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserEvent',
@@ -15,15 +15,11 @@
         'use strict';
 
         /**
-         * A base class for mouse wheel events. This is used with the
-         * MouseWheelHandler.
-         *
-         * @param {number} detail The number of rows the user scrolled.
-         * @param {Event} browserEvent Browser event object.
-         * @param {number} deltaX The number of rows the user scrolled in the X
-         *     direction.
-         * @param {number} deltaY The number of rows the user scrolled in the Y
-         *     direction.
+         * mousewheel事件的基类. 和MouseWheelHandler一起使用.
+         * @param {number} detail 滚动行数.
+         * @param {Event} browserEvent 浏览器事件对象.
+         * @param {number} deltaX X轴方向滚动距离(rows).
+         * @param {number} deltaY Y轴方向滚动距离(rows).
          * @constructor
          * @extends {BrowserEvent}
          */
@@ -31,27 +27,21 @@
             BrowserEvent.call(this, browserEvent);
             this.type = EventType.MOUSEWHEEL;
             /**
-             * The number of lines the user scrolled
+             * 滚动行数
              * @type {number}
-             * NOTE: Informally deprecated. Use deltaX and deltaY instead, they provide
-             * more information.
+             * 注意: 尽量用deltaX和deltaY instead.
              */
             this.detail = detail;
             /**
-             * The number of "lines" scrolled in the X direction.
-             *
-             * Note that not all browsers provide enough information to distinguish
-             * horizontal and vertical scroll events, so for these unsupported browsers,
-             * we will always have a deltaX of 0, even if the user scrolled their mouse
-             * wheel or trackpad sideways.
-             *
-             * Currently supported browsers are Webkit and Firefox 3.1 or later.
-             *
+             * X轴方向滚动行数.
+             * 注意不是所有浏览器都能区分横,纵向滚动事件,对于不支持的浏览器deltaX永远是0,
+             * 即使用户滚了滚轮或者用trackpad做的滑动.
+             * 目前支持的浏览器有: Webkit Firefox 3.1+
              * @type {number}
              */
             this.deltaX = deltaX;
             /**
-             * The number of lines scrolled in the Y direction.
+             * Y轴方向滚动行数.
              * @type {number}
              */
             this.deltaY = deltaY;

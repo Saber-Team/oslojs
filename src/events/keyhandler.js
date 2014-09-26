@@ -1,7 +1,6 @@
 /**
- * @fileoverview This file contains a class for working with keyboard events
- * that repeat consistently across browsers and platforms. It also unifies the
- * key code so that it is the same in all browsers and platforms.
+ * @fileoverview 本模块包含的类处理键盘事件在各浏览器及系统的兼容性问题.
+ *     包括重复触发和key code问题.
  *
  * Different web browsers have very different keyboard event handling. Most
  * importantly is that only certain browsers repeat keydown events:
@@ -106,79 +105,11 @@ sogou('Sogou.Events.KeyHandler',
         'use strict';
 
         /**
-         * A wrapper around an element that you want to listen to keyboard events on.
-         * @param {Element|Document=} opt_element The element or document to listen on.
-         * @param {boolean=} opt_capture Whether to listen for browser events in
-         *     capture phase (defaults to false).
-         * @constructor
-         * @extends {EventTarget}
-         */
-        var KeyHandler = function(opt_element, opt_capture) {
-            EventTarget.call(this);
-
-            if (opt_element) {
-                this.attach(opt_element, opt_capture);
-            }
-        };
-        util.inherits(KeyHandler, EventTarget);
-
-        /**
-         * This is the element that we will listen to the real keyboard events on.
-         * @type {Element|Document|null}
-         * @private
-         */
-        KeyHandler.prototype.element_ = null;
-
-        /**
-         * The key for the key press listener.
-         * @type {Listener}
-         * @private
-         */
-        KeyHandler.prototype.keyPressKey_ = null;
-
-        /**
-         * The key for the key down listener.
-         * @type {Listener}
-         * @private
-         */
-        KeyHandler.prototype.keyDownKey_ = null;
-
-        /**
-         * The key for the key up listener.
-         * @type {Listener}
-         * @private
-         */
-        KeyHandler.prototype.keyUpKey_ = null;
-
-        /**
-         * Used to detect keyboard repeat events.
-         * @private
-         * @type {number}
-         */
-        KeyHandler.prototype.lastKey_ = -1;
-
-        /**
-         * Keycode recorded for key down events. As most browsers don't report the
-         * keycode in the key press event we need to record it in the key down phase.
-         * @private
-         * @type {number}
-         */
-        KeyHandler.prototype.keyCode_ = -1;
-
-        /**
-         * Alt key recorded for key down events. FF on Mac does not report the alt key
-         * flag in the key press event, we need to record it in the key down phase.
-         * @type {boolean}
-         * @private
-         */
-        KeyHandler.prototype.altKey_ = false;
-
-        /**
-         * An enumeration of key codes that Safari 2 does incorrectly
+         * 在Safari 2中返回不正确的key codes.
          * @type {Object}
          * @private
          */
-        KeyHandler.safariKey_ = {
+        var safariKey_ = {
             '3': KeyCodes.ENTER, // 13
             '12': KeyCodes.NUMLOCK, // 144
             '63232': KeyCodes.UP, // 38
@@ -208,14 +139,13 @@ sogou('Sogou.Events.KeyHandler',
         };
 
         /**
-         * An enumeration of key identifiers currently part of the W3C draft for DOM3
-         * and their mappings to keyCodes.
+         * 一些键的id出现在W3C draft for DOM3. 详见:
          * http://www.w3.org/TR/DOM-Level-3-Events/keyset.html#KeySet-Set
-         * This is currently supported in Safari and should be platform independent.
+         * 目前Safari支持,应该分平台考虑.
          * @type {Object}
          * @private
          */
-        KeyHandler.keyIdentifier_ = {
+        var keyIdentifier_ = {
             'Up': KeyCodes.UP, // 38
             'Down': KeyCodes.DOWN, // 40
             'Left': KeyCodes.LEFT, // 37
@@ -241,63 +171,125 @@ sogou('Sogou.Events.KeyHandler',
             'Insert': KeyCodes.INSERT // 45
         };
 
-
         /**
-         * If true, the KeyEvent fires on keydown. Otherwise, it fires on keypress.
-         *
+         * 在此条件下需要在keydown时缓存alt key且在key press时复用.
+         * FF on Mac does not set the alt flag in the key press event.
          * @type {boolean}
          * @private
          */
-        KeyHandler.USES_KEYDOWN_ = ua.isIE || ua.isWEBKIT && ua.isVersionOrHigher('525');
+        var SAVE_ALT_FOR_KEYPRESS_ = ua.isMAC && ua.isGECKO;
 
         /**
-         * If true, the alt key flag is saved during the key down and reused when
-         * handling the key press. FF on Mac does not set the alt flag in the key press
-         * event.
+         * 是否用keydown事件触发. 否则用keypress.
          * @type {boolean}
          * @private
          */
-        KeyHandler.SAVE_ALT_FOR_KEYPRESS_ = ua.isMAC && ua.isGECKO;
+        var USES_KEYDOWN_ = ua.isIE || ua.isWEBKIT && ua.isVersionOrHigher('525');
 
         /**
-         * Records the keycode for browsers that only returns the keycode for key up/
-         * down events. For browser/key combinations that doesn't trigger a key pressed
-         * event it also fires the patched key event.
+         * 键盘事件处理器封装类.
+         * @param {Element|Document=} opt_element 监听元素.
+         * @param {boolean=} opt_capture 是否处理捕获阶段(默认false).
+         * @constructor
+         * @extends {EventTarget}
+         */
+        var KeyHandler = function(opt_element, opt_capture) {
+            EventTarget.call(this);
+
+            if (opt_element) {
+                this.attach(opt_element, opt_capture);
+            }
+        };
+        util.inherits(KeyHandler, EventTarget);
+
+        /**
+         * 监听元素.
+         * @type {Element|Document|null}
+         * @private
+         */
+        KeyHandler.prototype.element_ = null;
+
+        /**
+         * key press listener.
+         * @type {Listener}
+         * @private
+         */
+        KeyHandler.prototype.keyPressKey_ = null;
+
+        /**
+         * key down listener.
+         * @type {Listener}
+         * @private
+         */
+        KeyHandler.prototype.keyDownKey_ = null;
+
+        /**
+         * key up listener.
+         * @type {Listener}
+         * @private
+         */
+        KeyHandler.prototype.keyUpKey_ = null;
+
+        /**
+         * 用于检测键盘的连续事件.
+         * @private
+         * @type {number}
+         */
+        KeyHandler.prototype.lastKey_ = -1;
+
+        /**
+         * 记录key down事件中的Keycode. 大多数浏览器不会在keypress事件报告keycode,
+         * 我们要在此之前的key down阶段记录keycode.
+         * @private
+         * @type {number}
+         */
+        KeyHandler.prototype.keyCode_ = -1;
+
+        /**
+         * key down事件中的alt key. Mac上的FF不会在key press事件中带有alt key,
+         * 我们要在此之前的key down阶段记录keycode.
+         * @type {boolean}
+         * @private
+         */
+        KeyHandler.prototype.altKey_ = false;
+
+        /**
+         * 对只在keydown/up事件才有keycode的浏览器存储其keycode.
+         * 对于不会触发key pressed的一些组合键情况(用keycodes模块的firesKeyPressEvent方法判断)
+         * 仍然会触发事件处理器.
          * @param {BrowserEvent} e The key down event.
          * @private
          */
         KeyHandler.prototype.handleKeyDown_ = function(e) {
-            // Ctrl-Tab and Alt-Tab can cause the focus to be moved to another window
-            // before we've caught a key-up event.  If the last-key was one of these we
-            // reset the state.
-
+            // Ctrl-Tab 和 Alt-Tab 会移动焦点去别的窗口在我们处理key-up event之前.
+            // If the last-key was one of these we reset the state.
             if (ua.isWEBKIT) {
-                if (this.lastKey_ == KeyCodes.CTRL && !e.ctrlKey ||
-                    this.lastKey_ == KeyCodes.ALT && !e.altKey ||
-                    ua.isMAC && this.lastKey_ == KeyCodes.META && !e.metaKey) {
-                    this.lastKey_ = -1;
-                    this.keyCode_ = -1;
+                if (this.lastKey_ === KeyCodes.CTRL && !e.ctrlKey ||
+                    this.lastKey_ === KeyCodes.ALT && !e.altKey ||
+                    ua.isMAC && this.lastKey_ === KeyCodes.META && !e.metaKey) {
+                    this.resetState();
                 }
             }
 
-            if (this.lastKey_ == -1) {
+            if (this.lastKey_ === -1) {
                 if (e.ctrlKey && e.keyCode != KeyCodes.CTRL) {
                     this.lastKey_ = KeyCodes.CTRL;
-                } else if (e.altKey && e.keyCode != KeyCodes.ALT) {
+                }
+                else if (e.altKey && e.keyCode != KeyCodes.ALT) {
                     this.lastKey_ = KeyCodes.ALT;
-                } else if (e.metaKey && e.keyCode != KeyCodes.META) {
+                }
+                else if (e.metaKey && e.keyCode != KeyCodes.META) {
                     this.lastKey_ = KeyCodes.META;
                 }
             }
 
-            if (KeyHandler.USES_KEYDOWN_ &&
-                !KeyCodes.firesKeyPressEvent(e.keyCode,
-                    this.lastKey_, e.shiftKey, e.ctrlKey, e.altKey)) {
+            if (USES_KEYDOWN_ && !KeyCodes.firesKeyPressEvent(
+                e.keyCode, this.lastKey_, e.shiftKey, e.ctrlKey, e.altKey)) {
                 this.handleEvent(e);
             } else {
                 this.keyCode_ = ua.isGECKO ?
                     KeyCodes.normalizeGeckoKeyCode(e.keyCode) : e.keyCode;
-                if (KeyHandler.SAVE_ALT_FOR_KEYPRESS_) {
+                if (SAVE_ALT_FOR_KEYPRESS_) {
                     this.altKey_ = e.altKey;
                 }
             }
@@ -314,9 +306,8 @@ sogou('Sogou.Events.KeyHandler',
         };
 
         /**
-         * Clears the stored previous key value, resetting the key repeat status. Uses
-         * -1 because the Safari 3 Windows beta reports 0 for certain keys (like Home
-         * and End.)
+         * 清楚之前缓存的key code,重置键重复的状态(key repeat status).用-1是因为Safari 3 Windows beta
+         * 某些键值返回0(比如Home键和End键).
          * @param {BrowserEvent} e The keyup event.
          * @private
          */
@@ -326,9 +317,8 @@ sogou('Sogou.Events.KeyHandler',
         };
 
         /**
-         * Handles the events on the element.
-         * @param {BrowserEvent} e  The keyboard event sent from the
-         *     browser.
+         * 事件处理器.
+         * @param {BrowserEvent} e
          */
         KeyHandler.prototype.handleEvent = function(e) {
             var be = e.getBrowserEvent();
@@ -342,8 +332,8 @@ sogou('Sogou.Events.KeyHandler',
                 charCode = (keyCode !== KeyCodes.ENTER && keyCode !== KeyCodes.ESC ?
                     be.keyCode : 0);
 
-                // Safari reports the character code in the keyCode field for keypress
-                // events but also has a charCode field.
+            // Safari reports the character code in the keyCode field for keypress
+            // events but also has a charCode field.
             } else if (ua.isWEBKIT &&
                 e.type === EventType.KEYPRESS) {
                 keyCode = this.keyCode_;
@@ -351,17 +341,17 @@ sogou('Sogou.Events.KeyHandler',
                     KeyCodes.isCharacterKey(keyCode) ?
                     be.charCode : 0;
 
-                // Opera reports the keycode or the character code in the keyCode field.
+            // Opera reports the keycode or the character code in the keyCode field.
             } else if (ua.isOPERA) {
                 keyCode = this.keyCode_;
                 charCode = KeyCodes.isCharacterKey(keyCode) ?
                     be.keyCode : 0;
 
-                // Mozilla reports the character code in the charCode field.
+            // Mozilla reports the character code in the charCode field.
             } else {
                 keyCode = be.keyCode || this.keyCode_;
                 charCode = be.charCode || 0;
-                if (KeyHandler.SAVE_ALT_FOR_KEYPRESS_) {
+                if (SAVE_ALT_FOR_KEYPRESS_) {
                     altKey = this.altKey_;
                 }
                 // On the Mac, shift-/ triggers a question mark char code and no key code
@@ -376,10 +366,10 @@ sogou('Sogou.Events.KeyHandler',
 
             // Correct the key value for certain browser-specific quirks.
             if (keyCode) {
-                if (keyCode >= 63232 && keyCode in KeyHandler.safariKey_) {
+                if (keyCode >= 63232 && keyCode in safariKey_) {
                     // NOTE(nicksantos): Safari 3 has fixed this problem,
                     // this is only needed for Safari 2.
-                    key = KeyHandler.safariKey_[keyCode];
+                    key = safariKey_[keyCode];
                 } else {
 
                     // Safari returns 25 for Shift+Tab instead of 9.
@@ -388,10 +378,10 @@ sogou('Sogou.Events.KeyHandler',
                     }
                 }
             } else if (keyIdentifier &&
-                keyIdentifier in KeyHandler.keyIdentifier_) {
+                keyIdentifier in keyIdentifier_) {
                 // This is needed for Safari Windows because it currently doesn't give a
                 // keyCode/which for non printable keys.
-                key = KeyHandler.keyIdentifier_[keyIdentifier];
+                key = keyIdentifier_[keyIdentifier];
             }
 
             // If we get the same keycode as a keydown/keypress without having seen a
@@ -405,19 +395,17 @@ sogou('Sogou.Events.KeyHandler',
         };
 
         /**
-         * Returns the element listened on for the real keyboard events.
-         * @return {Element|Document|null} The element listened on for the real
-         *     keyboard events.
+         * 返回监听元素.
+         * @return {Element|Document|null}
          */
         KeyHandler.prototype.getElement = function() {
             return this.element_;
         };
 
         /**
-         * Adds the proper key event listeners to the element.
-         * @param {Element|Document} element The element to listen on.
-         * @param {boolean=} opt_capture Whether to listen for browser events in
-         *     capture phase (defaults to false).
+         * 绑定事件.
+         * @param {Element|Document} element 元素.
+         * @param {boolean=} opt_capture 是否在捕获阶段监听(默认false).
          */
         KeyHandler.prototype.attach = function(element, opt_capture) {
             if (this.keyUpKey_) {
@@ -427,30 +415,19 @@ sogou('Sogou.Events.KeyHandler',
             this.element_ = element;
 
             this.keyPressKey_ = EventsUtil.listen(this.element_,
-                EventType.KEYPRESS,
-                this,
-                opt_capture);
+                EventType.KEYPRESS, this, opt_capture);
 
-            // Most browsers (Safari 2 being the notable exception) doesn't include the
-            // keyCode in keypress events (IE has the char code in the keyCode field and
-            // Mozilla only included the keyCode if there's no charCode). Thus we have to
-            // listen for keydown to capture the keycode.
+            // 大多数浏览器(Safari 2例外)在keypress事件中不包含keyCode(IE有keyCode但实际是char code,
+            // Mozilla只在没有charCode的属性时才会加一个keyCode属性).因此我们在keydown事件中存储keycode.
             this.keyDownKey_ = EventsUtil.listen(this.element_,
-                EventType.KEYDOWN,
-                this.handleKeyDown_,
-                opt_capture,
-                this);
-
+                EventType.KEYDOWN, this.handleKeyDown_, opt_capture, this);
 
             this.keyUpKey_ = EventsUtil.listen(this.element_,
-                EventType.KEYUP,
-                this.handleKeyup_,
-                opt_capture,
-                this);
+                EventType.KEYUP, this.handleKeyup_, opt_capture, this);
         };
 
         /**
-         * Removes the listeners that may exist.
+         * 移除句柄处理器.
          */
         KeyHandler.prototype.detach = function() {
             if (this.keyPressKey_) {
