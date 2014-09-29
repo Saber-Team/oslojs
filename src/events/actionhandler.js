@@ -15,7 +15,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.ActionHandler',
+define('Sogou.Events.ActionHandler',
     [
         'Sogou.Util',
         'Sogou.Events.Util',
@@ -33,6 +33,13 @@ sogou('Sogou.Events.ActionHandler',
         'use strict';
 
         /**
+         * 要监听的键盘事件.
+         * @type {string}
+         * @private
+         */
+        var KEY_EVENT_TYPE_ = ua.isGECKO ? EventType.KEYPRESS : EventType.KEYDOWN;
+
+        /**
          * 一个对元素进行action事件监听的句柄类.
          * @param {Element|Document} element 要监听的元素.
          * @constructor
@@ -47,17 +54,10 @@ sogou('Sogou.Events.ActionHandler',
              */
             this.element_ = element;
 
-            EventsUtil.listen(element, ActionHandler.KEY_EVENT_TYPE_, this.handleKeyDown_, false, this);
+            EventsUtil.listen(element, KEY_EVENT_TYPE_, this.handleKeyDown_, false, this);
             EventsUtil.listen(element, EventType.CLICK, this.handleClick_, false, this);
         };
         util.inherits(ActionHandler, EventTarget);
-
-        /**
-         * 要监听的键盘事件.
-         * @type {string}
-         * @private
-         */
-        ActionHandler.KEY_EVENT_TYPE_ = ua.isGECKO ? EventType.KEYPRESS : EventType.KEYDOWN;
 
         /**
          * 键盘事件处理器.
@@ -107,7 +107,7 @@ sogou('Sogou.Events.ActionHandler',
         /** @override */
         ActionHandler.prototype.disposeInternal = function() {
             ActionHandler.superClass_.disposeInternal.call(this);
-            EventsUtil.unlisten(this.element_, ActionHandler.KEY_EVENT_TYPE_,
+            EventsUtil.unlisten(this.element_, KEY_EVENT_TYPE_,
                 this.handleKeyDown_, false, this);
             EventsUtil.unlisten(this.element_, EventType.CLICK, this.handleClick_, false, this);
             delete this.element_;

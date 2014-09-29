@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.KeyEventType',
+define('Sogou.Events.KeyEventType',
     [],
     function() {
 

@@ -30,7 +30,7 @@
  *
  */
 
-sogou('Sogou.Events.BrowserEvent',
+define('Sogou.Events.BrowserEvent',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserFeature',

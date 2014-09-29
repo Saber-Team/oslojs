@@ -1,5 +1,5 @@
 /** 
  * Sogou JavaScript Library 
- * 2014-09-26 build 
+ * 2014-09-29 build 
  */
-sogou("Sogou.Events.KeyEventType",[],function(){"use strict";return{KEY:"key"}});
+define("Sogou.Events.KeyEventType",[],function(){"use strict";return{KEY:"key"}});

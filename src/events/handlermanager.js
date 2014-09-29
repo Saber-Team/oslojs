@@ -41,7 +41,7 @@
  * </pre>
  */
 
-sogou('Sogou.Events.HandlerManager',
+define('Sogou.Events.HandlerManager',
     [
         'Sogou.Util',
         'Sogou.Disposable',

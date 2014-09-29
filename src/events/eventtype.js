@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.EventType',
+define('Sogou.Events.EventType',
     ['Sogou.UA.Util'],
     function(ua) {
 

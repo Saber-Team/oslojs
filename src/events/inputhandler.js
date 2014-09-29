@@ -20,7 +20,7 @@
  * @see ../demos/inputhandler.html
  */
 
-sogou('Sogou.Events.InputHandler',
+define('Sogou.Events.InputHandler',
     [
         'Sogou.Util',
         'Sogou.Timer',

@@ -5,11 +5,8 @@
  * @see ../demos/keyhandler.html
  */
 
-sogou('Sogou.Events.KeyCodes',
-    [
-        'Sogou.Util',
-        'Sogou.UA.Util'
-    ],
+define('Sogou.Events.KeyCodes',
+    ['Sogou.Util','Sogou.UA.Util'],
     function(util, ua) {
 
         'use strict';
@@ -146,7 +143,7 @@ sogou('Sogou.Events.KeyCodes',
         };
 
         /**
-         * Returns true if the event contains a text modifying key.
+         * 键盘事件是否会改变文本需要判断, 如果包含的键值会改变则返回true.
          * @param {BrowserEvent} e A key event.
          * @return {boolean} Whether it's a text modifying key.
          */
@@ -157,8 +154,7 @@ sogou('Sogou.Events.KeyCodes',
                 return false;
             }
 
-            // The following keys are quite harmless, even in combination with
-            // CTRL, ALT or SHIFT.
+            // 下列键值一般无害, 即使同CTRL, ALT, SHIFT一起使用.
             switch (e.keyCode) {
                 case KeyCodes.ALT:
                 case KeyCodes.CAPS_LOCK:

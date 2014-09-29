@@ -7,7 +7,7 @@
  * @see ../demos/focushandler.html
  */
 
-sogou('Sogou.Events.FocusHandler',
+define('Sogou.Events.FocusHandler',
     [
         'Sogou.Util',
         'Sogou.Events.Util',

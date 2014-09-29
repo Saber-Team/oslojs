@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Net.Cookies',
+define('Sogou.Net.Cookies',
     ['Sogou.Util'],
     function(util) {
 

@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.EventBase',
+define('Sogou.Events.EventBase',
     [],
     function() {
 

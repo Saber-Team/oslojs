@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.MouseWheelEvent',
+define('Sogou.Events.MouseWheelEvent',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserEvent',

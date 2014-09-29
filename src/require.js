@@ -1,5 +1,5 @@
 /**
- * @fileoverview 文件提供了全局基础函数sogou作为一个包裹器. 可以封装任何模块代码,
+ * @fileoverview 文件提供了全局基础函数define作为一个包裹器. 可以封装任何模块代码,
  *     同时检测全局环境中是否存在AMD加载器. Sogou前端框架主要运行在浏览器端, 但对于
  *     一些通用代码也可以运行在CMD环境中, 因此对CMD环境也做了检测.
  * @modified Leo.Zhang
@@ -86,15 +86,20 @@
      * @param {function} factory
      */
     if (typeof module !== 'undefined' && module.exports) {
-        global.sogou = function(name, deps, factory) {
+        global.define = function(name, deps, factory) {
             module.exports = factory();
         };
     } else if (typeof global.define === 'function' && global.define.amd) {
-        global.sogou = global.define;
+        // 全局中有AMD加载器,不要覆盖require和define函数
     } else {
-        global.sogou = function(name, deps, factory) {
+        global.define = function(name, deps, factory) {
             var dList = checkDependency(deps);
             exportPath(name, factory.apply(global, dList));
+        };
+        global.require = function(deps, factory) {
+            var dList = checkDependency(deps);
+            factory.apply(global, dList);
+            // 不做全局导出
         };
     }
 

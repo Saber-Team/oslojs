@@ -4,55 +4,49 @@
  * @email zmike86@gmail.com
  */
 
-;sogou('Sogou.Math.Util',
-    [
-        'Sogou.Array'
-    ],
+define('Sogou.Math.Util',
+    ['Sogou.Array'],
     function(array) {
 
         'use strict';
 
         /**
          * 给定一个整数, 返回一个大于等于0 小于此整数{@code a}的随机整数值.
-         * @param {number} a  The upper bound for the random integer (exclusive).
-         * @return {number} A random integer N such that 0 <= N < a.
+         * @param {number} a 随机数上界 (exclusive).
+         * @return {number} 随机数 0 <= N < a.
          */
         function randomInt(a) {
             return Math.floor(Math.random() * a);
         }
 
         /**
-         * 给定上下界, 返回大于等于{@code a}小于{@code b}的随机值(非整型 float).
-         * @param {number} a  The lower bound for the random number (inclusive).
-         * @param {number} b  The upper bound for the random number (exclusive).
-         * @return {number} A random number N such that a <= N < b.
+         * 给定上下界, 返回大于等于a小于b的随机值(非整型 float).
+         * @param {number} a 随机数下界 (inclusive).
+         * @param {number} b 随机数上界 (exclusive).
+         * @return {number} 随机数 a <= N < b.
          */
         function uniformRandom(a, b) {
             return a + Math.random() * (b - a);
         }
 
         /**
-         * 给定一个边界值, 输入值若在其中则返回原值, 否则返回范围内在数轴上离此值最近的数.
-         * (clamp本义是夹板)
+         * 给定一个边界值,输入值若在其中则返回原值,否则返回范围内在数轴上离此值最近的数.(clamp本义是夹板)
          * @param {number} value 输入的数字.
-         * @param {number} min The minimum value to return.
-         * @param {number} max The maximum value to return.
-         * @return {number} The input number if it is within bounds, or the nearest
-         *     number within the bounds.
+         * @param {number} min 下界.
+         * @param {number} max 上界.
+         * @return {number} 若数字在界内则返回否则返回邻近的界值.
          */
         function clamp(value, min, max) {
             return Math.min(Math.max(value, min), max);
         }
 
         /**
-         * 求余操作符%在js中返回a/b的余数, 但和其他语言不同, 余数一定是和被除数同号.
-         * For example, -1 % 8 == -1, 而其他语言的结果是7(such as Python).
+         * 求余操作符%在js中返回a/b的余数,但和其他语言不同,余数一定是和被除数同号.
+         * 举例, -1 % 8 == -1, 而其他语言的结果是7(Python).
          * 这个函数模拟了正确的求模行为(modulo behavior), 这对于在循环队列中计算偏移量很有用.
-         *
          * @param {number} a 被除数.
          * @param {number} b 除数.
-         * @return {number} a % b where the result is between 0 and b (either 0 <= x < b
-         *     or b < x <= 0, depending on the sign of b).
+         * @return {number} a % b的结果应在如下范围 0 and b(不论0 <= x < b或b < x <= 0, 由b的符号决定).
          */
         function modulo(a, b) {
             var r = a % b;
@@ -74,23 +68,21 @@
         }
 
         /**
-         * 测试两个数值是否近似相等, within a certain
-         * tolerance to adjust for floating pount errors.
-         * @param {number} a A number.
-         * @param {number} b A number.
-         * @param {number=} opt_tolerance Optional tolerance range. Defaults
-         *     to 0.000001. If specified, should be greater than 0.
-         * @return {boolean} Whether {@code a} and {@code b} are nearly equal.
+         * 测试两个数值是否近似相等,js中全部是浮点数表示,进行运算时会产生计算误差.
+         * @param {number} a 操作数1.
+         * @param {number} b 操作数2.
+         * @param {number=} opt_tolerance 误差范围. 默认0.000001.
+         * @return {boolean} 是否a与b近似相等.
          */
         function nearlyEquals(a, b, opt_tolerance) {
             return Math.abs(a - b) <= (opt_tolerance || 0.000001);
         }
 
         /**
-         * 对于一个角度值, 标准化其为[0-360).
+         * 对于一个角度值标准化其为[0-360).
          * 负值会变成正数, 大于360度的会被限定在360之内(modulo 360).
-         * @param {number} angle Angle in degrees.
-         * @return {number} Standardized angle.
+         * @param {number} angle 角度.
+         * @return {number}
          */
         function standardAngle(angle) {
             return modulo(angle, 360);
@@ -98,8 +90,8 @@
 
         /**
          * 角度转化为弧度.
-         * @param {number} angleDegrees Angle in degrees.
-         * @return {number} Angle in radians.
+         * @param {number} angleDegrees 角度.
+         * @return {number} 弧度.
          */
         function toRadians(angleDegrees) {
             return angleDegrees * Math.PI / 180;
@@ -107,17 +99,17 @@
 
         /**
          * 弧度转化为角度.
-         * @param {number} angleRadians Angle in radians.
-         * @return {number} Angle in degrees.
+         * @param {number} angleRadians 弧度.
+         * @return {number} 角度.
          */
         function toDegrees(angleRadians) {
             return angleRadians * 180 / Math.PI;
         }
 
         /**
-         * 给定一个角度和半径, 取得X 轴的位置.
-         * @param {number} degrees Angle in degrees (zero points in +X direction).
-         * @param {number} radius Radius.
+         * 给定一个角度和半径, 取得X轴的位置.
+         * @param {number} degrees 角度(zero points in +X direction).
+         * @param {number} radius 半径.
          * @return {number} The x-distance for the angle and radius.
          */
         function angleDx(degrees, radius) {
@@ -125,9 +117,9 @@
         }
 
         /**
-         * 给定一个角度和半径, 取得Y 轴的位置.
-         * @param {number} degrees Angle in degrees (zero points in +X direction).
-         * @param {number} radius Radius.
+         * 给定一个角度和半径, 取得Y轴的位置.
+         * @param {number} degrees 角度(zero points in +X direction).
+         * @param {number} radius 半径.
          * @return {number} The y-distance for the angle and radius.
          */
         function angleDy(degrees, radius) {
@@ -135,7 +127,7 @@
         }
 
         /**
-         * 计算两个点之间的角度值 (x1,y1) and (x2,y2).
+         * 计算两个点之间连线的角度值(x1,y1)和(x2,y2).
          * Math.atan和Math.atan2返回的都是一个弧度表示的角度值.
          * Angle zero points in the +X direction, 90 degrees points in the +Y
          * direction (down) and from there we grow clockwise towards 360 degrees.
@@ -150,16 +142,13 @@
         }
 
         /**
-         * Computes the difference between startAngle and endAngle (angles in degrees).
-         * @param {number} startAngle  开始的角度.
-         * @param {number} endAngle  终止的角度.
-         * @return {number} The number of degrees that when added to
-         *     startAngle will result in endAngle. Positive numbers mean that the
-         *     direction is clockwise. Negative numbers indicate a counter-clockwise
-         *     direction.
+         * 计算两个角度间的差,控制在(-180, 180).
+         * @param {number} startAngle 开始的角度.
+         * @param {number} endAngle 终止的角度.
+         * @return {number} 返回的角度+起始角度 = 结束角度. 正差值表示+方向,负差值表示-方向.
          *     The shortest route (clockwise vs counter-clockwise) between the angles
          *     is used.
-         *     When the difference is 180 degrees, the function returns 180 (not -180)
+         *     若差值是180度,此函数返回180(非-180)
          *     angleDifference(30, 40) is 10, and angleDifference(40, 30) is -10.
          *     angleDifference(350, 10) is 20, and angleDifference(10, 350) is -20.
          */
@@ -174,26 +163,21 @@
         }
 
         /**
-         * Returns the sign of a number as per the "sign" or "signum" function.
+         * -1,0,1 "sign" or "signum" function.
          * @param {number} x The number to take the sign of.
          * @return {number} -1 when negative, 1 when positive, 0 when 0.
          */
         function sign(x) {
-            return x == 0 ? 0 : (x < 0 ? -1 : 1);
+            return x === 0 ? 0 : (x < 0 ? -1 : 1);
         }
 
         /**
-         * todo JS实现的最大公共序列
-         * JavaScript implementation of Longest Common Subsequence problem.
-         * http://en.wikipedia.org/wiki/Longest_common_subsequence
+         * JS实现的最大公共序列.
+         * http://en.wikipedia.org/wiki/Longest_common_subsequence.
          *
-         * Returns the longest possible array that is subarray of both of given arrays.
-         *
-         * @param {Array.<Object>} array1 First array of objects.
-         * @param {Array.<Object>} array2 Second array of objects.
-         * @param {Function=} opt_compareFn Function that acts as a custom comparator
-         *     for the array ojects. Function should return true if objects are equal,
-         *     otherwise false.
+         * @param {Array.<Object>} array1 数组1.
+         * @param {Array.<Object>} array2 数组2.
+         * @param {Function=} opt_compareFn 自定义的比较函数用于比较数组项.
          * @param {Function=} opt_collectorFn Function used to decide what to return
          *     as a result subsequence. It accepts 2 arguments: index of common element
          *     in the first array and index in the second. The default function returns
@@ -204,7 +188,7 @@
          */
         function longestCommonSubsequence(array1, array2, opt_compareFn, opt_collectorFn) {
             var compare = opt_compareFn || function(a, b) {
-                return a == b;
+                return a === b;
             };
 
             var collect = opt_collectorFn || function(i1, i2) {
@@ -213,14 +197,15 @@
 
             var length1 = array1.length;
             var length2 = array2.length;
+            var i, j;
 
             var arr = [];
-            for (var i = 0; i < length1 + 1; i++) {
+            for (i = 0; i < length1 + 1; i++) {
                 arr[i] = [];
                 arr[i][0] = 0;
             }
 
-            for (var j = 0; j < length2 + 1; j++) {
+            for (j = 0; j < length2 + 1; j++) {
                 arr[0][j] = 0;
             }
 
@@ -236,7 +221,8 @@
 
             // Backtracking
             var result = [];
-            var i = length1, j = length2;
+            i = length1;
+            j = length2;
             while (i > 0 && j > 0) {
                 if (compare(array1[i - 1], array2[j - 1])) {
                     result.unshift(collect(i - 1, j - 1));
@@ -257,8 +243,7 @@
         /**
          * 计算总和.
          * @param {...number} var_args Numbers to add.
-         * @return {number} The sum of the arguments (0 if no arguments were provided,
-         *     {@code NaN} if any of the arguments is not a valid number).
+         * @return {number} 形参总和,NaN意味着有非法值.
          */
         function sum(var_args) {
             return /** @type {number} */ (array.reduce(arguments,
@@ -270,8 +255,7 @@
         /**
          * 计算均值.
          * @param {...number} var_args Numbers to average.
-         * @return {number} The average of the arguments ({@code NaN} if no arguments
-         *     were provided or any of the arguments is not a valid number).
+         * @return {number} 形参平均值,NaN意味着有非法值..
          */
         function average(var_args) {
             return sum.apply(null, arguments) / arguments.length;
@@ -279,13 +263,9 @@
 
         /**
          * 返回标准方差.
-         * Returns the sample standard deviation of the arguments.  For a definition of
-         * sample standard deviation, see e.g.
-         * http://en.wikipedia.org/wiki/Standard_deviation
-         * @param {...number} var_args Number samples to analyze.
-         * @return {number} The sample standard deviation of the arguments (0 if fewer
-         *     than two samples were provided, or {@code NaN} if any of the samples is
-         *     not a valid number).
+         * 详见: http://en.wikipedia.org/wiki/Standard_deviation
+         * @param {...number} var_args 计算的数列.
+         * @return {number} 少于两个参数返回0, 若参数有非法值返回NaN.
          */
         function standardDeviation(var_args) {
             var sampleSize = arguments.length;
@@ -303,28 +283,27 @@
         }
 
         /**
-         * 返回是否整数, i.e. that is has
-         * no fractional component.  No range-checking is performed on the number.
-         * @param {number} num The number to test.
-         * @return {boolean} Whether {@code num} is an integer.
+         * 返回是否整数. 求模运算比对结果比范围检测性能好.
+         * @param {number} num 测试数字.
+         * @return {boolean}
          */
         function isInt(num) {
-            return isFinite(num) && num % 1 == 0;
+            return isFinite(num) && num % 1 === 0;
         }
 
         /**
-         * Returns whether the supplied number is finite and not NaN.
-         * @param {number} num The number to test.
-         * @return {boolean} Whether {@code num} is a finite number.
+         * 判断是否有理数.
+         * @param {number} num 测试数字.
+         * @return {boolean}
          */
         function isFiniteNumber(num) {
             return isFinite(num) && !isNaN(num);
         }
 
         /**
-         * {@code Math.floor} 的一种变体, 可以允许所给结果无限小地浮动于最近的整数.
-         * 这种情况经常出现在浮点数计算的中间过程中. For example {@code Math.floor(Math.log(1000) /
-         * Math.LN10) == 2}, not 3 as one would expect.
+         * Math.floor的安全版本, 可以允许所给结果无限小地浮动于最近的整数.
+         * 这种情况经常出现在浮点数计算的中间过程中. 例如Math.floor(Math.log(1000) /
+         * Math.LN10) === 2, 而非得到3.
          * @param {number} num A number.
          * @param {number=} opt_epsilon 一个无限小的正数作为允许浮动的范围.
          * @return {number} The largest integer less than or equal to {@code num}.
@@ -334,9 +313,7 @@
         }
 
         /**
-         * tweaked意为微调.
-         * A tweaked variant of {@code Math.ceil}. See {@code math.safeFloor} for
-         * details.
+         * Math.ceil的安全版本.
          * @param {number} num A number.
          * @param {number=} opt_epsilon An infinitesimally small positive number, the
          *     rounding error to tolerate.
@@ -348,12 +325,17 @@
 
         return {
             randomInt: randomInt,
+            uniformRandom: uniformRandom,
             clamp: clamp,
             modulo: modulo,
+            nearlyEquals: nearlyEquals,
             angle: angle,
+            sign: sign,
             sum: sum,
             average: average,
+            standardDeviation: standardDeviation,
             isInt: isInt,
+            isFiniteNumber: isFiniteNumber,
             safeFloor: safeFloor,
             safeCeil: safeCeil
         };

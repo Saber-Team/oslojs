@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Object', [], function() {
+define('Sogou.Object', [], function() {
 
     'use strict';
 

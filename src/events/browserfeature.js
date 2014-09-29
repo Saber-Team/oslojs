@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.BrowserFeature', ['Sogou.UA.Util'], function(ua) {
+define('Sogou.Events.BrowserFeature', ['Sogou.UA.Util'], function(ua) {
 
     'use strict';
 

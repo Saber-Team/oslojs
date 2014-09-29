@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.BeforeActionEvent',
+define('Sogou.Events.BeforeActionEvent',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserEvent',

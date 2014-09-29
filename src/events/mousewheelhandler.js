@@ -11,7 +11,7 @@
  * @see ../demos/mousewheelhandler.html
  */
 
-sogou('Sogou.Events.MouseWheelHandler',
+define('Sogou.Events.MouseWheelHandler',
     [
         'Sogou.Util',
         'Sogou.Dom.Util',

@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.EventTarget',
+define('Sogou.Events.EventTarget',
     [
         'Sogou.Util',
         'Sogou.Disposable',

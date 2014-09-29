@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.ListenerMap',
+define('Sogou.Events.ListenerMap',
     [
         'Sogou.Util',
         'Sogou.Array',

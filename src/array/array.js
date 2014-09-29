@@ -6,7 +6,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Array',
+define('Sogou.Array',
     ['Sogou.Util'],
     function(util) {
 

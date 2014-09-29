@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Disposable',
+define('Sogou.Disposable',
     ['Sogou.Util'],
     function(util) {
 

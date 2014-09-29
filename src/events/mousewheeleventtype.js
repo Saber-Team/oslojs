@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.MouseWheelEventType', [],
+define('Sogou.Events.MouseWheelEventType', [],
     function() {
 
         'use strict';

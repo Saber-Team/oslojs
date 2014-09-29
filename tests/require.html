@@ -17,7 +17,7 @@
 	<script type="text/javascript" src="../lib/jasmine-2.0.3/boot.js"></script>
 
 	<!-- include source files here... -->
-	<script src="../src/sogou.js"></script>
+	<script src="../src/require.js"></script>
 </head>
 <body>
 	<!-- include spec files here... -->
@@ -27,26 +27,23 @@
 
             var global = window;
 
-            beforeEach(function() {
-                global.module = null;
-                global.define = null;
-            });
-
             afterEach(function() {
                 global.A = null;
                 global.C = null;
             });
 
 
-            it('是一个全局方法', function() {
-                expect(global.sogou).toEqual(sogou);
-                expect(typeof sogou).toBe('function');
+            it('提供两个全局方法', function() {
+                expect(global.define).toEqual(define);
+                expect(global.require).toEqual(require);
+                expect(typeof define).toBe('function');
+                expect(typeof require).toBe('function');
             });
 
 
-            it('无模块加载器时,通过sogou声明空间', function() {
+            it('无模块加载器时,通过define声明空间', function() {
 
-                sogou('A.B', [], function() {});
+                define('A.B', [], function() {});
 
                 expect(A.B).toBeTruthy();
                 expect(A.B).toBe(global.A.B);
@@ -56,7 +53,7 @@
             it('依赖模块不存在时抛出异常', function() {
 
                 var f = function() {
-                    sogou('T',['A'],function(a) {});
+                    define('T',['A'],function(a) {});
                 };
 
                 expect(f).toThrow();
@@ -71,7 +68,7 @@
                     }
                 };
 
-                sogou('A',['A.B'],
+                define('A',['A.B'],
                     function(a) {
 
                         expect(a).toBe(A.B);
@@ -98,7 +95,7 @@
 
                 spyOn(o, 'f');
 
-                sogou('A', ['A.B', 'C'], o.f);
+                define('A', ['A.B', 'C'], o.f);
 
                 expect(o.f).toHaveBeenCalled();
                 expect(o.f).toHaveBeenCalledWith(A.B, C);

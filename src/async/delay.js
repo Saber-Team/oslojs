@@ -6,7 +6,7 @@
  * @see ../demos/timers.html
  */
 
-sogou('Sogou.Async.Delay',
+define('Sogou.Async.Delay',
     [
         'Sogou.Util',
         'Sogou.Disposable',

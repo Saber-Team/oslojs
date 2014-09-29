@@ -89,7 +89,7 @@
  * @see ../demos/keyhandler.html
  */
 
-sogou('Sogou.Events.KeyHandler',
+define('Sogou.Events.KeyHandler',
     [
         'Sogou.Util',
         'Sogou.Events.Util',
@@ -272,13 +272,13 @@ sogou('Sogou.Events.KeyHandler',
             }
 
             if (this.lastKey_ === -1) {
-                if (e.ctrlKey && e.keyCode != KeyCodes.CTRL) {
+                if (e.ctrlKey && e.keyCode !== KeyCodes.CTRL) {
                     this.lastKey_ = KeyCodes.CTRL;
                 }
-                else if (e.altKey && e.keyCode != KeyCodes.ALT) {
+                else if (e.altKey && e.keyCode !== KeyCodes.ALT) {
                     this.lastKey_ = KeyCodes.ALT;
                 }
-                else if (e.metaKey && e.keyCode != KeyCodes.META) {
+                else if (e.metaKey && e.keyCode !== KeyCodes.META) {
                     this.lastKey_ = KeyCodes.META;
                 }
             }
@@ -296,9 +296,9 @@ sogou('Sogou.Events.KeyHandler',
         };
 
         /**
-         * Resets the stored previous values. Needed to be called for webkit which will
-         * not generate a key up for meta key operations. This should only be called
-         * when having finished with repeat key possiblities.
+         * 重置上一状态的值.
+         * Needed to be called for webkit which will not generate a key up for meta key
+         * operations. This should only be called when having finished with repeat key possiblities.
          */
         KeyHandler.prototype.resetState = function() {
             this.lastKey_ = -1;
@@ -325,29 +325,27 @@ sogou('Sogou.Events.KeyHandler',
             var keyCode, charCode;
             var altKey = be.altKey;
 
-            // IE reports the character code in the keyCode field for keypress events.
-            // There are two exceptions however, Enter and Escape.
+            // IE在keypress事件中的keyCode是字符码值. 有两个例外, Enter,Escape.
             if (ua.isIE && e.type === EventType.KEYPRESS) {
                 keyCode = this.keyCode_;
                 charCode = (keyCode !== KeyCodes.ENTER && keyCode !== KeyCodes.ESC ?
                     be.keyCode : 0);
 
-            // Safari reports the character code in the keyCode field for keypress
-            // events but also has a charCode field.
-            } else if (ua.isWEBKIT &&
-                e.type === EventType.KEYPRESS) {
+            // Safari在keypress事件中的keyCode是字符码值.
+            // 但同时也含有charCode属性.
+            } else if (ua.isWEBKIT && e.type === EventType.KEYPRESS) {
                 keyCode = this.keyCode_;
                 charCode = be.charCode >= 0 && be.charCode < 63232 &&
                     KeyCodes.isCharacterKey(keyCode) ?
                     be.charCode : 0;
 
-            // Opera reports the keycode or the character code in the keyCode field.
+            // Opera含有keyCode字段指示字符码值.
             } else if (ua.isOPERA) {
                 keyCode = this.keyCode_;
                 charCode = KeyCodes.isCharacterKey(keyCode) ?
                     be.keyCode : 0;
 
-            // Mozilla reports the character code in the charCode field.
+            // Mozilla则通过charCode字段指示字符码值.
             } else {
                 keyCode = be.keyCode || this.keyCode_;
                 charCode = be.charCode || 0;
@@ -356,7 +354,8 @@ sogou('Sogou.Events.KeyHandler',
                 }
                 // On the Mac, shift-/ triggers a question mark char code and no key code
                 // (normalized to WIN_KEY), so we synthesize the latter.
-                if (ua.isMAC && charCode === KeyCodes.QUESTION_MARK && keyCode === KeyCodes.WIN_KEY) {
+                if (ua.isMAC && charCode === KeyCodes.QUESTION_MARK &&
+                    keyCode === KeyCodes.WIN_KEY) {
                     keyCode = KeyCodes.SLASH;
                 }
             }
@@ -364,29 +363,26 @@ sogou('Sogou.Events.KeyHandler',
             var key = keyCode;
             var keyIdentifier = be.keyIdentifier;
 
-            // Correct the key value for certain browser-specific quirks.
+            // 解决浏览器在码值方面的bug, 直接依据浏览器判断
             if (keyCode) {
                 if (keyCode >= 63232 && keyCode in safariKey_) {
-                    // NOTE(nicksantos): Safari 3 has fixed this problem,
-                    // this is only needed for Safari 2.
+                    //Safari 3修改了这个问题,该问题只存在于Safari 2.
                     key = safariKey_[keyCode];
                 } else {
-
-                    // Safari returns 25 for Shift+Tab instead of 9.
-                    if (keyCode == 25 && e.shiftKey) {
+                    // Safari Shift+Tab返回25而不是9.
+                    if (keyCode === 25 && e.shiftKey) {
                         key = 9;
                     }
                 }
-            } else if (keyIdentifier &&
-                keyIdentifier in keyIdentifier_) {
+            } else if (keyIdentifier && keyIdentifier in keyIdentifier_) {
                 // This is needed for Safari Windows because it currently doesn't give a
                 // keyCode/which for non printable keys.
                 key = keyIdentifier_[keyIdentifier];
             }
 
-            // If we get the same keycode as a keydown/keypress without having seen a
-            // keyup event, then this event was caused by key repeat.
-            var repeat = key == this.lastKey_;
+            // 如果两次得到了(keypress或者keydown)相同的keycode但没有触发keyup事件, 则很可能是连续
+            // 按键导致的(比如用户长按某键不放)
+            var repeat = (key === this.lastKey_);
             this.lastKey_ = key;
 
             var event = new KeyEvent(key, charCode, repeat, be);

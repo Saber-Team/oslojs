@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-sogou('Sogou.Events.Listener', [], function() {
+define('Sogou.Events.Listener', [], function() {
 
     'use strict';
 
