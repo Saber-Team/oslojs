@@ -131,6 +131,39 @@ define('Sogou.Object', [], function() {
         return true;
     }
 
+    /**
+     * 用一个对象扩展另一个对象. 这个操作是'in-place'原地操作,在原对象上进行并不创建新的对象.
+     * 用法:
+     * var o = {};
+     * object.extend(o, {a: 0, b: 1});
+     * o; // {a: 0, b: 1}
+     * object.extend(o, {c: 2});
+     * o; // {a: 0, b: 1, c: 2}
+     *
+     * @param {Object} target 要扩展的对象
+     * @param {...Object} var_args 不定数量的对象,这些对象的属性会被复制
+     */
+    function extend(target, var_args) {
+        var key, source;
+        for (var i = 1; i < arguments.length; i++) {
+            source = arguments[i];
+            for (key in source) {
+                target[key] = source[key];
+            }
+
+            // IE对于for-in循环不能遍历对象原型链上的不可枚举属性,比如Object.prototype.isPrototypeOf
+            // 并且即使对象覆盖了这些属性也不能被遍历到,测试678都如此表现(9不会), Chrome和FireFox
+            // 虽然也不能遍历这些方法但是如果是被直接自定义的属性覆盖则可以遍历到. 所以对IE做特殊处理.
+            // 注: 采用类型封装生成对象new String()会有同样的问题在IE678下.
+            for (var j = 0; j < PROTOTYPE_FIELDS_.length; j++) {
+                key = PROTOTYPE_FIELDS_[j];
+                if (hasOwn.call(source, key)) {
+                    target[key] = source[key];
+                }
+            }
+        }
+    }
+
     return {
         containsKey: containsKey,
         containsValue: containsValue,
@@ -139,38 +172,7 @@ define('Sogou.Object', [], function() {
         map: map,
         some: some,
         every: every,
-        /**
-         * 用一个对象扩展另一个对象. 这个操作是'in-place'原地操作,在原对象上进行并不创建新的对象.
-         * 用法:
-         * var o = {};
-         * object.extend(o, {a: 0, b: 1});
-         * o; // {a: 0, b: 1}
-         * object.extend(o, {c: 2});
-         * o; // {a: 0, b: 1, c: 2}
-         *
-         * @param {Object} target 要扩展的对象
-         * @param {...Object} var_args 不定数量的对象,这些对象的属性会被复制
-         */
-        extend: function(target, var_args) {
-            var key, source;
-            for (var i = 1; i < arguments.length; i++) {
-                source = arguments[i];
-                for (key in source) {
-                    target[key] = source[key];
-                }
-
-                // IE对于for-in循环不能遍历对象原型链上的不可枚举属性,比如Object.prototype.isPrototypeOf
-                // 并且即使对象覆盖了这些属性也不能被遍历到,测试678都如此表现(9不会), Chrome和FireFox
-                // 虽然也不能遍历这些方法但是如果是被直接自定义的属性覆盖则可以遍历到. 所以对IE做特殊处理.
-                // 注: 采用类型封装生成对象new String()会有同样的问题在IE678下.
-                for (var j = 0; j < PROTOTYPE_FIELDS_.length; j++) {
-                    key = PROTOTYPE_FIELDS_[j];
-                    if (hasOwn.call(source, key)) {
-                        target[key] = source[key];
-                    }
-                }
-            }
-        },
+        extend: extend,
         /**
          * 返回对象的值作为数组.
          * @param {Object.<K,V>} obj 对象.
@@ -208,6 +210,9 @@ define('Sogou.Object', [], function() {
             var result = obj;
             if (Object.isFrozen && !Object.isFrozen(obj)) {
                 result = Object.create(obj);
+                // freeze方法冻结对象后添加属性不报错(严格模式抛出异常)
+                // 但是添加不成功;
+                // delete对象属性也返回true但实际不能删除(不分是否严格模式)
                 Object.freeze(result);
             }
             return result;
@@ -218,6 +223,7 @@ define('Sogou.Object', [], function() {
          * @return {boolean}
          */
         isImmutableView: function(obj) {
+            // isFrozen不会判断对象嵌套的情况
             return !!Object.isFrozen && Object.isFrozen(obj);
         },
         /**
