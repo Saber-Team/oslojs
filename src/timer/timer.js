@@ -1,9 +1,9 @@
 /**
- * @fileoverview 提供了一个定时器的类, 其他类或对象可对监听tick事件。
- * 其实就是Interval的一个封装类。全局代码完全木有用到setInterval。
- * 这个文件很重要虽然只有区区300行, 但是在动画的实现, hashchange
- * 和async等等实现上都起到重要作用。
- * @author Leo.Zhang
+ * @fileoverview 提供了一个定时器的类,其他类或对象可对监听tick事件.
+ *     其实就是Interval的一个封装类. 全局代码完全木有用到setInterval.
+ *     这个文件很重要虽然只有区区300行, 但是在动画的实现, hashchange
+ *     和async等等实现上都起到重要作用。
+ * @modified Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../demos/timers.html
  */
@@ -32,15 +32,15 @@ define('Sogou.Timer',
              */
             this.interval_ = opt_interval || 1;
             /**
-             * 实现了setTimout, setInterval, clearTimeout and clearInterval的对象。
-             * 默认是window对象。
+             * 实现了setTimout, setInterval, clearTimeout和clearInterval的对象.
+             * 默认是window对象
              * @type {Object}
              * @private
              */
             this.timerObject_ = opt_timerObject || window;
             /**
-             * 给tick的监听器绑定函数上下文为timer实例对象。
-             * this.tick_就是监听器函数。
+             * 给tick的监听器绑定函数上下文为timer实例对象.
+             * this.tick_就是监听器函数.
              * @type {Function}
              * @private
              */
@@ -57,7 +57,7 @@ define('Sogou.Timer',
         util.inherits(Timer, EventTarget);
 
         /**
-         * 最大值时间间隔。
+         * 最大值时间间隔.
          * 间隔时间过大(大于32位有符号整型的最大值)会引起很多浏览器边界溢出. 最终会很快执行
          * 函数. 所以不能超过这个值, 谁会设置24.8天啊
          * @type {number}
@@ -72,8 +72,8 @@ define('Sogou.Timer',
         Timer.prototype.enabled = false;
 
         /**
-         * 针对FF的经典bug。用这个变量保存一个系数，当小于规定的时间间隔触发了函数，
-         * 定时器会被重新计算补齐时间差。last_字段会作为比较。
+         * 针对FF的经典bug. 用这个变量保存一个系数,当小于规定的时间间隔触发了函数,
+         * 定时器会被重新计算补齐时间差. last_字段会作为比较.
          * @type {number}
          */
         var intervalScale = 0.8;
@@ -110,7 +110,7 @@ define('Sogou.Timer',
         };
 
         /**
-         * 计时器需要执行的函数主体。
+         * 计时器需要执行的函数主体.
          * 函数执行上下文被绑定成this了, 也就是此Timer实例
          * @private
          */
@@ -120,7 +120,7 @@ define('Sogou.Timer',
             if (this.enabled) {
                 // 计算间隔时间
                 var elapsed = (+new Date()) - this.last_;
-                // 如果FF下出现了bug则不执行任何操作，补差时间后再执行
+                // 如果FF下出现了bug则不执行任何操作,补差时间后再执行
                 if (elapsed > 0 && elapsed < this.interval_ * intervalScale) {
                     this.timer_ = this.timerObject_.setTimeout(this.boundTick_,
                         this.interval_ - elapsed);
@@ -152,17 +152,17 @@ define('Sogou.Timer',
         };
 
         /**
-         * 开始计时。并且约定时间后执行的代码
+         * 开始计时. 并且约定时间后执行的代码
          */
         Timer.prototype.start = function() {
             this.enabled = true;
             // 如果没有this.timer_就设置定时，否则不做任何动作。
             if (!this.timer_) {
                 // IMPORTANT!
-                // window.setInterval在FireFox中有个bug - 它是基于绝对时间触发而不是相对时间。
-                // 也就是说假如你的电脑休眠或者hibernating了一天，定时器如果每秒触发的话，当电脑
-                // 重新进入系统时，会连续快速触发3600*24次。
-                // 这个bug已经被修复了, 但需要时间摒弃带有这些bug的版本, 所以我们使用setTimeout。
+                // window.setInterval在FireFox中有个bug - 它是基于绝对时间触发而不是相对时间.
+                // 也就是说假如你的电脑休眠或者hibernating了一天,定时器如果每秒触发的话,当电脑
+                // 重新进入系统时, 会连续快速触发3600*24次.
+                // 这个bug已经被修复了, 但需要时间摒弃带有这些bug的版本, 所以我们使用setTimeout.
                 //     https://bugzilla.mozilla.org/show_bug.cgi?id=376643
                 this.timer_ = this.timerObject_.setTimeout(this.boundTick_, this.interval_);
                 this.last_ = +new Date();
@@ -191,22 +191,17 @@ define('Sogou.Timer',
         };
 
         /**
-         * 静态方法，触发一次定时器。
-         * The function is always called asynchronously, even if the delay is 0. This
-         * is a common trick to schedule a function to run after a batch of browser
-         * event processing.
-         *
-         * @param {Function|{handleEvent:Function}} listener Function or object that
-         *     has a handleEvent method.
-         * @param {number=} opt_delay Milliseconds to wait; default is 0.
-         * @param {Object=} opt_context Object in whose scope to call the listener.
-         * @return {number} A handle to the timer ID.
+         * 静态方法，触发一次定时器. 异步触发.
+         * @param {Function|{handleEvent:Function}} listener 处理器函数或者含有handleEvent方法的对象.
+         * @param {number=} opt_delay 间隔时间,默认是0.
+         * @param {Object=} opt_context 函数上下文.
+         * @return {number} 返回timer ID.
          */
         Timer.callOnce = function(listener, opt_delay, opt_context) {
-            if (typeof listener == 'function') {
+            if (typeof listener === 'function') {
                 if (opt_context)
                     listener = util.bind(listener, opt_context);
-            } else if (listener && typeof listener.handleEvent == 'function') {
+            } else if (listener && typeof listener.handleEvent === 'function') {
                 // using typeof to prevent strict js warning
                 listener = util.bind(listener.handleEvent, listener);
             } else {
@@ -224,8 +219,7 @@ define('Sogou.Timer',
         };
 
         /**
-         * 静态方法
-         * Clears a timeout initiated by callOnce
+         * 静态方法. 取消callOnce定义的定时器.
          * @param {?number} timerId a timer ID.
          */
         Timer.clear = function(timerId) {

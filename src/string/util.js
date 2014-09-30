@@ -127,24 +127,18 @@ define('Sogou.String.Util',
         /**
          * 转义一些诸如'"', '&', '<', '>'的字符,让双引号内的字符串即便包含这些字符也能
          * 作为HTML标签的属性值.
-         *
-         * It should be noted that > doesn't need to be escaped for the HTML or XML to
-         * be valid, but it has been decided to escape it for consistency with other
-         * implementations.
+         * 在html和XML中 > 是不需要转义的,但这里仍然需要转义是为了其他方法实现上的一致性.
          *
          * 注意:
          * HtmlEscape这个方法一般用在生成大规模html片段的时候,
          * 大型app使用静态正则表达式匹配字符串是一种优化技术,可以节省IE中的一半时间,因为字符串
-         * 和正则表达式都会引起GC的重分配.
-         * Using statics for the regular expressions and strings is an optimization
-         * that can more than half the amount of time IE spends in this function for
-         * large apps, since strings and regexes both contribute to GC allocations.
+         * 和正则表达式都会引起GC的分配回收.
          *
          * 转义前测试是否含有特殊字符会增加函数调用次数,但是测试发现实际上有助于提升平均速度.
          * 因为平均情况很少含有全部4个特殊字符,并且indexOf比replace更快. 最坏情况确实会有更多
          * 的函数调用,所以可以传参指定是否字符串中含有4个需转义字符.
          *
-         * 测试结果 (times tended to fluctuate +-0.05ms):
+         * 测试结果(times tended to fluctuate +-0.05ms):
          *                                     FireFox                     IE6
          * (no chars / average (mix of cases) / all 4 chars)
          * no checks                     0.13 / 0.22 / 0.22         0.23 / 0.53 / 0.80
@@ -154,9 +148,9 @@ define('Sogou.String.Util',
          * 另外检查是否需要替换也可以减少对象的内存分配，当APP规模增长的时候差别就会体现出来。
          *
          * @param {string} str 要转义的字符串
-         * @param {boolean=} opt_isLikelyToContainHtmlChars 不要检查是否含有特殊字符，如果确认
-         *     特殊字符会多次出现的话就用这个参数。如果字符串很少几率出现html字符就默认不传这个参数。
-         * @return {string} An escaped copy of {@code str}.
+         * @param {boolean=} opt_isLikelyToContainHtmlChars 不要检查是否含有特殊字符,如果确认
+         *     特殊字符会多次出现的话就用这个参数.如果字符串很少几率出现html字符就默认不传这个参数.
+         * @return {string} 转义后的字符串.
          */
         function htmlEscape(str, opt_isLikelyToContainHtmlChars) {
             if (opt_isLikelyToContainHtmlChars) {
@@ -165,8 +159,7 @@ define('Sogou.String.Util',
                     .replace(gtRe_, '&gt;')
                     .replace(quotRe_, '&quot;');
             } else {
-                // 快速测试是否含有特殊字符, in
-                // worst case this makes barely a difference to the time taken
+                // 快速测试是否含有特殊字符, 最坏情况this makes barely a difference to the time taken
                 if (!allRe_.test(str))
                     return str;
 
@@ -181,6 +174,28 @@ define('Sogou.String.Util',
                     str = str.replace(quotRe_, '&quot;');
                 return str;
             }
+        }
+
+        /**
+         * 字符串替代函数.
+         * subs("foo%s hot%s", "bar", "dog") ==> "foobar hotdog".
+         * @param {string} str 包含特定模式的字符串.
+         * @param {...*} var_args 形参是代替项的数列.
+         * @return {string} 原字符串中的％s会被逐一代替. 返回一个新的字符串.
+         */
+        function subs(str, var_args) {
+            var splitParts = str.split('%s');
+            var returnString = '';
+            // 得到替代数列
+            var subsArguments = Array.prototype.slice.call(arguments, 1);
+            while (subsArguments.length &&
+                // 循环代替知道split部分只剩下一项.
+                // 在分裂的各部分间插入代替数列项.
+                splitParts.length > 1) {
+                returnString += splitParts.shift() + subsArguments.shift();
+            }
+
+            return returnString + splitParts.join('%s'); // 连接未用的'%s'
         }
 
         // exports
@@ -205,16 +220,13 @@ define('Sogou.String.Util',
                 return l >= 0 && str.indexOf(suffix, l) === l;
             },
             /**
-             * Checks if a string is empty or contains only whitespaces.
-             * @param {string} str The string to check.
-             * @return {boolean} True if {@code str} is empty or whitespace only.
+             * 检查字符串是否只包含空白符或长度为零.
+             * @param {string} str 测试字符串.
+             * @return {boolean} 是否为空.
              */
             isEmpty: function(str) {
-                // testing length == 0 first is actually slower in all browsers (about the
-                // same in Opera).
-                // Since IE doesn't include non-breaking-space (0xa0) in their \s character
-                // class (as required by section 7.2 of the ECMAScript spec), we explicitly
-                // include it in the regexp to enforce consistent cross-browser behavior.
+                // 直接测试length === 0在所有浏览器中结果较慢(about the same in Opera).
+                // 正则这么写的原因可以看trim方法.
                 return /^[\s\xa0]*$/.test(str);
             },
             /**
@@ -227,9 +239,9 @@ define('Sogou.String.Util',
             },
             caseInsensitiveEquals: caseInsensitiveEquals,
             /**
-             * Replaces Windows and Mac new lines with unix style: \r or \r\n with \n.
-             * @param {string} str The string to in which to canonicalize newlines.
-             * @return {string} {@code str} A copy of {@code} with canonicalized newlines.
+             * 用unix的换行符\n代替Windows和Mac上的换行符: \r or \r\n.
+             * @param {string} str 需要标准化的字符串.
+             * @return {string} 标准化后的字符串.
              */
             canonicalizeNewlines: function(str) {
                 return str.replace(/(\r\n|\r|\n)/g, '\n');
@@ -237,57 +249,34 @@ define('Sogou.String.Util',
             /**
              * URL-encodes a string
              * @param {*} str The string to url-encode.
-             * @return {string} An encoded copy of {@code str} that is safe for urls.
-             *     Note that '#', ':', and other characters used to delimit portions
-             *     of URLs will be encoded.
+             * @return {string} 返回对url安全的编码字符串. 具体的编码规则查看encodeURIComponent
+             *     ('#', ':', 和其他的url中有特殊意义的关键字符都会被编码).
              */
             urlEncode: function(str) {
                 return encodeURIComponent(String(str));
             },
             /**
-             * URL-decodes the string. We need to specially handle '+'s because
-             * the javascript library doesn't convert them to spaces.
-             * @param {string} str The string to url decode.
-             * @return {string} The decoded {@code str}.
+             * URL-decodes the string. 需要特殊处理 '+'s js本身不会将 '+'转化为空格.
+             * @param {string} str 要解码的字符串.
+             * @return {string} 解码后的字符串.
              */
             urlDecode: function(str) {
                 return decodeURIComponent(str.replace(/\+/g, ' '));
             },
             /**
-             * Converts \n to <br>s or <br />s.
+             * 转化 \n 至 <br>s 或者 <br />.
              * @param {string} str The string in which to convert newlines.
-             * @param {boolean=} opt_xml Whether to use XML compatible tags.
-             * @return {string} A copy of {@code str} with converted newlines.
+             * @param {boolean=} opt_xml 是否要用兼容XML的标签.
+             * @return {string} 转化后的字符串.
              */
             newLineToBr: function(str, opt_xml) {
                 return str.replace(/(\r\n|\r|\n)/g, opt_xml ? '<br />' : '<br>');
             },
             htmlEscape: htmlEscape,
             buildString: buildString,
+            subs: subs,
             /**
-             * Does simple python-style string substitution.
-             * subs("foo%s hot%s", "bar", "dog") becomes "foobar hotdog".
-             * @param {string} str The string containing the pattern.
-             * @param {...*} var_args The items to substitute into the pattern.
-             * @return {string} A copy of {@code str} in which each occurrence of
-             *     {@code %s} has been replaced an argument from {@code var_args}.
-             */
-            subs: function(str, var_args) {
-                var splitParts = str.split('%s');
-                var returnString = '';
-
-                var subsArguments = Array.prototype.slice.call(arguments, 1);
-                while (subsArguments.length &&
-                    // Replace up to the last split part. We are inserting in the
-                    // positions between split parts.
-                    splitParts.length > 1) {
-                    returnString += splitParts.shift() + subsArguments.shift();
-                }
-
-                return returnString + splitParts.join('%s'); // Join unused '%s'
-            },
-            /**
-             * 把字符串从选择器形式改为驼峰形式 (e.g. from "multi-part-string" to "multiPartString"),
+             * 把字符串从选择器形式改为驼峰形式(比如 "multi-part-string" ==> "multiPartString"),
              * 主要用于js设置获取属性。
              * @param {string} str The string in selector-case form.
              * @return {string} The string in camelCase form.
@@ -298,11 +287,8 @@ define('Sogou.String.Util',
                 });
             },
             /**
-             * Converts a string into TitleCase. First character of the string is always
-             * capitalized in addition to the first letter of every subsequent word.
-             * Words are delimited by one or more whitespaces by default. Custom delimiters
-             * can optionally be specified to replace the default, which doesn't preserve
-             * whitespace delimiters and instead must be explicitly included if needed.
+             * 转化字符串成为TitleCase. 每个单独的单词首个字母都会大写,单词以空格分割. 支持自定义分隔符,会覆盖默认的空格,
+             * 这时候如需要空格符要手动引入.
              *
              * Default delimiter => " ":
              *    toTitleCase('oneTwoThree')    => 'OneTwoThree'
@@ -321,11 +307,8 @@ define('Sogou.String.Util',
              *    toTitleCase('one. two. three', '_-.')   => 'One. two. three'
              *    toTitleCase('one-two.three', '_-.')     => 'One-Two.Three'
              *
-             * @param {string} str String value in camelCase form.
-             * @param {string=} opt_delimiters Custom delimiter character set used to
-             *      distinguish words in the string value. Each character represents a
-             *      single delimiter. When provided, default whitespace delimiter is
-             *      overridden and must be explicitly included if needed.
+             * @param {string} str 驼峰式字符串.
+             * @param {string=} opt_delimiters 自定义分隔符.
              * @return {string} String value in TitleCase form.
              */
             toTitleCase: function(str, opt_delimiters) {
@@ -344,28 +327,28 @@ define('Sogou.String.Util',
             trimLeft: trimLeft,
             trimRight: trimRight,
             /**
-             * Checks whether a string contains a given substring.
-             * @param {string} s The string to test.
-             * @param {string} ss The substring to test for.
-             * @return {boolean} True if {@code s} contains {@code ss}.
+             * 测试字符串是否包含某个子串.
+             * @param {string} s 测试字符串.
+             * @param {string} ss 子串.
+             * @return {boolean}
              */
             contains: function(s, ss) {
                 return s.indexOf(ss) !== -1;
             },
             /**
-             * Returns a string with at least 64-bits of randomness.
-             * 不要依赖random函数。由随机算法和时间戳异或组合得到随机字符串，输出base-36的编码让结果更短。
-             * @return {string} A random string, e.g. sn1s7vb4gcic.
+             * 生成一个至少64-bits的随即字符串.
+             * 不要依赖random函数,由随机算法和时间戳异或组合得到随机字符串,输出base-36的编码让结果更短.
+             * @return {string} 返回举例. sn1s7vb4gcic.
              */
             getRandomString: function() {
-                var x = 2147483648;
+                var x = 2147483648; // +2e31
                 return Math.floor(Math.random() * x).toString(36) +
                     Math.abs(Math.floor(Math.random() * x) ^ (+new Date())).toString(36);
             },
             /**
              * 比较两个版本号.
-             * @param {string|number} version1 Version of first item.
-             * @param {string|number} version2 Version of second item.
+             * @param {string|number} version1
+             * @param {string|number} version2
              * @return {number}  1 if {@code version1} is higher.
              *                   0 if arguments are equal.
              *                  -1 if {@code version2} is higher.
@@ -379,7 +362,7 @@ define('Sogou.String.Util',
                 var subCount = Math.max(v1Subs.length, v2Subs.length);
 
                 // Iterate over the subversions, as long as they appear to be equivalent.
-                for (var subIdx = 0; order == 0 && subIdx < subCount; subIdx++) {
+                for (var subIdx = 0; order === 0 && subIdx < subCount; subIdx++) {
                     var v1Sub = v1Subs[subIdx] || '';
                     var v2Sub = v2Subs[subIdx] || '';
 
@@ -392,21 +375,21 @@ define('Sogou.String.Util',
                         var v1Comp = v1CompParser.exec(v1Sub) || ['', '', ''];
                         var v2Comp = v2CompParser.exec(v2Sub) || ['', '', ''];
                         // Break if there are no more matches.
-                        if (v1Comp[0].length == 0 && v2Comp[0].length == 0) {
+                        if (v1Comp[0].length === 0 && v2Comp[0].length === 0) {
                             break;
                         }
 
                         // Parse the numeric part of the subversion. A missing number is
                         // equivalent to 0.
-                        var v1CompNum = v1Comp[1].length == 0 ? 0 : parseInt(v1Comp[1], 10);
-                        var v2CompNum = v2Comp[1].length == 0 ? 0 : parseInt(v2Comp[1], 10);
+                        var v1CompNum = v1Comp[1].length === 0 ? 0 : parseInt(v1Comp[1], 10);
+                        var v2CompNum = v2Comp[1].length === 0 ? 0 : parseInt(v2Comp[1], 10);
 
                         // Compare the subversion components. The number has the highest
                         // precedence. Next, if the numbers are equal, a subversion without any
                         // qualifier is always higher than a subversion with any qualifier. Next,
                         // the qualifiers are compared as strings.
                         order = compareElements_(v1CompNum, v2CompNum) ||
-                            compareElements_(v1Comp[2].length == 0, v2Comp[2].length == 0) ||
+                            compareElements_(v1Comp[2].length === 0, v2Comp[2].length === 0) ||
                             compareElements_(v1Comp[2], v2Comp[2]);
                         // Stop as soon as an inequality is discovered.
                     } while (order == 0);

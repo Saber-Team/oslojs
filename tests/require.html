@@ -49,6 +49,15 @@
                 expect(A.B).toBe(global.A.B);
             });
 
+            it('通过require引入依赖', function() {
+
+                define('A.B', [], function() {});
+                require('A.B', function(b) {
+                    expect(A.B).toEqual(b);
+                    expect(A.B).toBe(global.A.B);
+                });
+            });
+
 
             it('依赖模块不存在时抛出异常', function() {
 
