@@ -125,6 +125,26 @@ define('Sogou.String.Util',
         }
 
         /**
+         * 测试字符串是否包含某个子串.
+         * @param {string} s 测试字符串.
+         * @param {string} ss 子串.
+         * @return {boolean}
+         */
+        function contains(s, ss) {
+            return s.indexOf(ss) !== -1;
+        }
+
+        /**
+         * 是否字符串含有忽略大小写的子串.
+         * @param {string} str 原字符串.
+         * @param {string} subString 子串.
+         * @return {boolean}
+         */
+        function caseInsensitiveContains(str, subString) {
+            return contains(str.toLowerCase(), subString.toLowerCase());
+        }
+
+        /**
          * 转义一些诸如'"', '&', '<', '>'的字符,让双引号内的字符串即便包含这些字符也能
          * 作为HTML标签的属性值.
          * 在html和XML中 > 是不需要转义的,但这里仍然需要转义是为了其他方法实现上的一致性.
@@ -238,6 +258,7 @@ define('Sogou.String.Util',
                 return str.replace(/(\r\n|\r|\n)+/g, ' ');
             },
             caseInsensitiveEquals: caseInsensitiveEquals,
+            caseInsensitiveContains: caseInsensitiveContains,
             /**
              * 用unix的换行符\n代替Windows和Mac上的换行符: \r or \r\n.
              * @param {string} str 需要标准化的字符串.
@@ -326,15 +347,7 @@ define('Sogou.String.Util',
             trim: trim,
             trimLeft: trimLeft,
             trimRight: trimRight,
-            /**
-             * 测试字符串是否包含某个子串.
-             * @param {string} s 测试字符串.
-             * @param {string} ss 子串.
-             * @return {boolean}
-             */
-            contains: function(s, ss) {
-                return s.indexOf(ss) !== -1;
-            },
+            contains: contains,
             /**
              * 生成一个至少64-bits的随即字符串.
              * 不要依赖random函数,由随机算法和时间戳异或组合得到随机字符串,输出base-36的编码让结果更短.
@@ -392,7 +405,7 @@ define('Sogou.String.Util',
                             compareElements_(v1Comp[2].length === 0, v2Comp[2].length === 0) ||
                             compareElements_(v1Comp[2], v2Comp[2]);
                         // Stop as soon as an inequality is discovered.
-                    } while (order == 0);
+                    } while (order === 0);
                 }
 
                 return order;
