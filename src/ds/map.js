@@ -1,10 +1,7 @@
 /**
- * @fileoverview Hash Map.
- *     This file contains an implementation of a Map structure. It implements a lot
- *     of the methods used in goog.structs so those functions work on hashes. This
- *     is best suited for complex key types. For simple keys such as numbers and
- *     strings, and where special names like __proto__ are not a concern, consider
- *     using the lighter-weight utilities in goog.object.
+ * @fileoverview Hash Map structure的实现. Map累实现了很多ds包下的方法所以这些方法在hash对象
+ *     依然可用. 对于复杂的key types也适用. 简单key如numbers或strings, 特殊key如__proto__
+ *     也不必担心.
  * @modified Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -21,32 +18,40 @@ define('Sogou.DS.Map',
         'use strict';
 
         /**
-         * Class for Hash Map datastructure.
-         * @param {*=} opt_map Map or Object to initialize the map with.
-         * @param {...*} var_args If 2 or more arguments are present then they
-         *     will be used as key-value pairs.
+         * Safe way to test for hasOwnProperty. It even allows testing for
+         * 'hasOwnProperty'.
+         * @param {Object} obj 要测试的对象.
+         * @param {*} key 指定key.
+         * @return {boolean} 是否含有指定key.
+         * @private
+         */
+        var hasKey_ = function(obj, key) {
+            return Object.prototype.hasOwnProperty.call(obj, key);
+        };
+
+        /**
+         * Hash Map data structure.
+         * @param {*=} opt_map 初始化用到的map对象.
+         * @param {...*} var_args 如果行参数目大于2, 那么这些参数会当做key-value对.
          * @constructor
          */
         var Map = function(opt_map, var_args) {
 
             /**
-             * Underlying JS object used to implement the map.
+             * 一个原生的js对象实现map.
              * @type {!Object}
              * @private
              */
             this.map_ = {};
 
             /**
-             * An array of keys. This is necessary for two reasons:
-             *   1. Iterating the keys using for (var key in this.map_) allocates an
-             *      object for every key in IE which is really bad for IE6 GC perf.
-             *   2. Without a side data structure, we would need to escape all the keys
-             *      as that would be the only way we could tell during iteration if the
-             *      key was an internal key or a property of the object.
+             * 数组保存keys.这么做两个理由:
+             *   1. 用for (var key in this.map_)迭代key每次都会生成js对象(在IE中), 这对于IE6下的GC
+             *      性能非常不好.
+             *   2. 当没有辅佐对象的时候我们需要有个地方保存所有的keys,这是唯一可以鉴别key是来自与对象外部还是
+             *      内部属性.
              *
-             * This array can contain deleted keys so it's necessary to check the map
-             * as well to see if the key is still in the map (this doesn't require a
-             * memory allocation in IE).
+             * 数组中也包含了删除的key, 所以有必要检查map是否仍然含有某些key(在IE中不会分配内存).
              * @type {!Array.<string>}
              * @private
              */
@@ -67,29 +72,29 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * The number of key value pairs in the map.
+         * 键值对数目.
          * @private
          * @type {number}
          */
         Map.prototype.count_ = 0;
 
         /**
-         * Version used to detect changes while iterating.
+         * 迭代时监测变化用的版本号.
          * @private
          * @type {number}
          */
         Map.prototype.version_ = 0;
 
         /**
-         * @return {number} The number of key-value pairs in the map.
+         * @return {number} 返回key-value对的数目.
          */
         Map.prototype.getCount = function() {
             return this.count_;
         };
 
         /**
-         * Returns the values of the map.
-         * @return {!Array} The values in the map.
+         * 返回值数组.
+         * @return {!Array}
          */
         Map.prototype.getValues = function() {
             this.cleanupKeysArray_();
@@ -103,8 +108,8 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Returns the keys of the map.
-         * @return {!Array.<string>} Array of string values.
+         * 返回键数组.
+         * @return {!Array.<string>}
          */
         Map.prototype.getKeys = function() {
             this.cleanupKeysArray_();
@@ -112,23 +117,23 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Whether the map contains the given key.
-         * @param {*} key The key to check for.
-         * @return {boolean} Whether the map contains the key.
+         * 是否含有某个指定key.
+         * @param {*} key 指定的key.
+         * @return {boolean}
          */
         Map.prototype.containsKey = function(key) {
-            return Map.hasKey_(this.map_, key);
+            return hasKey_(this.map_, key);
         };
 
         /**
-         * Whether the map contains the given value. This is O(n).
-         * @param {*} val The value to check for.
-         * @return {boolean} Whether the map contains the value.
+         * 是否含有指定的值. 复杂度O(n).
+         * @param {*} val 检测的值.
+         * @return {boolean}
          */
         Map.prototype.containsValue = function(val) {
             for (var i = 0; i < this.keys_.length; i++) {
                 var key = this.keys_[i];
-                if (Map.hasKey_(this.map_, key) && this.map_[key] == val) {
+                if (hasKey_(this.map_, key) && this.map_[key] === val) {
                     return true;
                 }
             }
@@ -136,19 +141,17 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Whether this map is equal to the argument map.
-         * @param {goog.structs.Map} otherMap The map against which to test equality.
-         * @param {function(?, ?) : boolean=} opt_equalityFn Optional equality function
-         *     to test equality of values. If not specified, this will test whether
-         *     the values contained in each map are identical objects.
-         * @return {boolean} Whether the maps are equal.
+         * 两个map是否相等.
+         * @param {Map} otherMap 测试的另外的map对象.
+         * @param {function(?, ?) : boolean=} opt_equalityFn 判定是否相等的函数.
+         * @return {boolean} 返回是否相等.
          */
         Map.prototype.equals = function(otherMap, opt_equalityFn) {
             if (this === otherMap) {
                 return true;
             }
 
-            if (this.count_ != otherMap.getCount()) {
+            if (this.count_ !== otherMap.getCount()) {
                 return false;
             }
 
@@ -165,24 +168,24 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Default equality test for values.
-         * @param {*} a The first value.
-         * @param {*} b The second value.
-         * @return {boolean} Whether a and b reference the same object.
+         * 默认的是否相等的helper函数.
+         * @param {*} a 第一个对象.
+         * @param {*} b 第二个对象.
+         * @return {boolean} 是否相同对象.
          */
         Map.defaultEquals = function(a, b) {
             return a === b;
         };
 
         /**
-         * @return {boolean} Whether the map is empty.
+         * @return {boolean} map是否为空.
          */
         Map.prototype.isEmpty = function() {
-            return this.count_ == 0;
+            return this.count_ === 0;
         };
 
         /**
-         * Removes all key-value pairs from the map.
+         * 清空key-value对.
          */
         Map.prototype.clear = function() {
             this.map_ = {};
@@ -192,19 +195,18 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Removes a key-value pair based on the key. This is O(logN) amortized due to
-         * updating the keys array whenever the count becomes half the size of the keys
-         * in the keys array.
-         * @param {*} key  The key to remove.
-         * @return {boolean} Whether object was removed.
+         * 根据指定的key删除key-value对. 复杂度O(logN)是因为有条件触发: 只有当count是
+         * keys array长度1/2时清理keys array.
+         * @param {*} key 要删除的key.
+         * @return {boolean} 是否删除成功.
          */
         Map.prototype.remove = function(key) {
-            if (Map.hasKey_(this.map_, key)) {
+            if (hasKey_(this.map_, key)) {
                 delete this.map_[key];
                 this.count_--;
                 this.version_++;
 
-                // clean up the keys array if the threshhold is hit
+                // 如果到达了边界条件则删除keys array中不存在的一些值.
                 if (this.keys_.length > 2 * this.count_) {
                     this.cleanupKeysArray_();
                 }
@@ -215,18 +217,17 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Cleans up the temp keys array by removing entries that are no longer in the
-         * map.
+         * 清理一些临时的keys array删除其中一些不再在map出现的.
          * @private
          */
         Map.prototype.cleanupKeysArray_ = function() {
-            if (this.count_ != this.keys_.length) {
+            if (this.count_ !== this.keys_.length) {
                 // First remove keys that are no longer in the map.
                 var srcIndex = 0;
                 var destIndex = 0;
                 while (srcIndex < this.keys_.length) {
                     var key = this.keys_[srcIndex];
-                    if (Map.hasKey_(this.map_, key)) {
+                    if (hasKey_(this.map_, key)) {
                         this.keys_[destIndex++] = key;
                     }
                     srcIndex++;
@@ -234,7 +235,7 @@ define('Sogou.DS.Map',
                 this.keys_.length = destIndex;
             }
 
-            if (this.count_ != this.keys_.length) {
+            if (this.count_ !== this.keys_.length) {
                 // If the count still isn't correct, that means we have duplicates. This can
                 // happen when the same key is added and removed multiple times. Now we have
                 // to allocate one extra Object to remove the duplicates. This could have
@@ -245,7 +246,7 @@ define('Sogou.DS.Map',
                 var destIndex = 0;
                 while (srcIndex < this.keys_.length) {
                     var key = this.keys_[srcIndex];
-                    if (!(Map.hasKey_(seen, key))) {
+                    if (!hasKey_(seen, key)) {
                         this.keys_[destIndex++] = key;
                         seen[key] = 1;
                     }
@@ -256,28 +257,26 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Returns the value for the given key.  If the key is not found and the default
-         * value is not given this will return {@code undefined}.
-         * @param {*} key The key to get the value for.
-         * @param {*=} opt_val The value to return if no item is found for the given
-         *     key, defaults to undefined.
-         * @return {*} The value for the given key.
+         * 获得给定的值. 如果没有返回undefined.
+         * @param {*} key 指定的key.
+         * @param {*=} opt_val 没找到的话默认的返回值.
+         * @return {*}
          */
         Map.prototype.get = function(key, opt_val) {
-            if (Map.hasKey_(this.map_, key)) {
+            if (hasKey_(this.map_, key)) {
                 return this.map_[key];
             }
             return opt_val;
         };
 
         /**
-         * Adds a key-value pair to the map.
+         * 添加key-value pair.
          * @param {*} key The key.
          * @param {*} value The value to add.
          * @return {*} Some subclasses return a value.
          */
         Map.prototype.set = function(key, value) {
-            if (!(Map.hasKey_(this.map_, key))) {
+            if (!hasKey_(this.map_, key)) {
                 this.count_++;
                 this.keys_.push(key);
                 // Only change the version if we add a new key.
@@ -287,7 +286,7 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Adds multiple key-value pairs from another goog.structs.Map or Object.
+         * 往结构里增加项 from another Map or Object.
          * @param {Object} map  Object containing the data to add.
          */
         Map.prototype.addAll = function(map) {
@@ -299,8 +298,7 @@ define('Sogou.DS.Map',
                 keys = object.getKeys(map);
                 values = object.getValues(map);
             }
-            // we could use goog.array.forEach here but I don't want to introduce that
-            // dependency just for this.
+            // 用array.forEach方法的话会简单些但是要引入array模块增加了文件体积.
             for (var i = 0; i < keys.length; i++) {
                 this.set(keys[i], values[i]);
             }
@@ -315,12 +313,9 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Returns a new map in which all the keys and values are interchanged
-         * (keys become values and values become keys). If multiple keys map to the
-         * same value, the chosen transposed value is implementation-dependent.
-         *
-         * It acts very similarly to {goog.object.transpose(Object)}.
-         *
+         * 返回一个新的键值交换的map对象. 如果多个key对应了一个value,
+         * the chosen transposed value is implementation-dependent.
+         * 同这个方法一样 {object.transpose(Object)}.
          * @return {!Map} The transposed map.
          */
         Map.prototype.transpose = function() {
@@ -348,23 +343,22 @@ define('Sogou.DS.Map',
         };
 
         /**
-         * Returns an iterator that iterates over the keys in the map.  Removal of keys
+         * 返回一个迭代器迭代keys.  Removal of keys
          * while iterating might have undesired side effects.
-         * @return {!goog.iter.Iterator} An iterator over the keys in the map.
+         * @return {!Iterator} An iterator over the keys in the map.
          */
         Map.prototype.getKeyIterator = function() {
             return this.__iterator__(true);
         };
 
         /**
-         * Returns an iterator that iterates over the values in the map.  Removal of
+         * 返回一个迭代器迭代values.  Removal of
          * keys while iterating might have undesired side effects.
-         * @return {!goog.iter.Iterator} An iterator over the values in the map.
+         * @return {!Iterator} An iterator over the values in the map.
          */
         Map.prototype.getValueIterator = function() {
             return this.__iterator__(false);
         };
-
 
         /**
          * Returns an iterator that iterates over the values or the keys in the map.
@@ -372,7 +366,7 @@ define('Sogou.DS.Map',
          * created.
          * @param {boolean=} opt_keys True to iterate over the keys. False to iterate
          *     over the values.  The default value is false.
-         * @return {!goog.iter.Iterator} An iterator over the values or keys in the map.
+         * @return {!Iterator} An iterator over the values or keys in the map.
          */
         Map.prototype.__iterator__ = function(opt_keys) {
             // Clean up keys to minimize the risk of iterating over dead keys.
@@ -384,32 +378,20 @@ define('Sogou.DS.Map',
             var version = this.version_;
             var selfObj = this;
 
-            var newIter = new goog.iter.Iterator;
+            var newIter = new Iterator();
             newIter.next = function() {
                 while (true) {
-                    if (version != selfObj.version_) {
+                    if (version !== selfObj.version_) {
                         throw Error('The map has changed since the iterator was created');
                     }
                     if (i >= keys.length) {
-                        throw goog.iter.StopIteration;
+                        throw StopIteration;
                     }
                     var key = keys[i++];
                     return opt_keys ? key : map[key];
                 }
             };
             return newIter;
-        };
-
-        /**
-         * Safe way to test for hasOwnProperty.  It even allows testing for
-         * 'hasOwnProperty'.
-         * @param {Object} obj The object to test for presence of the given key.
-         * @param {*} key The key to check for.
-         * @return {boolean} Whether the object has the key.
-         * @private
-         */
-        Map.hasKey_ = function(obj, key) {
-            return Object.prototype.hasOwnProperty.call(obj, key);
         };
 
         return Map;
