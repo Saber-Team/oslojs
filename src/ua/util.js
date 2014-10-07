@@ -155,7 +155,7 @@ define('Sogou.UA.Util',
             else if (isIE) {
                 re = /\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/;
             }
-            else if (isWEBKIT) {
+            else if (isWebKit) {
                 // WebKit/125.4
                 re = /WebKit\/(\S+)/;
             }

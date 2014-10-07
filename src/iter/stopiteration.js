@@ -19,7 +19,7 @@ define('Sogou.Iter.StopIteration',
              * 单例的异常对象, 表示终止迭代发生.
              * @type {Error}
              */
-            StopIteration = util.global['StopIteration'];
+            StopIteration = util.global.StopIteration;
         } else {
             /**
              * 单例的异常对象, 表示终止迭代发生.

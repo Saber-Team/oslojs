@@ -26,7 +26,7 @@ module.exports = {
   
     options: {
         banner: '/** \n * Sogou JavaScript Library \n * <%= grunt.template.today("yyyy-mm-dd") %> build \n */\n',
-        report: 'gzip',     // 输出gzip后的文件体积
+        report: 'none',     // 输出gzip后的文件体积
         beautify: false,  // 不需要格式化良好的压缩代码 默认false
         compress: {
             properties: true,   // 引号的属性改为点符号方便压缩
