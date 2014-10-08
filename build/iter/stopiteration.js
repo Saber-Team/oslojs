@@ -1,5 +1,5 @@
 /** 
  * Sogou JavaScript Library 
- * 2014-10-02 build 
+ * 2014-10-09 build 
  */
-sogou("Sogou.Iter.StopIteration",["Sogou.Util"],function(a){"use strict";var b;return b="StopIteration"in a.global?a.global.StopIteration:Error("StopIteration"),b});
+define("Sogou.Iter.StopIteration",["Sogou.Util"],function(a){"use strict";var b;return b="StopIteration"in a.global?a.global.StopIteration:Error("StopIteration"),b});

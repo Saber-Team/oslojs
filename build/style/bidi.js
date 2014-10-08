@@ -1,0 +1,5 @@
+/** 
+ * Sogou JavaScript Library 
+ * 2014-10-09 build 
+ */
+sogou("Sogou.Style.Bidi",["Sogou.Util","Sogou.Dom.Util","Sogou.Style.Util","Sogou.UA.Util"],function(a,b,c,d){"use strict";return{getScrollLeft:function(a){var b=c.isRightToLeft(a);if(b&&d.isGECKO)return-a.scrollLeft;if(b&&(!d.isIE||!d.isVersionOrHigher("8"))){var e=c.getComputedOverflowX(a);return"visible"==e?a.scrollLeft:a.scrollWidth-a.clientWidth-a.scrollLeft}return a.scrollLeft},getOffsetStart:function(a){var e=a.offsetLeft,f=a.offsetParent;if(f||"fixed"!=c.getComputedPosition(a)||(f=b.getOwnerDocument(a).documentElement),!f)return e;if(d.isGECKO){var g=c.getBorderBox(f);e+=g.left}else if(d.isDocumentModeOrHigher(8)){var g=c.getBorderBox(f);e-=g.left}if(c.isRightToLeft(f)){var h=e+a.offsetWidth;return f.clientWidth-h}return e},setScrollOffset:function(a,b){b=Math.max(b,0),a.scrollLeft=c.isRightToLeft(a)?d.isGECKO?-b:d.isIE&&d.isVersionOrHigher("8")?b:a.scrollWidth-b-a.clientWidth:b},setPosition:function(b,c,d,e){a.isNull(d)||(b.style.top=d+"px"),e?(b.style.right=c+"px",b.style.left=""):(b.style.left=c+"px",b.style.right="")}}});
