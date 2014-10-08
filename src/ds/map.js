@@ -221,12 +221,15 @@ define('Sogou.DS.Map',
          * @private
          */
         Map.prototype.cleanupKeysArray_ = function() {
+            var srcIndex;
+            var destIndex;
+            var key;
             if (this.count_ !== this.keys_.length) {
                 // First remove keys that are no longer in the map.
-                var srcIndex = 0;
-                var destIndex = 0;
+                srcIndex = 0;
+                destIndex = 0;
                 while (srcIndex < this.keys_.length) {
-                    var key = this.keys_[srcIndex];
+                    key = this.keys_[srcIndex];
                     if (hasKey_(this.map_, key)) {
                         this.keys_[destIndex++] = key;
                     }
@@ -242,10 +245,10 @@ define('Sogou.DS.Map',
                 // been done in the first pass, but in the common case, we can avoid
                 // allocating an extra object by only doing this when necessary.
                 var seen = {};
-                var srcIndex = 0;
-                var destIndex = 0;
+                srcIndex = 0;
+                destIndex = 0;
                 while (srcIndex < this.keys_.length) {
-                    var key = this.keys_[srcIndex];
+                    key = this.keys_[srcIndex];
                     if (!hasKey_(seen, key)) {
                         this.keys_[destIndex++] = key;
                         seen[key] = 1;
