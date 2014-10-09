@@ -6,45 +6,46 @@ module.exports = {
     },
     // options here to override JSHint defaults
     options: {
-        bitwise: false,         // ½ûÓÃÎ»ÔËËã·û
-        camelcase: false,       // ÊÇ·ñÖ»ÔÊĞíÍÕ·åÃüÃû»òÏÂ»®ÏßÏàÁ¬µÄ´óĞ´ÃüÃû
-        curly: false,           // Ñ­»·Ê±²»Ç¿ÖÆÓÃÀ¨ºÅ
-        eqeqeq: true,           // ===´úÌæ==
-        es3: true,              // ÈÔÈ»ĞèÒªÖ§³ÖIE678
-        forin: false,           // ±éÀú¶ÔÏó²»ĞèÒªÈ«ÓÃfor-in
-        freeze: true,           // ½ûÖ¹ĞŞ¸ÄÔ­Éú¶ÔÏó
-        immed: true,            // Ö±½Óµ÷ÓÃµÄº¯ÊıĞèÒªwrapper
-        indent: true,           // Ëõ½øÈ«ÓÃtab
-        latedef: false,         // Í¬undef
-        newcap: true,           // ¹¹Ôìº¯ÊıĞèÒª´óĞ´
-        noarg: true,            // ½ûÓÃarguments.callee
-        noempty: true,          // ²»ÄÜÓĞ¿Õ°×´úÂë¿é
+        bitwise: false,         // ç¦ç”¨ä½è¿ç®—ç¬¦
+        camelcase: false,       // æ˜¯å¦åªå…è®¸é©¼å³°å‘½åæˆ–ä¸‹åˆ’çº¿ç›¸è¿çš„å¤§å†™å‘½å
+        curly: false,           // å¾ªç¯æ—¶ä¸å¼ºåˆ¶ç”¨æ‹¬å·
+        eqeqeq: true,           // ===ä»£æ›¿==
+        es3: true,              // ä»ç„¶éœ€è¦æ”¯æŒIE678
+        forin: false,           // éå†å¯¹è±¡ä¸éœ€è¦å…¨ç”¨for-in
+        freeze: true,           // ç¦æ­¢ä¿®æ”¹åŸç”Ÿå¯¹è±¡
+        immed: true,            // ç›´æ¥è°ƒç”¨çš„å‡½æ•°éœ€è¦wrapper
+        indent: true,           // ç¼©è¿›å…¨ç”¨tab
+        latedef: false,         // åŒundef
+        newcap: true,           // æ„é€ å‡½æ•°éœ€è¦å¤§å†™
+        noarg: true,            // ç¦ç”¨arguments.callee
+        noempty: true,          // ä¸èƒ½æœ‰ç©ºç™½ä»£ç å—
         nonbsp: false,          //
-        nonew: true,            // ¹¹Ôìº¯ÊıÖ»ÄÜÍ¨¹ınewÔËËã·ûµ÷ÓÃ
+        nonew: true,            // æ„é€ å‡½æ•°åªèƒ½é€šè¿‡newè¿ç®—ç¬¦è°ƒç”¨
         plusplus: false,
-        quotmark: 'single',     // ×Ö·û´®È«²¿µ¥ÒıºÅ
-        undef: true,            // ²»ÄÜÊ¹ÓÃÎ´¶¨ÒåµÄ±äÁ¿
-        unused: 'vars',         // ¼ì²é¶¨Òåµ«Î´±»Ê¹ÓÃµÄ±äÁ¿, ²»°üÀ¨ĞÎ²Î     
-        strict: true,           // ES5µÄÑÏ¸ñÄ£Ê½
-        maxparams: false,       // ²»ÏŞÖÆĞÎ²ÎÊıÁ¿
-        maxdepth: false,        // ²»ÏŞÖÆ´úÂë¿éÄÚÇ¶²ã´Î
-        maxstatements: 200,     // Ã¿¸öº¯ÊıÓï¾äÊıÄ¿×î´ó²»³¬¹ı200
+        quotmark: 'single',     // å­—ç¬¦ä¸²å…¨éƒ¨å•å¼•å·
+        undef: true,            // ä¸èƒ½ä½¿ç”¨æœªå®šä¹‰çš„å˜é‡
+        unused: 'vars',         // æ£€æŸ¥å®šä¹‰ä½†æœªè¢«ä½¿ç”¨çš„å˜é‡, ä¸åŒ…æ‹¬å½¢å‚
+        strict: true,           // ES5çš„ä¸¥æ ¼æ¨¡å¼
+        maxparams: false,       // ä¸é™åˆ¶å½¢å‚æ•°é‡
+        maxdepth: false,        // ä¸é™åˆ¶ä»£ç å—å†…åµŒå±‚æ¬¡
+        maxstatements: 200,     // æ¯ä¸ªå‡½æ•°è¯­å¥æ•°ç›®æœ€å¤§ä¸è¶…è¿‡200
         maxcomplexity: false,
-        maxlen: 120,            // Ã¿ĞĞ´úÂë×î´ó³¤¶È
-        
-        asi: true,              // ÔÊĞíÊ¡ÂÔ²»±ØÒªµÄ·ÖºÅ
+        maxlen: 120,            // æ¯è¡Œä»£ç æœ€å¤§é•¿åº¦
+
+        asi: true,              // å…è®¸çœç•¥ä¸å¿…è¦çš„åˆ†å·
         boss: true,
-        debug: false,           // Ä¬ÈÏ´úÂëÖĞ²»º¬ÓĞdebugger
-        evil: false,            // ²»ÔÊĞíÓÃeval
+        debug: false,           // é»˜è®¤ä»£ç ä¸­ä¸å«æœ‰debugger
+        evil: false,            // ä¸å…è®¸ç”¨eval
         laxcomma: false,
-        browser: true,          // ä¯ÀÀÆ÷»·¾³
-        devel: true,            // ²»Òªº¬ÓĞalert console.logµÈ´úÂë
-        
+        browser: true,          // æµè§ˆå™¨ç¯å¢ƒ
+        devel: true,            // ä¸è¦å«æœ‰alert console.logç­‰ä»£ç 
+
 
         globals: {
             sogou: false,
             module: false,
-            define: false
+            define: false,
+            ActiveXObject: false
         },
         reporter: require('jshint-stylish'),
         ignores: ['scripts/', 'build/'],

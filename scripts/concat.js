@@ -13,7 +13,7 @@ module.exports = {
     top: {
         src: config['top']['js'],
         dest: '../dist/top.concat.js'
-    }
+    },
     options: {
         separator: ';',
         nonull: true
