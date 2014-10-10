@@ -1,5 +1,5 @@
 /** 
  * Sogou JavaScript Library 
- * 2014-10-09 build 
+ * 2014-10-10 build 
  */
 define("Sogou.History.EventType",[],function(){"use strict";return{NAVIGATE:"navigate"}});
