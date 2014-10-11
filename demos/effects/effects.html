@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Effects</title>
+    <script src="../../src/require.js"></script>
+    <link rel="stylesheet" href="../css/demo.css">
+    <style>
+        #test1 {
+          position: absolute;
+          left: 150px;
+          top: 100px;
+          width: 20px;
+          height: 20px;
+          background-color: rgb(0,0,0);
+        }
+
+        button {
+          font: normal 10px arial;
+          width: 125px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Effects</h1>
+    <p><strong>动画示例</strong></p>
+
+    <p>
+        <button id="but0" onclick="slide(0, 0);">Slide To 0x0</button><br>
+        <button id="but1" onclick="slide(400, 40);">Slide To 400x40</button><br>
+        <button id="but2" onclick="slide(300, 200);">Slide To 300x200</button><br>
+        <button id="but3" onclick="slide(600, 100);">Slide To 600x100</button>
+    </p>
+
+    <p>
+        <button id="but4" onclick="resize(50, 50);">Resize To 50x50</button><br>
+        <button id="but5" onclick="resize(250, 50);">Resize To 250x50</button><br>
+        <button id="but6" onclick="resize(5, 5);">Resize To 5x5</button><br>
+        <button id="but7" onclick="resize(250, 250);">Resize To 250x250</button><br>
+        <button id="but8" onclick="resize(1250, 1250);">Resize To 1250x1250</button>
+    </p>
+
+    <p>
+        <button id="but9" onclick="fadeout();">Fade Out</button><br>
+        <button id="but10" onclick="fadein();">Fade In</button>
+    </p>
+
+    <p>
+        <button id="but11" onclick="color(200, 0, 0);">Transform to red</button><br>
+        <button id="but12" onclick="color(180, 180, 180);">Transform to grey</button><br>
+        <button id="but13" onclick="color(0, 0, 0);">Transform to black</button><br>
+        <button id="but14" onclick="color(100, 100, 255);">Transform to blue</button>
+    </p>
+
+    <p>
+        <button id="but15" onclick="toggleRequestAnimationFrame();"></button>
+    <p>
+
+    <div id="test1"><!-- This comment is an IE6 hack to fix height:20px --></div>
+
+    <script type="text/javascript" src="../../src/util/util.js"></script>
+    <script type="text/javascript" src="../../src/dom/nodetype.js"></script>
+    <script type="text/javascript" src="../../src/math/size.js"></script>
+    <script type="text/javascript" src="../../src/string/util.js"></script>
+    <script type="text/javascript" src="../../src/array/array.js"></script>
+    <script type="text/javascript" src="../../src/object/object.js"></script>
+    <script type="text/javascript" src="../../src/events/eventbase.js"></script>
+    <script type="text/javascript" src="../../src/events/listener.js"></script>
+    <script type="text/javascript" src="../../src/events/listenermap.js"></script>
+    <script type="text/javascript" src="../../src/disposable/disposable.js"></script>
+    <script type="text/javascript" src="../../src/events/eventtarget.js"></script>
+    <script type="text/javascript" src="../../src/timer/timer.js"></script>
+    <script type="text/javascript" src="../../src/ua/util.js"></script>
+    <script type="text/javascript" src="../../src/events/eventtype.js"></script>
+    <script type="text/javascript" src="../../src/events/browserfeature.js"></script>
+    <script type="text/javascript" src="../../src/events/browserevent.js"></script>
+    <script type="text/javascript" src="../../src/functions/functions.js"></script>
+    <script type="text/javascript" src="../../src/events/util.js"></script>
+    <script type="text/javascript" src="../../src/async/delay.js"></script>
+    <script type="text/javascript" src="../../src/async/animationdelay.js"></script>
+    <script type="text/javascript" src="../../src/fx/eventtype.js"></script>
+    <script type="text/javascript" src="../../src/fx/event.js"></script>
+    <script type="text/javascript" src="../../src/fx/util.js"></script>
+    <script type="text/javascript" src="../../src/fx/transitionbase.js"></script>
+    <script type="text/javascript" src="../../src/math/util.js"></script>
+    <script type="text/javascript" src="../../src/math/coordinate.js"></script>
+    <script type="text/javascript" src="../../src/dom/vender.js"></script>
+    <script type="text/javascript" src="../../src/dom/dom.js"></script>
+    <script type="text/javascript" src="../../src/fx/animation.js"></script>
+    <script type="text/javascript" src="../../src/style/style.js"></script>
+    <script type="text/javascript" src="../../src/color/names.js"></script>
+    <script type="text/javascript" src="../../src/fx/effectbase.js"></script>
+    <script type="text/javascript" src="../../src/color/color.js"></script>
+    <script type="text/javascript" src="../../src/fx/fade.js"></script>
+    <script type="text/javascript" src="../../src/fx/bgcolortransform.js"></script>
+    <script type="text/javascript" src="../../src/fx/fadeinandshow.js"></script>
+    <script type="text/javascript" src="../../src/fx/fadeoutandhide.js"></script>
+    <script type="text/javascript" src="../../src/fx/resize.js"></script>
+    <script type="text/javascript" src="../../src/fx/slide.js"></script>
+    <script type="text/javascript" src="../../src/fx/easing.js"></script>
+    <script type="text/javascript" src="effect.js"></script>
+</body>
+</html>
