@@ -39,7 +39,7 @@
 //       back in the tree
 //   sources_: src uid -> [Listener]
 
-sogou('Sogou.Events.Util',
+define('Sogou.Events.Util',
     [
         'Sogou.Util',
         'Sogou.Events.BrowserEvent',
