@@ -1,5 +1,5 @@
 /** 
  * Sogou JavaScript Library 
- * 2014-10-10 build 
+ * 2014-10-11 build 
  */
 define("Sogou.Events.MouseWheelEventType",[],function(){"use strict";return{MOUSEWHEEL:"mousewheel"}});
