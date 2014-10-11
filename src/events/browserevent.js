@@ -267,10 +267,8 @@ define('Sogou.Events.BrowserEvent',
             },
             /**
              * Whether this has an "action"-producing mouse button.
-             *
-             * By definition, this includes left-click on windows/linux, and left-click
-             * without the ctrl key on Macs.
-             *
+             * 根据定义, 包括windows/linux系统上的鼠标左键单击, 和Macs系统上的鼠标左键
+             * 单击但不包含ctrl键一起按下.
              * @return {boolean} The result.
              */
             isMouseActionButton: function() {
