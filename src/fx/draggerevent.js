@@ -14,13 +14,12 @@ define('Sogou.FX.DraggerEvent',
          * 拖拽事件对象
          * @param {string} type 事件类型.
          * @param {Dragger} dragobj Dragger实例.
-         * @param {number} clientX X-coordinate relative to the viewport.
-         * @param {number} clientY Y-coordinate relative to the viewport.
-         * @param {BrowserEvent} browserEvent The closure object
-         *   representing the browser event that caused this drag event.
-         * @param {number=} opt_actX Optional actual x for drag if it has been limited.
-         * @param {number=} opt_actY Optional actual y for drag if it has been limited.
-         * @param {boolean=} opt_dragCanceled Whether the drag has been canceled.
+         * @param {number} clientX
+         * @param {number} clientY
+         * @param {BrowserEvent} browserEvent 标准化的浏览器事件.
+         * @param {number=} opt_actX limited x.
+         * @param {number=} opt_actY limited y.
+         * @param {boolean=} opt_dragCanceled 是否被取消了.
          * @constructor
          * @extends {EventBase}
          */
@@ -29,51 +28,51 @@ define('Sogou.FX.DraggerEvent',
             EventBase.call(this, type);
 
             /**
-             * X-coordinate relative to the viewport
+             * 视口x坐标
              * @type {number}
              */
             this.clientX = clientX;
 
             /**
-             * Y-coordinate relative to the viewport
+             * 视口y坐标
              * @type {number}
              */
             this.clientY = clientY;
 
             /**
-             * The closure object representing the browser event that caused this drag
-             * event.
+             * 标准化的浏览器事件.
              * @type {BrowserEvent}
              */
             this.browserEvent = browserEvent;
 
             /**
-             * The real x-position of the drag if it has been limited
+             * 被限制范围后真实的x坐标
              * @type {number}
              */
             this.left = util.isDef(opt_actX) ? opt_actX : dragobj.deltaX;
 
             /**
-             * The real y-position of the drag if it has been limited
+             * 被限制范围后真实的y坐标
              * @type {number}
              */
             this.top = util.isDef(opt_actY) ? opt_actY : dragobj.deltaY;
 
             /**
-             * Reference to the drag object for this event
-             * @type {goog.fx.Dragger}
+             * 相关的dragger实例
+             * @type {Dragger}
              */
             this.dragger = dragobj;
 
             /**
-             * Whether drag was canceled with this event. Used to differentiate between
-             * a legitimate drag END that can result in an action and a drag END which is
-             * a result of a drag cancelation. For now it can happen 1) with drag END
-             * event on FireFox when user drags the mouse out of the window, 2) with
+             * 分发事件时拖拽是否被取消了. 这个参数用于区分正常的drag end 和 drag cancelation引发的drag end.
+             * 以下三种情况会发生
+             * 1) with drag END
+             * event on FireFox when user drags the mouse out of the window,
+             * 2) with
              * drag END event on IE7 which is generated on MOUSEMOVE event when user
              * moves the mouse into the document after the mouse button has been
-             * released, 3) when TOUCHCANCEL is raised instead of TOUCHEND (on touch
-             * events).
+             * released,
+             * 3) 触发了TOUCHCANCEL 而不是 TOUCHEND (on touch events).
              * @type {boolean}
              */
             this.dragCanceled = !!opt_dragCanceled;
