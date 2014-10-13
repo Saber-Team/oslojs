@@ -32,7 +32,7 @@ define('Sogou.FX.Animation',
             if (!util.isArray(start) || !util.isArray(end)) {
                 throw Error('Start and end parameters must be arrays');
             }
-            if (start.length != end.length) {
+            if (start.length !== end.length) {
                 throw Error('Start and end points must be the same length');
             }
 
@@ -254,7 +254,7 @@ define('Sogou.FX.Animation',
                 this.updateCoords_(this.progress);
 
                 // Animation has finished.
-                if (this.progress == 1) {
+                if (this.progress === 1) {
                     this.setStateStopped();
                     fx.unregisterAnimation(this);
 

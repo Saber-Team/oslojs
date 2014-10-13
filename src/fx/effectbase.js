@@ -37,10 +37,10 @@ define('Sogou.FX.EffectBase',
 
             /**
              * 是否由右→左渲染right-to-left
-             * @type {boolean|undefined}
+             * @type {?boolean|undefined}
              * @private
              */
-            this.rightToLeft_;
+            this.rightToLeft_ = null;
 
         };
 
@@ -56,10 +56,10 @@ define('Sogou.FX.EffectBase',
 
         /**
          * 元素渲染模式是否right-to-left. 这个属性可以后设置.
-         * @type {boolean|undefined}
+         * @type {?boolean|undefined}
          * @private
          */
-        EffectBase.prototype.rightToLeft_;
+        EffectBase.prototype.rightToLeft_ = null;
 
 
         /**
