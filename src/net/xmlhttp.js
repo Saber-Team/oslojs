@@ -11,11 +11,19 @@ define('Sogou.Net.XmlHttp',
         'use strict';
 
         /**
+         * 一个静态的私有属性,保存了创建XMLHttpRequest对象的工厂实例,是全局的工厂.
+         * @type {XmlHttpFactory}
+         * @private
+         */
+        var factory_ = null;
+
+
+        /**
          * 创建 XMLHttpRequest 对象的静态类.
          * @return {!(XMLHttpRequest|GearsHttpRequest)} A new XMLHttpRequest object.
          */
         var XmlHttp = function() {
-            return XmlHttp.factory_.createInstance();
+            return factory_.createInstance();
         };
 
 
@@ -24,7 +32,7 @@ define('Sogou.Net.XmlHttp',
          * @return {Object} The options.
          */
         XmlHttp.getOptions = function() {
-            return XmlHttp.factory_.getOptions();
+            return factory_.getOptions();
         };
 
 
@@ -61,19 +69,11 @@ define('Sogou.Net.XmlHttp',
 
 
         /**
-         * 一个静态的私有属性,保存了创建XMLHttpRequest对象的工厂实例,是全局的工厂.
-         * @type {XmlHttpFactory}
-         * @private
-         */
-        XmlHttp.factory_;
-
-
-        /**
-         * 设置XmlHttp的factory_对象.
+         * 设置factory_对象.
          * @param {!XmlHttpFactory} factory New global factory object.
          */
         XmlHttp.setGlobalFactory = function(factory) {
-            XmlHttp.factory_ = factory;
+            factory_ = factory;
         };
 
 
