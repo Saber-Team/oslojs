@@ -1,0 +1,808 @@
+<!--
+	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.Array</title>
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arraySameElements.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/array/array.js"></script>
+
+    <script src="../../src/object/object.js"></script>
+    <script src="../../src/string/util.js"></script>
+    <script src="../../src/ua/util.js"></script>
+    <script src="../../src/math/util.js"></script>
+    <script src="../../src/math/size.js"></script>
+    <script src="../../src/math/coordinate.js"></script>
+    <script src="../../src/dom/nodetype.js"></script>
+    <script src="../../src/dom/classes.js"></script>
+    <script src="../../src/dom/browserfeature.js"></script>
+    <script src="../../src/dom/dom.js"></script>
+</head>
+<body>
+    <div class="foo"></div>
+    <!-- include spec files here... -->
+    <script>
+
+    describe('Sogou.Array模块', function() {
+
+        var global = window;
+        var util = Sogou.Util;
+        var array = Sogou.Array;
+        var dom = Sogou.Dom.Util;
+
+        function assertUnique(expected, original) {
+            var tempArr = array.toArray(original);
+            array.unique(tempArr);
+            expect(expected).toEqualArray(tempArr);
+        }
+
+        beforeEach(function() {
+            jasmine.addMatchers(arrayEqual);
+            jasmine.addMatchers(arraySameElements);
+        });
+
+        describe('测试indexOf相关方法', function() {
+            it('测试indexOf方法', function() {
+                expect(array.indexOf([0, 1, 2, 3], 1)).toBe(1);
+                expect(array.indexOf([0, 1, 1, 1], 1)).toBe(1);
+                expect(array.indexOf([0, 1, 2, 3], 4)).toBe(-1);
+                expect(array.indexOf([0, 1, 2, 3], 1, 1)).toBe(1);
+                expect(array.indexOf([0, 1, 2, 3], 1, 2)).toBe(-1);
+                expect(array.indexOf([0, 1, 2, 3], 1, -3)).toBe(1);
+                expect(array.indexOf([0, 1, 2, 3], 1, -2)).toBe(-1);
+            });
+
+            it('测试删除数组项后的indexOf方法', function() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                expect(array.indexOf(a, undefined)).toBe(-1);
+            });
+
+            it('测试lastIndexOf方法', function() {
+                expect(array.lastIndexOf([0, 1, 2, 3], 1)).toBe(1);
+                expect(array.lastIndexOf([0, 1, 1, 1], 1)).toBe(3);
+                expect(array.lastIndexOf([0, 1, 1, 1], 1, 2)).toBe(2);
+            });
+
+            it('测试删除数组项后的lastIndexOf方法', function() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                expect(array.lastIndexOf(a, undefined)).toBe(-1);
+            });
+        });
+
+        describe('测试forEach方法', function() {
+
+            it('基本测试', function testArrayForEachBasic() {
+                var s = '';
+                var a = ['a', 'b', 'c', 'd'];
+                array.forEach(a, function(val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    s += val + index;
+                });
+                expect(s).toBe('a0b1c2d3');
+            });
+
+            it('用空数组', function testArrayForEachWithEmptyArray() {
+                var a = new Array(100);
+                var count = 0;
+                array.forEach(a, function(val, index, a2) {
+                    count++;
+                    //fail('The function should not be called since no values were assigned.');
+                });
+                expect(count).toBe(0);
+            });
+
+            it('用部分项赋值的数组', function testArrayForEachWithOnlySomeValuesAsigned() {
+                var count = 0;
+                var a = new Array(1000);
+                a[100] = undefined;
+                array.forEach(a, function(val, index, a2) {
+                    expect(index).toBe(100);
+                    count++;
+                });
+
+                expect(count).toBe(1);
+            });
+
+            /*
+            it('用类数组对象测试', function testArrayForEachWithArrayLikeObject() {
+                var counter = testing.recordFunction();
+                var a = {
+                    'length':1,
+                    '0':0,
+                    '100':100,
+                    '101':102
+                };
+                array.forEach(a, counter);
+                expect(counter.getCallCount()).toBe(1);
+            });*/
+
+            it('delete某些项', function testArrayForEachOmitsDeleted() {
+                var s = '';
+                var a = ['a', 'b', 'c', 'd'];
+                delete a[1];
+                delete a[3];
+                array.forEach(a, function(val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    s += val + index;
+                });
+                expect(s).toBe('a0c2');
+            });
+
+            it('用指定上下文的函数遍历', function testArrayForEachScope() {
+                var scope = {};
+                var a = ['a', 'b', 'c', 'd'];
+                array.forEach(a, function(val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    expect(this).toEqual(scope);
+                }, scope);
+
+            });
+
+            it('测试forEachRight', function testArrayForEachRight() {
+                var s = '';
+                var a = ['a', 'b', 'c', 'd'];
+                array.forEachRight(a, function(val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    s += val + String(index);
+                });
+                expect(s).toBe('d3c2b1a0');
+            });
+
+            it('删除某些项测试forEachRight', function testArrayForEachRightOmitsDeleted() {
+                var s = '';
+                var a = ['a', 'b', 'c', 'd'];
+                delete a[1];
+                delete a[3];
+                array.forEachRight(a, function(val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    expect(typeof val).toBe('string');
+                    s += val + String(index);
+                });
+                expect(s).toBe('c2a0');
+            });
+
+        });
+
+        describe('测试filter方法', function() {
+
+            it('基本测试', function testArrayFilter() {
+                var a = [0, 1, 2, 3];
+                a = array.filter(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                //assertArrayEquals([2, 3], a);
+                expect(a).toEqual([2, 3]);
+            });
+
+            it('delete某些项', function testArrayFilterOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                a = array.filter(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                //assertArrayEquals([2], a);
+                expect(a).toEqual([2]);
+            });
+
+            it('预留值', function testArrayFilterPreservesValues() {
+                var a = [0, 1, 2, 3];
+                a = array.filter(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    // sometimes functions might be evil and do something like this, but we
+                    // should still use the original values when returning the filtered array
+                    a2[index] = a2[index] - 1;
+                    return a2[index] >= 1;
+                });
+                //assertArrayEquals([2, 3], a);
+                expect(a).toEqual([2, 3]);
+            });
+
+        });
+
+        describe('测试map方法', function() {
+
+            it('基本测试', function testArrayMap() {
+                var a = [0, 1, 2, 3];
+                var result = array.map(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    // assertEquals('index is not a number', 'number', typeof index);
+                    return val * val;
+                });
+                // assertArrayEquals([0, 1, 4, 9], result);
+                expect(result).toEqual([0, 1, 4, 9]);
+            });
+
+            it('delete某些项', function testArrayMapOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var result = array.map(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    //assertEquals('index is not a number', 'number', typeof index);
+                    return val * val;
+                });
+                var expected = [0, 1, 4, 9];
+                delete expected[1];
+                delete expected[3];
+
+                //assertArrayEquals(expected, result);
+                expect(expected).toEqual(result);
+                expect('1' in result).toBeFalsy();
+                expect('3' in result).toBeFalsy();
+            });
+
+        });
+
+        describe('测试reduce相关方法', function() {
+
+            it('基本测试', function testArrayReduce() {
+                var a = [0, 1, 2, 3];
+                expect(array.reduce(a, function (rval, val, i, arr) {
+                    expect(typeof i).toBe('number');
+                    expect(a).toEqual(arr);
+                    return rval + val;
+                }, 0)).toBe(6);
+
+                var scope = {
+                    last: 0,
+                    testFn: function(r, v, i, arr) {
+                        expect(typeof i).toBe('number');
+                        expect(a).toEqual(arr);
+                        var l = this.last;
+                        this.last = r + v;
+                        return this.last + l;
+                    }
+                };
+
+                expect(array.reduce(a, scope.testFn, 0, scope)).toBe(10);
+            });
+
+            it('delete某些项', function testArrayReduceOmitDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                expect(array.reduce(a, function (rval, val, i, arr) {
+                    expect(typeof i).toBe('number');
+                    expect(a).toEqual(arr);
+                    return rval + val;
+                }, 0)).toBe(2);
+
+                var scope = {
+                    last: 0,
+                    testFn: function(r, v, i, arr) {
+                        expect(typeof i).toBe('number');
+                        expect(a).toEqual(arr);
+                        var l = this.last;
+                        this.last = r + v;
+                        return this.last + l;
+                    }
+                };
+
+                expect(array.reduce(a, scope.testFn, 0, scope)).toBe(2);
+            });
+
+            it('测试reduceRight', function testArrayReduceRight() {
+                var a = [0, 1, 2, 3, 4];
+                expect(array.reduceRight(a, function (rval, val, i, arr) {
+                    expect(typeof i).toBe('number');
+                    expect(a).toEqual(arr);
+                    return rval + val;
+                }, '')).toBe('43210');
+
+                var scope = {
+                    last: '',
+                    testFn: function(r, v, i, arr) {
+                        expect(typeof i).toBe('number');
+                        expect(a).toEqual(arr);
+                        var l = this.last;
+                        this.last = v;
+                        return r + v + l;
+                    }
+                };
+
+                a = ['a', 'b', 'c'];
+                expect(array.reduceRight(a, scope.testFn, '_', scope)).toBe('_cbcab');
+            });
+
+            it('delete某些项测试reduceRight', function testArrayReduceRightOmitsDeleted() {
+                var a = [0, 1, 2, 3, 4];
+                delete a[1];
+                delete a[4];
+                expect(array.reduceRight(a, function (rval, val, i, arr) {
+                    expect(typeof i).toBe('number');
+                    expect(a).toEqual(arr);
+                    return rval + val;
+                }, '')).toBe('320');
+
+                scope = {
+                    last: '',
+                    testFn: function(r, v, i, arr) {
+                        expect(typeof i).toBe('number');
+                        expect(a).toEqual(arr);
+                        var l = this.last;
+                        this.last = v;
+                        return r + v + l;
+                    }
+                };
+
+                a = ['a', 'b', 'c', 'd'];
+                delete a[1];
+                delete a[3];
+                expect(array.reduceRight(a, scope.testFn, '_', scope)).toBe('_cac');
+            });
+
+        });
+
+        describe('测试find相关方法', function() {
+
+            it('基本测试', function testArrayFind() {
+                var a = [0, 1, 2, 3];
+                var b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(2);
+
+                b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(null);
+
+                a = 'abCD';
+                b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val >= 'A' && val <= 'Z';
+                });
+                expect(b).toBe('C');
+
+                a = 'abcd';
+                b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val >= 'A' && val <= 'Z';
+                });
+                expect(b).toBe(null);
+            });
+
+            it('delete某些项', function testArrayFindOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+
+                expect(b).toBe(2);
+                b = array.find(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(null);
+            });
+
+            it('测试findIndex', function testArrayFindIndex() {
+                var a = [0, 1, 2, 3];
+                var b = array.findIndex(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(2);
+
+                b = array.findIndex(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(-1);
+            });
+
+            it('delete某些项测试findIndex', function testArrayFindIndexOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var b = array.findIndex(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(2);
+
+                b = array.findIndex(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(-1);
+            });
+
+            it('测试findIndexRight', function testArrayFindIndexRight() {
+                var a = [0, 1, 2, 3];
+                var b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val < 3;
+                });
+                expect(b).toBe(2);
+
+                b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(-1);
+
+                a = 'abCD';
+                b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val >= 'a' && val <= 'z';
+                });
+                expect(b).toBe(1);
+
+                a = 'abcd';
+                b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val >= 'A' && val <= 'Z';
+                });
+                expect(b).toBe(-1);
+            });
+
+            it('delete某些项测试findIndexRight', function testArrayFindIndexRightOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val < 3;
+                });
+                expect(b).toBe(2);
+                b = array.findIndexRight(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(-1);
+            });
+
+        });
+
+        describe('测试some方法', function() {
+
+            it('基本测试', function testArraySome() {
+                var a = [0, 1, 2, 3];
+                var b = array.some(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(true);
+                b = array.some(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(false);
+            });
+
+            it('delete某些项测试some', function testArraySomeOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var b = array.some(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(true);
+                b = array.some(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    return val > 100;
+                });
+                expect(b).toBe(false);
+            });
+
+        });
+
+        describe('测试every方法', function() {
+
+            it('基本测试', function testArrayEvery() {
+                var a = [0, 1, 2, 3];
+                var b = array.every(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val >= 0;
+                });
+                expect(b).toBe(true);
+                b = array.every(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(false);
+            });
+
+            it('delete某些项测试every', function testArrayEveryOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                var b = array.every(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    return val >= 0;
+                });
+                expect(b).toBe(true);
+                b = array.every(a, function (val, index, a2) {
+                    expect(a).toEqual(a2);
+                    expect(typeof val).toBe('number');
+                    expect(typeof index).toBe('number');
+                    return val > 1;
+                });
+                expect(b).toBe(false);
+            });
+
+        });
+
+        describe('测试contains方法', function() {
+
+            it('基本测试', function testArrayContains() {
+                var a = [0, 1, 2, 3];
+                expect(array.contains(a, 3)).toBe(true);
+                expect(array.contains(a, 4)).toBe(false);
+            });
+
+            it('delete某些项测试contains', function testArrayContainsOmitsDeleted() {
+                var a = [0, 1, 2, 3];
+                delete a[1];
+                delete a[3];
+                expect(array.contains(a, undefined)).toBe(false);
+            });
+        });
+
+        describe('测试remove相关方法', function() {
+
+            it('基本测试', function testArrayRemove() {
+                var a = ['a', 'b', 'c', 'd'];
+                array.remove(a, 'c');
+                expect(a).toEqualArray(['a', 'b', 'd']);
+                array.remove(a, 'x');
+                expect(a).toEqualArray(['a', 'b', 'd']);
+            });
+
+            it('测试removeAt', function testArrayRemoveAt() {
+                var a = [0, 1, 2, 3];
+                array.removeAt(a, 2);
+                expect(a).toEqualArray([0, 1, 3]);
+                a = [0, 1, 2, 3];
+                array.removeAt(a, 10);
+                expect(a).toEqualArray([0, 1, 2, 3]);
+                a = [0, 1, 2, 3];
+                array.removeAt(a, -2);
+                expect(a).toEqualArray([0, 1, 3]);
+            });
+        });
+
+        describe('测试toArray方法', function() {
+
+            it('基本测试', function testToArray() {
+                var a = [0, 1, 2, 3];
+                var a2 = array.toArray(a);
+                expect(a).toEqualArray(a2);
+
+                var b = {0: 0, 1: 1, 2: 2, 3: 3, length: 4};
+                var b2 = array.toArray(b);
+                for (var i = 0; i < b.length; i++) {
+                    expect(b[i]).toEqual(b2[i]);
+                }
+            });
+
+            it('非数组测试toArray', function testToArrayOnNonArrayLike() {
+                var nonArrayLike = {};
+                expect(array.toArray(nonArrayLike)).toEqualArray([]);
+
+                var nonArrayLike2 = {length: 'hello world'};
+                expect(array.toArray(nonArrayLike2)).toEqualArray([]);
+            });
+        });
+
+        describe('测试extend方法', function() {
+
+            it('基本测试', function testExtend() {
+                var a = [0, 1];
+                array.extend(a, [2, 3]);
+                var a2 = [0, 1, 2, 3];
+                expect(a).toEqualArray(a2);
+
+                var b = [0, 1];
+                array.extend(b, 2);
+                var b2 = [0, 1, 2];
+                expect(b).toEqualArray(b2);
+
+                a = [0, 1];
+                array.extend(a, [2, 3], [4, 5]);
+                a2 = [0, 1, 2, 3, 4, 5];
+                expect(a).toEqualArray(a2);
+
+                b = [0, 1];
+                array.extend(b, 2, 3);
+                b2 = [0, 1, 2, 3];
+                expect(b).toEqualArray(b2);
+
+                var c = [0, 1];
+                array.extend(c, 2, [3, 4], 5, [6]);
+                var c2 = [0, 1, 2, 3, 4, 5, 6];
+                expect(c).toEqualArray(c2);
+
+                var d = [0, 1];
+                var arrayLikeObject = {0: 2, 1: 3, length: 2};
+                array.extend(d, arrayLikeObject);
+                var d2 = [0, 1, 2, 3];
+                expect(d).toEqualArray(d2);
+
+                var e = [0, 1];
+                var emptyArrayLikeObject = {length: 0};
+                array.extend(e, emptyArrayLikeObject);
+                expect(e).toEqualArray(e);
+
+                var f = [0, 1];
+                var length3ArrayLikeObject = {0: 2, 1: 4, 2: 8, length: 3};
+                array.extend(f, length3ArrayLikeObject, length3ArrayLikeObject);
+                var f2 = [0, 1, 2, 4, 8, 2, 4, 8];
+                expect(f).toEqualArray(f2);
+            });
+
+            it('带参数测试extend', function testExtendWithArguments() {
+                function f() {
+                    return arguments;
+                }
+                var a = [0];
+                var a2 = [0, 1, 2, 3, 4, 5];
+                array.extend(a, f(1, 2, 3), f(4, 5));
+                expect(a).toEqualArray(a2);
+            });
+
+            it('测试NodeList extend', function testExtendWithQuerySelector() {
+                var a = [0];
+                var d = dom.getElementsByTagNameAndClass('div', 'foo');
+                array.extend(a, d);
+                expect(a.length).toBe(2);
+            });
+        });
+
+        describe('测试unique方法', function() {
+
+            it('基本测试', function testUnique() {
+                assertUnique([1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 6]);
+                assertUnique([9, 4, 2, 1, 3, 6, 0, -9],
+                        [9, 4, 2, 4, 4, 2, 9, 1, 3, 6, 0, -9]);
+                assertUnique(['four', 'one', 'two', 'three', 'THREE'],
+                        ['four', 'one', 'two', 'one', 'three', 'THREE', 'four', 'two']);
+                assertUnique([], []);
+                assertUnique(
+                        ['abc', 'hasOwnProperty', 'toString'],
+                        ['abc', 'hasOwnProperty', 'toString', 'abc']);
+
+                var o1 = {}, o2 = {}, o3 = {}, o4 = {};
+                assertUnique([o1, o2, o3, o4], [o1, o1, o2, o3, o2, o4]);
+
+                // Mixed object types.
+                assertUnique([1, '1', 2, '2'], [1, '1', 2, '2']);
+                assertUnique([true, 'true', false, 'false'],
+                        [true, 'true', false, 'false']);
+                assertUnique(['foo'], [String('foo'), 'foo']);
+                assertUnique([12], [Number(12), 12]);
+
+                var obj = {};
+                var uid = util.getUid(obj);
+                assertUnique([obj, uid], [obj, uid])
+            });
+        });
+
+        describe('测试toObject方法', function() {
+
+            it('基本测试', function testArrayToObject() {
+                var a = [
+                    {name: 'a'},
+                    {name: 'b'},
+                    {name: 'c'},
+                    {name: 'd'}];
+
+                function getName(value, index, array) {
+                    expect(value).toEqual(array[index]);
+                    expect(typeof index).toBe('number');
+                    expect(a).toEqual(array);
+                    return value.name;
+                }
+
+                var b = array.toObject(a, getName);
+
+                for (var i = 0; i < a.length; i++) {
+                    expect(a[i]).toEqual(b[a[i].name]);
+                }
+            });
+
+        });
+
+        describe('测试shuffle方法', function() {
+
+            it('基本测试', function testShuffle() {
+                // Test array.
+                var testArray = [1, 2, 3, 4, 5];
+                var testArrayCopy = array.toArray(testArray);
+
+                // todo 这几个用例设计不好
+                // 自定义的比较函数返回常量1, 会使shuffle方法保持数组的原顺序.
+                var noChangeShuffleFunction = function() {
+                    return .999999;
+                };
+                array.shuffle(testArray, noChangeShuffleFunction);
+                expect(testArrayCopy).toEqualArray(testArray);
+
+                // 自定义的比较函数返回常量0, 顺序会和原数组不一样但可以预测结果.
+                var testShuffleFunction = function() {
+                    return 0;
+                };
+                array.shuffle(testArray, testShuffleFunction);
+                expect(testArray).toEqualArray([2, 3, 4, 5, 1]);
+
+                // 默认随机函数 (no optional RNG is specified).
+                array.shuffle(testArray);
+
+                // 测试原数组没变但不测顺序.
+                expect(testArrayCopy).toEqualArrayItem(testArray);
+            });
+
+        });
+
+    });
+
+</script>
+</body>
+</html>
