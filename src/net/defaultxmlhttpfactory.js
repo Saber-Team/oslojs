@@ -1,6 +1,6 @@
 /**
- * 定义一个默认的xhr工厂. 没必要亲自实例化它, 而是通过Sogou.Net.XmlHttp.
- * 实际上xmlhttp.js模块最后一行已经进行了默认设置.
+ * @fileoverview 定义一个默认的xhr工厂. 没必要亲自实例化它, 而是通过Sogou.Net.XmlHttp.
+ *     实际上xmlhttp.js模块最后一行已经进行了默认设置.
  * @extends {XmlHttpFactory}
  * @constructor
  */
@@ -50,11 +50,11 @@ define('Sogou.Net.DefaultXmlHttpFactory',
 
 
         /**
-         * 在IE下创建ajax插件的prog id. Lazily initialized.
-         * @type {string|undefined}
+         * 在IE下创建ajax插件的prog id.
+         * @type {?string|undefined}
          * @private
          */
-        DefaultXmlHttpFactory.prototype.ieProgId_;
+        DefaultXmlHttpFactory.prototype.ieProgId_ = null;
 
 
         /**
