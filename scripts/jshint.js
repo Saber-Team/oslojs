@@ -42,11 +42,12 @@ module.exports = {
 
 
         globals: {
-            sogou: false,
+            require: false,
             module: false,
             define: false,
             ActiveXObject: false
         },
+
         reporter: require('jshint-stylish'),
         ignores: ['scripts/', 'build/'],
         force: true
