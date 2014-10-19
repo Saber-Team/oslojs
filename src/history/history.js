@@ -836,7 +836,7 @@ define('Sogou.History.History',
                 // NOTE: persisted is a property passed in the pageshow event that
                 // indicates whether the page is being persisted from the cache or is being
                 // loaded for the first time.
-                if (e.getBrowserEvent()['persisted']) {
+                if (e.getBrowserEvent().persisted) {
                     this.setEnabled(false);
                     this.setEnabled(true);
                 }
