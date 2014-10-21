@@ -16,6 +16,7 @@ define('Sogou.Disposable',
      */
     function Disposable() {}
 
+
     /**
      * 对象是否被析构. 若对象没有此方法直接返回false.
      * @param {*} obj 要测试的对象.
@@ -28,20 +29,24 @@ define('Sogou.Disposable',
         return false;
     };
 
+
     // 原型字段
     util.mixin(Disposable.prototype, {
+
         /**
          * 是否已被析构
          * @type {boolean}
          * @private
          */
         disposed_: false,
+
         /**
          * 用个数组保存析构时的回调函数。
          * @type {Array.<!Function>}
          * @private
          */
         onDisposeCallbacks_: null,
+
         /**
          * @return {boolean}
          * @override
@@ -49,6 +54,7 @@ define('Sogou.Disposable',
         isDisposed: function() {
             return this.disposed_;
         },
+
         /**
          * 析构对象. 如果对象不曾析构, 调用{@link #disposeInternal}.
          * Disposable的子类应该重写disposeInternal.
@@ -62,6 +68,7 @@ define('Sogou.Disposable',
                 this.disposeInternal();
             }
         },
+
         /**
          * 关联两个对象,当this析构时,被关联对象也会被析构.
          * @param {Disposable} disposable 被关联对象.
@@ -69,6 +76,7 @@ define('Sogou.Disposable',
         registerDisposable: function(disposable) {
             this.addOnDisposeCallback(util.partial(util.dispose, disposable));
         },
+
         /**
          * 当析构对象时需要有回调函数。回调触发有顺序
          * @param {function(this:T):?} callback 回调函数.
@@ -81,6 +89,7 @@ define('Sogou.Disposable',
             }
             this.onDisposeCallbacks_.push(util.bind(callback, opt_scope));
         },
+        
         /**
          * 解除对COM对象, DOM结点或其他可析构对象的引用. Disposable的子类应该重写这个方法.
          * 这个方法通常只被调用一次(Not reentrant). 为了避免被调用两次,该方法声明成protected,
