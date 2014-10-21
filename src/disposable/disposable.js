@@ -89,7 +89,7 @@ define('Sogou.Disposable',
             }
             this.onDisposeCallbacks_.push(util.bind(callback, opt_scope));
         },
-        
+
         /**
          * 解除对COM对象, DOM结点或其他可析构对象的引用. Disposable的子类应该重写这个方法.
          * 这个方法通常只被调用一次(Not reentrant). 为了避免被调用两次,该方法声明成protected,
