@@ -1,0 +1,213 @@
+<!--
+	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.Disposable</title>
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/disposable/disposable.js"></script>
+</head>
+<body>
+<div id="someElement">Hello!</div>
+<!-- include spec files here... -->
+<script>
+
+describe('Sogou.Disposable模块', function() {
+
+    var global = window;
+    var util = Sogou.Util;
+    var Disposable = Sogou.Disposable;
+
+    var d1, d2;
+    // Sample subclass of Disposable.
+
+    function DisposableTest() {
+        Disposable.call(this);
+        this.element = document.getElementById('someElement');
+    }
+    util.inherits(DisposableTest, Disposable);
+
+    DisposableTest.prototype.disposeInternal = function() {
+        DisposableTest.superClass_.disposeInternal.call(this);
+        delete this.element;
+    };
+
+    // Class that doesn't inherit from Disposable, but implements the
+    // disposable interface via duck typing.
+
+    function DisposableDuck() {
+        this.element = document.getElementById('someElement');
+    }
+
+    DisposableDuck.prototype.dispose = function() {
+        delete this.element;
+    };
+
+    // Class which calls dispose recursively.
+
+    function RecursiveDisposable() {
+        this.disposedCount = 0;
+    }
+    util.inherits(RecursiveDisposable, Disposable);
+
+    RecursiveDisposable.prototype.disposeInternal = function() {
+        ++this.disposedCount;
+        expect(this.disposedCount).toBe(1);
+        this.dispose();
+    };
+
+
+    beforeEach(function() {
+        d1 = new Disposable();
+        d2 = new DisposableTest();
+
+        jasmine.addMatchers(arrayEqual);
+    });
+
+    afterEach(function() {
+        d1.dispose();
+        d2.dispose();
+    });
+
+
+    // Test methods.
+
+    it('测试构造函数', function testConstructor() {
+        expect(d1.isDisposed()).toBe(false);
+        expect(d2.isDisposed()).toBe(false);
+        expect(document.getElementById('someElement')).toEqual(d2.element);
+    });
+
+
+    it('测试Dispose', function testDispose() {
+        expect(d1.isDisposed()).toBe(false);
+        d1.dispose();
+        expect(d1.isDisposed()).toBe(true);
+
+        expect(d2.isDisposed()).toBe(false);
+        d2.dispose();
+        expect(d2.isDisposed()).toBe(true);
+    });
+
+
+    it('测试disposeInternal', function testDisposeInternal() {
+        expect(d2.element).not.toBeUndefined();
+        d2.dispose();
+        expect(d2.element).toBeUndefined();
+    });
+
+
+    it('再测dispose', function testDisposeAgain() {
+        d2.dispose();
+        expect(d2.element).toBeUndefined();
+        // 手动设置然后调用dispose(). 因为实例已经被标记为disposed, disposeInternal不会再次调用.
+        d2.element = document.getElementById('someElement');
+        d2.dispose();
+        expect(d2.element).not.toBeUndefined();
+    });
+
+
+    it('测试DisposeWorksRecursively', function testDisposeWorksRecursively() {
+        new RecursiveDisposable().dispose();
+    });
+
+
+    it('测试静态dispose方法', function testStaticDispose() {
+        expect(d1.isDisposed()).toBe(false);
+        util.dispose(d1);
+        expect(d1.isDisposed()).toBe(true);
+
+        expect(d2.isDisposed()).toBe(false);
+        util.dispose(d2);
+        expect(d2.isDisposed()).toBe(true);
+
+        var duck = new DisposableDuck();
+        expect(duck.element).not.toBeUndefined();
+        util.dispose(duck);
+        expect(duck.element).toBeUndefined();
+    });
+
+
+    it('测试一些不能被析构的对象', function testStaticDisposeOnNonDisposableType() {
+        // Call util.dispose() with various types and make sure no errors are
+        // thrown.
+        function f() {
+            util.dispose(true);
+            util.dispose(false);
+            util.dispose(null);
+            util.dispose(undefined);
+            util.dispose('');
+            util.dispose([]);
+            util.dispose({});
+
+            function A() {
+            }
+
+            util.dispose(new A());
+        }
+
+        expect(f).not.toThrow();
+    });
+
+
+    it('测试registerDisposable方法', function testRegisterDisposable() {
+        var d1 = new DisposableTest();
+        var d2 = new DisposableTest();
+
+        d1.registerDisposable(d2);
+        d1.dispose();
+
+        expect(d2.isDisposed()).toBe(true);
+    });
+
+
+    it('测试OnDisposeCallback', function testOnDisposeCallback() {
+        var foo = {
+            cb: function() {}
+        };
+
+        spyOn(foo, 'cb').and.callThrough();
+
+        d1.addOnDisposeCallback(foo.cb);
+
+        expect(foo.cb.calls.count()).toEqual(0);
+
+        d1.dispose();
+
+        expect(foo.cb.calls.count()).toEqual(1);
+    });
+
+
+    it('测试DisposeCallbackOrder', function testOnDisposeCallbackOrder() {
+        var invocations = [];
+        var callback = function(str) {
+            invocations.push(str);
+        };
+        d1.addOnDisposeCallback(util.partial(callback, 'a'));
+        d1.addOnDisposeCallback(util.partial(callback, 'b'));
+        util.dispose(d1);
+
+
+        expect(invocations).toEqualArray(['a', 'b']);
+    });
+
+
+});
+</script>
+</body>
+</html>
