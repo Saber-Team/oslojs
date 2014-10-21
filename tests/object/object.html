@@ -1,0 +1,95 @@
+<!--
+	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.Disposable</title>
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/object/object.js"></script>
+</head>
+<body>
+<script>
+
+describe('Sogou.Object模块', function() {
+
+    var global = window;
+    var util = Sogou.Util;
+    var object = Sogou.Object;
+
+    function stringifyObject(m) {
+        var keys = object.getKeys(m);
+        var s = '';
+        for (var i = 0; i < keys.length; i++) {
+            s += keys[i] + object.get(m, keys[i]);
+        }
+        return s;
+    }
+
+    function getObject() {
+        return {
+            a: 0,
+            b: 1,
+            c: 2,
+            d: 3
+        };
+    }
+
+
+    // Test methods.
+
+    it('测试keys', function testKeys() {
+
+        var m = getObject();
+        expect(object.getKeys(m).join(',')).toBe('a,b,c,d');
+
+    });
+
+
+    it('测试values', function testValues() {
+
+        var m = getObject();
+        expect(object.getValues(m).join(',')).toBe('0,1,2,3');
+
+    });
+
+
+    it('测试ContainsKey', function testContainsKey() {
+
+        var m = getObject();
+        expect(object.containsKey(m, 'a')).toBe(true);
+        expect(object.containsKey(m, 'e')).toBe(false);
+
+    });
+
+
+    it('测试ContainsValue', function testContainsValue() {
+
+        var m = getObject();
+
+        expect(object.containsValue(m, 0)).toBe(true);
+        expect(object.containsValue(m, 4)).toBe(false);
+        expect(object.isEmpty(m)).not.toBe(true);
+
+    });
+
+
+});
+
+</script>
+</body>
+</html>
