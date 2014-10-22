@@ -35,7 +35,7 @@ describe('Sogou.Object模块', function() {
         var keys = object.getKeys(m);
         var s = '';
         for (var i = 0; i < keys.length; i++) {
-            s += keys[i] + object.get(m, keys[i]);
+            s += keys[i] + m[keys[i]];
         }
         return s;
     }
@@ -87,6 +87,203 @@ describe('Sogou.Object模块', function() {
 
     });
 
+
+    it('测试forEach', function testForEach() {
+        var m = getObject();
+        var s = '';
+        object.forEach(m, function(val, key, m2) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m2);
+            s += key + val;
+        });
+        expect(s).toBe('a0b1c2d3');
+    });
+
+
+    it('测试filter', function testFilter() {
+        var m = getObject();
+
+        var m2 = object.filter(m, function (val, key, m3) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m3);
+            return val > 1;
+        });
+        expect(stringifyObject(m2)).toBe('c2d3');
+    });
+
+
+    it('测试map', function testMap() {
+        var m = getObject();
+        var m2 = object.map(m, function (val, key, m3) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m3);
+            return val * val;
+        });
+        expect(stringifyObject(m2)).toBe('a0b1c4d9');
+    });
+
+
+    it('测试some', function testSome() {
+        var m = getObject();
+        var b = object.some(m, function (val, key, m2) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m2);
+            return val > 1;
+        });
+
+        expect(b).toBe(true);
+
+        var b = object.some(m, function (val, key, m2) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m2);
+            return val > 100;
+        });
+
+        expect(b).toBe(false);
+    });
+
+
+    it('测试every', function testEvery() {
+        var m = getObject();
+        var b = object.every(m, function (val, key, m2) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m2);
+            return val >= 0;
+        });
+
+        expect(b).toBe(true);
+
+        b = object.every(m, function (val, key, m2) {
+            expect(key).not.toBeUndefined();
+            expect(m).toEqual(m2);
+            return val > 1;
+        });
+
+        expect(b).toBe(false);
+
+    });
+
+
+    it('测试extend', function testExtend() {
+        var o = {};
+        var o2 = {
+            a: 0,
+            b: 1
+        };
+        object.extend(o, o2);
+
+        expect(o.a).toBe(0);
+        expect(o.b).toBe(1);
+
+        expect('a' in o).toBe(true);
+        expect('b' in o).toBe(true);
+
+        o2 = {c: 2};
+        object.extend(o, o2);
+        expect(o.c).toBe(2);
+        expect('c' in o).toBe(true);
+
+        o2 = {c: 3};
+        object.extend(o, o2);
+        expect(o.c).toBe(3);
+        expect('c' in o).toBe(true);
+
+
+        o = {};
+        o2 = {
+            a: 0,
+            b: 1
+        };
+        var o3 = {
+            c: 2,
+            d: 3
+        };
+
+        object.extend(o, o2, o3);
+
+        expect(o.a).toBe(0);
+        expect(o.b).toBe(1);
+        expect(o.c).toBe(2);
+        expect(o.d).toBe(3);
+
+        expect('a' in o).toBe(true);
+        expect('b' in o).toBe(true);
+        expect('c' in o).toBe(true);
+        expect('d' in o).toBe(true);
+
+        o = {};
+        o2 = {
+            'constructor': 0,
+            'hasOwnProperty': 1,
+            'isPrototypeOf': 2,
+            'propertyIsEnumerable': 3,
+            'toLocaleString': 4,
+            'toString': 5,
+            'valueOf': 6
+        };
+        object.extend(o, o2);
+
+        expect(o['constructor']).toBe(0);
+        expect(o['hasOwnProperty']).toBe(1);
+        expect(o['isPrototypeOf']).toBe(2);
+        expect(o['propertyIsEnumerable']).toBe(3);
+        expect(o['toLocaleString']).toBe(4);
+        expect(o['toString']).toBe(5);
+        expect(o['valueOf']).toBe(6);
+
+        expect('constructor' in o).toBe(true);
+        expect('hasOwnProperty' in o).toBe(true);
+        expect('isPrototypeOf' in o).toBe(true);
+        expect('propertyIsEnumerable' in o).toBe(true);
+        expect('toLocaleString' in o).toBe(true);
+        expect('toString' in o).toBe(true);
+        expect('valueOf' in o).toBe(true);
+
+    });
+
+
+    it('测试ImmutableView', function testImmutableView() {
+        if (!Object.isFrozen)
+            return;
+
+        var x = {propA: 3};
+        var y = object.createImmutableView(x);
+
+        x.propA = 4;
+        x.propB = 6;
+        y.propA = 5;
+        y.propB = 7;
+
+        expect(x.propA).toBe(4);
+        expect(x.propB).toBe(6);
+        expect(object.isImmutableView(x)).toBe(false);
+
+        expect(y.propA).toBe(4);
+        expect(y.propB).toBe(6);
+        expect(object.isImmutableView(y)).toBe(true);
+
+        expect(x == y).toBe(false);
+        expect(y == object.createImmutableView(y)).toBe(true);
+    });
+
+
+    it('测试ImmutableViewStrict', function testImmutableViewStrict() {
+        'use strict';
+
+        if (!Object.isFrozen)
+            return;
+
+        var x = {propA: 3};
+        var y = object.createImmutableView(x);
+
+        expect(function() {
+            y.propA = 4;
+        }).toThrow();
+
+        expect(function() {
+            y.propB = 4;
+        }).toThrow();
+    });
 
 });
 
