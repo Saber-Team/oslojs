@@ -1,4 +1,6 @@
 *.pyc
 *.java
+*.javac
+*.rb
 .idea/
 .DS_Store
