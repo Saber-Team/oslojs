@@ -22,12 +22,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
 
 
-    // 执行lib的代码检查
+    // 代码检查
     grunt.registerTask('hint', function() {
         grunt.task.run(['jshint']);
     });
 
-    // 执行lib的代码压缩
+    // 代码压缩
     grunt.registerTask('jsmin', function() {
         grunt.task.run(['uglify']);
     });

@@ -1,5 +1,2 @@
-/** 
- * Sogou JavaScript Library 
- * 2014-10-19 build 
- */
+/** Sogou JavaScript Framework.  2014-10-25 build */
 define("Sogou.Events.MouseWheelEvent",["Sogou.Util","Sogou.Events.BrowserEvent","Sogou.Events.MouseWheelEventType"],function(a,b,c){"use strict";var d=function(a,d,e,f){b.call(this,d),this.type=c.MOUSEWHEEL,this.detail=a,this.deltaX=e,this.deltaY=f};return a.inherits(d,b),d});

@@ -1,5 +1,2 @@
-/** 
- * Sogou JavaScript Library 
- * 2014-10-19 build 
- */
+/** Sogou JavaScript Framework.  2014-10-25 build */
 define("Sogou.FX.FadeIn",["Sogou.Util","Sogou.FX.Fade"],function(a,b){"use strict";var c=function(a,c,d){b.call(this,a,0,1,c,d)};return a.inherits(c,b),c});
