@@ -5,8 +5,6 @@
 // see here: https://github.com/gruntjs/grunt-contrib-uglify/issues/143
 // 在这里提了issue
 
-var grunt = require('grunt');
-
 module.exports = {
    
     build: {
@@ -25,7 +23,7 @@ module.exports = {
     },
   
     options: {
-        banner: '/** \n * Sogou JavaScript Library \n * <%= grunt.template.today("yyyy-mm-dd") %> build \n */\n',
+        banner: '/** \n * Sogou JavaScript Framework \n * <%= grunt.template.today("yyyy-mm-dd") %> build \n */\n',
         report: 'none',     // 输出gzip后的文件体积
         beautify: false,  // 不需要格式化良好的压缩代码 默认false
         compress: {
