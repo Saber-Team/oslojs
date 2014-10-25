@@ -1,4 +1,3 @@
-var grunt = require('grunt');
 
 module.exports = {
     build: {
@@ -25,7 +24,7 @@ module.exports = {
         quotmark: 'single',     // 字符串全部单引号
         undef: true,            // 不能使用未定义的变量
         unused: 'vars',         // 检查定义但未被使用的变量, 不包括形参
-        strict: true,           // ES5的严格模式
+        strict: false,          // ES5的严格模式 (对于debug的相关模块这里不做强制要求)
         maxparams: false,       // 不限制形参数量
         maxdepth: false,        // 不限制代码块内嵌层次
         maxstatements: 200,     // 每个函数语句数目最大不超过200
