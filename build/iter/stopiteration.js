@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-25 build */
+/** Sogou JavaScript Framework.  2014-10-27 build */
 define("Sogou.Iter.StopIteration",["Sogou.Util"],function(a){"use strict";var b;return b="StopIteration"in a.global?a.global.StopIteration:Error("StopIteration"),b});

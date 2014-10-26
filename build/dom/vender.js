@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-25 build */
+/** Sogou JavaScript Framework.  2014-10-27 build */
 define("Sogou.Dom.Vender",["Sogou.UA.Util"],function(a){"use strict";return{getVendorJsPrefix:function(){return a.isWEBKIT?"Webkit":a.isGECKO?"Moz":a.isIE?"ms":a.isOPERA?"O":null},getVendorPrefix:function(){return a.isWEBKIT?"-webkit":a.isGECKO?"-moz":a.isIE?"-ms":a.isOPERA?"-o":null}}});

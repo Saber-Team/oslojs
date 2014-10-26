@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-25 build */
+/** Sogou JavaScript Framework.  2014-10-27 build */
 define("Sogou.Debug.Error",["Sogou.Util"],function(a){"use strict";var b=function(a){Error.captureStackTrace?Error.captureStackTrace(this,b):this.stack=(new Error).stack||"",a&&(this.message=String(a))};return a.inherits(b,Error),b.prototype.name="CustomError",b});

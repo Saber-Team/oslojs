@@ -70,21 +70,21 @@ define('Sogou.FX.Dragger',
          * 拖拽的目标元素.
          * @type {Element}
          */
-        Dragger.prototype.target;
+        Dragger.prototype.target = null;
 
 
         /**
          * 拖拽的部分.
          * @type {Element}
          */
-        Dragger.prototype.handle;
+        Dragger.prototype.handle = null;
 
 
         /**
          * 拖拽的限制范围.
          * @type {Rect}
          */
-        Dragger.prototype.limits;
+        Dragger.prototype.limits = null;
 
 
         /**
@@ -92,7 +92,7 @@ define('Sogou.FX.Dragger',
          * @type {boolean|undefined}
          * @private
          */
-        Dragger.prototype.rightToLeft_;
+        Dragger.prototype.rightToLeft_ = null;
 
 
         /**
@@ -142,7 +142,7 @@ define('Sogou.FX.Dragger',
          * 当前页面的滚动距离.
          * @type {Coordinate}
          */
-        Dragger.prototype.pageScroll;
+        Dragger.prototype.pageScroll = null;
 
 
         /**
@@ -182,7 +182,7 @@ define('Sogou.FX.Dragger',
          * @type {Document}
          * @private
          */
-        Dragger.prototype.document_;
+        Dragger.prototype.document_ = null;
 
 
         /**
@@ -191,7 +191,7 @@ define('Sogou.FX.Dragger',
          * @type {EventTarget}
          * @private
          */
-        Dragger.prototype.scrollTarget_;
+        Dragger.prototype.scrollTarget_ = null;
 
 
         /**
@@ -449,8 +449,7 @@ define('Sogou.FX.Dragger',
 
                 var x = this.limitX(this.deltaX);
                 var y = this.limitY(this.deltaY);
-                var dragCanceled = opt_dragCanceled ||
-                    e.type == EventType.TOUCHCANCEL;
+                var dragCanceled = opt_dragCanceled || e.type === EventType.TOUCHCANCEL;
                 this.dispatchEvent(new DragEvent(
                     DraggerEventType.END, this, e.clientX, e.clientY, e, x, y,
                     dragCanceled));
@@ -605,8 +604,8 @@ define('Sogou.FX.Dragger',
             var rect = this.limits;
             var left = !isNaN(rect.left) ? rect.left : null;
             var width = !isNaN(rect.width) ? rect.width : 0;
-            var maxX = left != null ? left + width : Infinity;
-            var minX = left != null ? left : -Infinity;
+            var maxX = (left !== null ? left + width : Infinity);
+            var minX = (left !== null ? left : -Infinity);
             return Math.min(maxX, Math.max(minX, x));
         };
 
@@ -621,8 +620,8 @@ define('Sogou.FX.Dragger',
             var rect = this.limits;
             var top = !isNaN(rect.top) ? rect.top : null;
             var height = !isNaN(rect.height) ? rect.height : 0;
-            var maxY = top != null ? top + height : Infinity;
-            var minY = top != null ? top : -Infinity;
+            var maxY = (top !== null ? top + height : Infinity);
+            var minY = (top !== null ? top : -Infinity);
             return Math.min(maxY, Math.max(minY, y));
         };
 
