@@ -1,0 +1,87 @@
+<!--
+	Copyright 2014 The SogouJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!-- 这个文件是classes.html的一个副本, 唯一不同是没有doctype. 改变的话需要同步另一个.
+-->
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.Dom.Class</title>
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arraySameElements.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/debug/error.js"></script>
+    <script src="../../src/string/util.js"></script>
+    <script src="../../src/asserts/asserts.js"></script>
+    <script src="../../src/array/array.js"></script>
+    <script src="../../src/ua/util.js"></script>
+
+    <!--<script src="../../src/dom/nodetype.js"></script>-->
+    <script src="../../src/dom/browserfeature.js"></script>
+    <script src="../../src/dom/tagname.js"></script>
+    <script src="../../src/dom/classes.js"></script>
+
+    <script src="../../src/math/util.js"></script>
+    <script src="../../src/math/size.js"></script>
+    <script src="../../src/math/coordinate.js"></script>
+
+    <script src="../../src/object/object.js"></script>
+    <script src="../../src/dom/dom.js"></script>
+
+    <style type="text/css">
+        #styleTest1 {
+            width: 120px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="testEl">
+        <span>Test Element</span>
+    </div>
+
+    <div><div><div id="testEl2"></div></div></div>
+
+    <span id="span1" class="TEST1"></span>
+    <span id="span2" class="TEST1"></span>
+    <span id="span3" class="TEST2"></span>
+    <span id="span4" class="TEST3"></span>
+    <span id="span5" class="TEST1"></span>
+    <span id="span6"></span>
+
+    <p id="p1"></p>
+
+    <div id="styleTest1"></div>
+    <div id="styleTest2" style="width:100px;font-weight:bold"></div>
+    <div id="styleTest3"></div>
+
+    <!-- Paragraph to test element child and sibling -->
+    <p id="p2">
+        <!-- Comment -->
+        a
+        <b id="b1">c</b>
+        d
+        <!-- Comment -->
+        e
+        <b id="b2">f</b>
+        g
+        <!-- Comment -->
+    </p>
+    <p id="p3" class="SOMECLASS OTHERCLASS">
+        h
+    </p>
+    <iframe name="frame" src="../math/math.html"></iframe>
+
+    <script src="classes.js"></script>
+</body>
+</html>
