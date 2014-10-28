@@ -39,7 +39,7 @@
     </p>
 
     <h2>Sogou.Timer</h2>
-    A timer can be set up to call a timeout function on every 'tick' of the timer.
+    timer对象在被启用后可以在每次一定时间间隔后触发函数, 它监听的是'tick'事件.
     <p>
         Timer interval (seconds):
         <input size="2" type="text" id="timerSeconds" value="1">
@@ -51,17 +51,15 @@
     </p>
 
     <h2>Sogou.Timer.callOnce</h2>
-    Timer also has a useful utility function that can call an action after some
-    timeout.
+    Timer模块有一个很有用的方法在指定时间后触发动作.
     <br />
-    This a shortcut/replacement for window.setTimeout, and has a
-    corresponding goog.Timer.clear as well, which stops the action.
+    这个方法是window.setTimeout的一个包装, 对应的还有个clear方法.
     <p>
         Timeout (seconds): <input size="2" type="text" id="doOnceSeconds" value="2">
         <button onclick="doOnce()">Go</button>
         <button onclick="doOnceClear()">Clear</button>
         <br />
-        Do Once Status: <span class="userStatus" id="doOnceStatus"></span>
+        Call Once Status: <span class="userStatus" id="doOnceStatus"></span>
     </p>
 
     <script type="text/javascript" src="../../src/require.js"></script>
