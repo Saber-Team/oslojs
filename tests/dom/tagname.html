@@ -1,0 +1,50 @@
+<!--
+	Copyright 2014 The SogouJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SogouJS单元测试集 - Sogou.Dom.TagName</title>
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/object/object.js"></script>
+    <script src="../../src/dom/tagname.js"></script>
+</head>
+<body>
+
+    <script>
+
+        describe('Sogou.Dom.TagName模块', function() {
+
+            var global = window;
+            var util = Sogou.Util;
+            var object = Sogou.Object;
+            var TagName = Sogou.Dom.TagName;
+
+            it('测试标签数目', function testCorrectNumberOfTagNames() {
+                expect(object.getKeys(TagName).length).toBe(125);
+            });
+
+            it('测试键值对相等', function testPropertyNamesEqualValues() {
+                for (var propertyName in TagName) {
+                    expect(TagName[propertyName]).toEqual(propertyName);
+                }
+            });
+
+        });
+
+    </script>
+</body>
+</html>
