@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-27 build */
+/** Sogou JavaScript Framework.  2014-10-29 build */
 define("Sogou.Net.EventType",[],function(){"use strict";return{COMPLETE:"complete",SUCCESS:"success",ERROR:"error",ABORT:"abort",READY:"ready",READY_STATE_CHANGE:"readystatechange",TIMEOUT:"timeout",INCREMENTAL_DATA:"incrementaldata",PROGRESS:"progress"}});
