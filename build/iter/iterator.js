@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-29 build */
+/** Sogou JavaScript Framework.  2014-10-31 build */
 define("Sogou.Iter.Iterator",["Sogou.Iter.StopIteration"],function(a){"use strict";var b=function(){};return b.prototype.next=function(){throw a},b.prototype.__iterator__=function(){return this},b});
