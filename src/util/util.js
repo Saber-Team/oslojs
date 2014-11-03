@@ -161,6 +161,10 @@ define('Sogou.Util', [], function() {
         bind: function(fn, selfObj, var_args) {
             return bindFn.apply(null, arguments);
         },
+        // 这个属性在一些模块中有特殊用处, 会利用debug模块的调试信息.
+        // 但我本意在产品形态中用更简单的util模块代替此模块, 那时debug
+        // 会设置成为false.
+        DEBUG: true,
         partial: partial,
         /**
          * 简单的对象混入, 更多问题参考Object.extend方法.
