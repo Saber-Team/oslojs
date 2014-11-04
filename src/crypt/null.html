@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        textarea {
+            width: 300px;
+            height: 600px;
+        }
+    </style>
+    <script src="../require.js"></script>
+    <script src="md5.js"></script>
+</head>
+<body>
+<script>
+    function compress() {
+        var md5 = new Oslo.Crypt.Md5();
+        var content = document.getElementById("content").value;
+        md5.update(content);
+        var hash = md5.digest();
+        document.getElementById("result").value = hash;
+        hash = hash.map(function(c) {
+            return Number(c).toString(16);
+        });
+        document.getElementById("hash").value = hash.join("");
+    }
+
+</script>
+    <textarea id="content"></textarea>
+    <button onclick="compress();">compress</button>
+    <textarea id="result"></textarea>
+<textarea id="hash"></textarea>
+</body>
+</html>
