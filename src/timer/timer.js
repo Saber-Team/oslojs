@@ -1,15 +1,15 @@
 /**
  * @fileoverview 提供了一个定时器的类,其他类或对象可对监听tick事件.
- *     其实就是Interval的一个封装类. 全局代码完全木有用到setInterval.
- *     这个文件很重要虽然只有区区300行, 但是在动画的实现, hashchange
- *     和async等等实现上都起到重要作用。
- * @modified Leo.Zhang
+ * 其实就是Interval的一个封装类. 全局代码完全木有用到setInterval.
+ * 这个文件很重要虽然只有区区300行, 但是在动画的实现, hashchange
+ * 和async等等实现上都起到重要作用。
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/timers.html
+ * @see ../../demos/timers.html
  */
 
-define('Sogou.Timer',
-    ['Sogou.Util', 'Sogou.Events.EventTarget'],
+define('@timer',
+    ['@util', '@events.eventtarget'],
     function(util, EventTarget) {
 
         'use strict';

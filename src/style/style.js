@@ -1,24 +1,24 @@
 /**
  * @fileoverview 关于dom元素样式的操作,这个模块太多兼容性的处理,了解就好
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/style/inline_block_quirks.html
  * @see ../../demos/style/inline_block_standards.html
  * @see ../../demos/style/style_viewport.html
  */
 
-define('Sogou.Style.Util',
+define('@style.util',
     [
-        'Sogou.Util',
-        'Sogou.Array',
-        'Sogou.Dom.Util',
-        'Sogou.Dom.NodeType',
-        'Sogou.Dom.Vender',
-        'Sogou.Math.Coordinate',
-        'Sogou.Math.Size',
-        'Sogou.Object',
-        'Sogou.String.Util',
-        'Sogou.UA.Util'
+        '@Util',
+        '@array',
+        '@dom.util',
+        '@dom.nodetype',
+        '@dom.vender',
+        '@math.coordinate',
+        '@math.size',
+        '@object',
+        '@string.util',
+        '@ua.util'
     ],
     function(util, array, dom, NodeType, vender, Coordinate, Size, object, string, ua) {
 

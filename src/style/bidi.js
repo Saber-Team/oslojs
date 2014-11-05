@@ -1,16 +1,16 @@
 /**
  * @fileoverview Bidi模块. 这个模块是style模块的补充,主要考虑了rtl渲染模式下元素的
- *     诸多定位和滚动的问题.
- * @modified Leo.Zhang
+ * 诸多定位和滚动的问题.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Style.Bidi',
+define('@style.bidi',
     [
-        'Sogou.Util',
-        'Sogou.Dom.Util',
-        'Sogou.Style.Util',
-        'Sogou.UA.Util'
+        '@util',
+        '@dom.util',
+        '@style.util',
+        '@ua.util'
     ],
     function(util, dom, style, ua) {
 

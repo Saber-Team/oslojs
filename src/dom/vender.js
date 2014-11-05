@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@dom.Vender', ['@ua.util'], function(ua) {
+define('@dom.vender', ['@ua.util'], function(ua) {
 
     'use strict';
 
