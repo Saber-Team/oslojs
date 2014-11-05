@@ -1,5 +1,5 @@
 <!--
-	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
 	Use of this source code is governed by the Apache License, Version 2.0.
 	See the COPYING file for details.
 -->
@@ -8,13 +8,19 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>SogouJS单元测试集 - Sogou.*</title>
+	<title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../lib/json2.js"></script>
+    <script type="text/javascript" src="../lib/jQuery/jq1.11.1.js"></script>
+
 	<link rel="shortcut icon" type="image/png" href="../lib/jasmine-2.0.3/jasmine_favicon.png">
 	<link rel="stylesheet" type="text/css" href="../lib/jasmine-2.0.3/jasmine.css">
-
 	<script type="text/javascript" src="../lib/jasmine-2.0.3/jasmine.js"></script>
 	<script type="text/javascript" src="../lib/jasmine-2.0.3/jasmine-html.js"></script>
 	<script type="text/javascript" src="../lib/jasmine-2.0.3/boot.js"></script>
+
+    <script type="text/javascript" src="../lib/sinon/sinon.js"></script>
 
 	<!-- include source files here... -->
 	<script src="../src/require.js"></script>
@@ -23,7 +29,7 @@
 	<!-- include spec files here... -->
 	<script>
 
-        describe('Sogou全局对象', function() {
+        describe('Oslo全局对象', function() {
 
             var global = window;
 
@@ -33,21 +39,46 @@
             });
 
 
-            it('提供两个全局方法', function() {
+            it('提供两个全局方法和一个全局对象', function() {
                 expect(global.define).toEqual(define);
                 expect(global.require).toEqual(require);
                 expect(typeof define).toBe('function');
                 expect(typeof require).toBe('function');
+
+                expect(global.Oslo).toEqual(Oslo);
+                expect(typeof global.Oslo).toBe('object');
+
+                expect(global.Oslo.authors).toBeDefined();
+                expect(global.Oslo.version).toBeDefined();
             });
 
 
-            it('无模块加载器时,通过define声明空间', function() {
+            it('无模块加载器时,通过define声明模块对象', function() {
 
-                define('A.B', [], function() {});
+                var exports = {};
 
-                expect(A.B).toBeTruthy();
+                define('A.B', [], function() {
+                    return 1;
+                });
+                expect(A.B).toBeDefined();
                 expect(A.B).toBe(global.A.B);
+                expect(A.B).toBe(1);
+
+
+                define('@A', [], exports);
+                expect(Oslo.A).toBeDefined();
+                expect(Oslo.A).toBe(global.Oslo.A);
+                expect(Oslo.A).toBe(exports);
+
+                define('@a.b', [], function() {
+                    return 2;
+                });
+                expect(Oslo.a.b).toBeDefined();
+                expect(Oslo.a.b).toBe(global.Oslo.a.b);
+                expect(Oslo.a.b).toBe(2);
+
             });
+
 
             it('通过require引入依赖', function() {
 
@@ -56,13 +87,19 @@
                     expect(A.B).toEqual(b);
                     expect(A.B).toBe(global.A.B);
                 });
+
+                define('@A.B', [], function() {});
+                require('@A.B', function(b) {
+                    expect(Oslo.A.B).toBe(global.Oslo.A.B);
+                    expect(global.Oslo.A.B).toEqual(b);
+                });
             });
 
 
             it('依赖模块不存在时抛出异常', function() {
 
                 var f = function() {
-                    define('T',['A'],function(a) {});
+                    define('T', ['A'], {});
                 };
 
                 expect(f).toThrow();
@@ -77,12 +114,10 @@
                     }
                 };
 
-                define('A',['A.B'],
+                define('A', ['A.B'],
                     function(a) {
-
                         expect(a).toBe(A.B);
                         expect(a).toBe(global.A.B);
-
                     });
 
             });
