@@ -1,7 +1,7 @@
 /**
  * @fileoverview 操作数组的一些基本方法.我本意不要涉及字符串的操作,虽然很多方法类似,
  * 但是参数的类型和返回值的类型不注意很容易出错,对于弱类型语言应警惕.关于String的操作可以
- * 按需加载Sogou.String包下的模块进行处理。
+ * 按需加载Oslo.string包下的模块进行处理。
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -237,7 +237,7 @@ define('@array', ['@util'], function(util) {
      * See {@link http://tinyurl.com/developer-mozilla-org-array-reduce}
      * 用法:
      * var a = [1, 2, 3, 4];
-     * Sogou.Array.reduce(a, function(r, v, i, arr) {
+     * Oslo.array.reduce(a, function(r, v, i, arr) {
          *   return r + v;
          * }, 0);
      * returns 10
@@ -272,7 +272,7 @@ define('@array', ['@util'], function(util) {
      * See {@link http://tinyurl.com/developer-mozilla-org-array-reduceright}
      * 用法:
      * var a = ['a', 'b', 'c'];
-     * Sogou.Array.reduceRight(a, function(r, v, i, arr) {
+     * Oslo.array.reduceRight(a, function(r, v, i, arr) {
      *     return r + v;
      * }, '');
      * returns 'cba'
