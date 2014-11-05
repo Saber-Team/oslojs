@@ -18,12 +18,14 @@
  *         l (lightness) [0, 1]之间的整数.
  *         @typedef {Array.<number>}
  *
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Color',
-    ['Sogou.Color.Names'],
+define('@colors',
+    [
+        '@color.names'
+    ],
     function(names) {
 
         'use strict';
