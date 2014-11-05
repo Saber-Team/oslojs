@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-11-06 build */
+/** Oslo JavaScript Framework. */
 define("Sogou.History.Event",["Sogou.Util","Sogou.Events.EventBase","Sogou.History.EventType"],function(a,b,c){"use strict";function d(a,d){b.call(this,c.NAVIGATE),this.token=a,this.isNavigation=d}return a.inherits(d,b),d});

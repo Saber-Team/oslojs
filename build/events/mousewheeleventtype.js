@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-11-06 build */
+/** Oslo JavaScript Framework. */
 define("Sogou.Events.MouseWheelEventType",[],function(){"use strict";return{MOUSEWHEEL:"mousewheel"}});

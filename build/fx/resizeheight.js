@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-11-06 build */
+/** Oslo JavaScript Framework. */
 define("Sogou.FX.ResizeHeight",["Sogou.Util","Sogou.FX.EffectBase"],function(a,b){"use strict";var c=function(a,c,d,e,f){b.call(this,a,[c],[d],e,f)};return a.inherits(c,b),c.prototype.updateStyle=function(){this.element.style.height=Math.round(this.coords[0])+"px"},c});

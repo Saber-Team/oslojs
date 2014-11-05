@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-11-06 build */
+/** Oslo JavaScript Framework. */
 define("Sogou.Net.EventType",[],function(){"use strict";return{COMPLETE:"complete",SUCCESS:"success",ERROR:"error",ABORT:"abort",READY:"ready",READY_STATE_CHANGE:"readystatechange",TIMEOUT:"timeout",INCREMENTAL_DATA:"incrementaldata",PROGRESS:"progress"}});

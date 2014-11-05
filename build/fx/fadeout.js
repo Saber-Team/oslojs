@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-11-06 build */
+/** Oslo JavaScript Framework. */
 define("Sogou.FX.FadeOut",["Sogou.Util","Sogou.FX.Fade"],function(a,b){"use strict";var c=function(a,c,d){b.call(this,a,1,0,c,d)};return a.inherits(c,b),c});
