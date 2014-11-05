@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-31 build */
+/** Sogou JavaScript Framework.  2014-11-06 build */
 define("Sogou.Events.KeyEvent",["Sogou.Util","Sogou.Events.BrowserEvent","Sogou.Events.KeyEventType"],function(a,b,c){"use strict";var d=function(a,d,e,f){b.call(this,f),this.type=c.KEY,this.keyCode=a,this.charCode=d,this.repeat=e};return a.inherits(d,b),d});

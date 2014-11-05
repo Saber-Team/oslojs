@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-31 build */
+/** Sogou JavaScript Framework.  2014-11-06 build */
 define("Sogou.FX.DraggerEventType",[],function(){"use strict";return{EARLY_CANCEL:"earlycancel",START:"start",BEFOREDRAG:"beforedrag",DRAG:"drag",END:"end"}});

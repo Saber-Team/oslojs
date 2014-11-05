@@ -1,2 +1,2 @@
-/** Sogou JavaScript Framework.  2014-10-31 build */
+/** Sogou JavaScript Framework.  2014-11-06 build */
 define("Sogou.FX.EventType",[],function(){"use strict";return{PLAY:"play",BEGIN:"begin",RESUME:"resume",END:"end",STOP:"stop",FINISH:"finish",PAUSE:"pause",ANIMATE:"animate",DESTROY:"destroy"}});
