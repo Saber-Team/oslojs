@@ -23,7 +23,7 @@ module.exports = {
     },
   
     options: {
-        banner: '/** Sogou JavaScript Framework.  <%= grunt.template.today("yyyy-mm-dd") %> build */\n',
+        banner: '/** Oslo JavaScript Framework. */\n',
         report: 'none',     // 输出gzip后的文件体积
         beautify: false,  // 不需要格式化良好的压缩代码 默认false
         compress: {

@@ -1,16 +1,16 @@
 /**
- * @fileoverview 此类用于以下情形: 函数必须在指定的事件后被执行, 且间隔执行多次。
- *     比如显示tooltip, menu的时候会做个延时。
- * @modified Leo.Zhang
+ * @fileoverview 此类用于以下情形: 函数必须在指定的事件后被执行, 且间隔执行多次.
+ * 比如显示tooltip, menu的时候会做个延时.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/timers.html
+ * @see ../../demos/timers.html
  */
 
-define('Sogou.Async.Delay',
+define('@async.delay',
     [
-        'Sogou.Util',
-        'Sogou.Disposable',
-        'Sogou.Timer'
+        '@util',
+        '@disposable',
+        '@timer'
     ],
     function(util, Disposable, Timer) {
 
@@ -51,7 +51,9 @@ define('Sogou.Async.Delay',
              */
             this.callback_ = util.bind(this.doAction_, this);
         };
+
         util.inherits(Delay, Disposable);
+
 
         /**
          * timeout返回的id, or 0 when inactive.
@@ -59,6 +61,7 @@ define('Sogou.Async.Delay',
          * @private
          */
         Delay.prototype.id_ = 0;
+
 
         /**
          * Disposes of the object, cancelling the timeout if it is still outstanding and
@@ -73,6 +76,7 @@ define('Sogou.Async.Delay',
             delete this.context_;
         };
 
+
         /**
          * 启动延时对象。函数的初次触发会在指定的时间间隔后。
          * 在已经启动的timer上调用start方法会重置timer。
@@ -85,6 +89,7 @@ define('Sogou.Async.Delay',
                 util.isNull(opt_interval) ? this.interval_ : opt_interval);
         };
 
+
         /**
          * 停止计时器
          */
@@ -94,6 +99,7 @@ define('Sogou.Async.Delay',
             this.id_ = 0;
         };
 
+
         /**
          * 手动触发要延时的action即便timer已经注销或者还未发生. 为了保护fire方法, 首先调用stop.
          */
@@ -101,6 +107,7 @@ define('Sogou.Async.Delay',
             this.stop();
             this.doAction_();
         };
+
 
         /**
          * 只有当delay对象的timer还未被触发时才执行.Stops the delay timer.
@@ -110,12 +117,14 @@ define('Sogou.Async.Delay',
                 this.fire();
         };
 
+
         /**
          * @return {boolean} 返回当前delay对象是否未被触发.
          */
         Delay.prototype.isActive = function() {
             return this.id_ !== 0;
         };
+
 
         /**
          * 执行函数

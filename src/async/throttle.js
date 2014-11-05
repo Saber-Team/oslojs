@@ -1,12 +1,16 @@
 /**
  * @fileoverview 函数节流类
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/timers.html
  */
 
-define('Sogou.Async.Throttle',
-    ['Sogou.Util','Sogou.Disposable','Sogou.Timer'],
+define('@async.throttle',
+    [
+        '@util',
+        '@disposable',
+        '@timer'
+    ],
     function(util, Disposable, Timer) {
 
         'use strict';

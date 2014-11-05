@@ -1,15 +1,15 @@
 /**
  * @fileoverview 延时触发的动画自动触发并不依赖用户自己的设置.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Async.AnimationDelay',
+define('@async.animationdelay',
     [
-        'Sogou.Util',
-        'Sogou.Disposable',
-        'Sogou.Events.Util',
-        'Sogou.Functions'
+        '@util',
+        '@disposable',
+        '@events.util',
+        '@functions'
     ],
     function(util, Disposable, EventUtil, fns) {
 
@@ -25,9 +25,9 @@ define('Sogou.Async.AnimationDelay',
 
 
         /**
-         * 延时触发动画的类,和Sogou.Async.Delay有相同的接口.
+         * 延时触发动画的类,和Oslo.async.Delay有相同的接口.
          * 默认检测是否可用requestAnimationFrame, 不存在的话退化到
-         * Sogou.Async.AnimationDelay.TIMEOUT.
+         * Oslo.async.animationDelay.TIMEOUT.
          * 关于requestAnimationFrame详见:
          * @see http://paulirish.com/2011/requestanimationframe-for-smart-animating/
          * @param {function(number)} listener 执行的函数.传入时间戳作为参数, in unix ms.
@@ -177,7 +177,7 @@ define('Sogou.Async.AnimationDelay',
 
             // 不用requestAnimationFrame返回的时间戳是因为它可能是 Date.now-style time 或者
             // high-resolution time(根据浏览器的实现而定). 用util.now()会消除浏览器间的不同并且和
-            // Sogou.Fx.Animation兼容.
+            // Oslo.fx.animation兼容.
             this.listener_.call(this.context_, util.now());
         };
 
