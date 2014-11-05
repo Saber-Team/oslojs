@@ -15,7 +15,7 @@
 <body>
 <script>
     function compress() {
-        var md5 = new Oslo.Crypt.Md5();
+        var md5 = new Oslo.crypt.md5();
         var content = document.getElementById("content").value;
         md5.update(content);
         var hash = md5.digest();

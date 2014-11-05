@@ -14,7 +14,7 @@
  *
  */
 
-define('Oslo.Crypt.Sha1', [], function() {
+define('@crypt.sha1', [], function() {
 
    'use strict';
 

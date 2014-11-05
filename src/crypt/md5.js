@@ -21,7 +21,7 @@
  * @email zmike86@gmail.com
  */
 
-define('Oslo.Crypt.Md5', [], function() {
+define('@crypt.md5', [], function() {
 
     'use strict';
 
