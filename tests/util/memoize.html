@@ -1,0 +1,188 @@
+<!--
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/util/memoize.js"></script>
+</head>
+<body>
+
+<!-- include spec files here... -->
+<script>
+
+describe('Oslo.memo模块', function() {
+
+    var util = Oslo.util,
+        memo = Oslo.memo;
+
+    it('测试无形参情况', function testNoArgs() {
+        var called = 0;
+        var f = memo.memoize(function() {
+            called++;
+            return 10;
+        });
+
+        expect(f()).toBe(10);
+        expect(f()).toBe(10);
+        expect(f.call()).toBe(10);
+        expect(called).toBe(1);
+    });
+
+
+    it('测试可选的一个形参', function testOneOptionalArgSimple() {
+        var called = 0;
+        var f = memo.memoize(function(opt_x) {
+            called++;
+            return arguments.length == 0 ? 'no args' : opt_x;
+        });
+
+
+        expect(f()).toBe('no args');
+        expect(f()).toBe('no args');
+        expect(f(0)).toBe(0);
+        expect(f(0)).toBe(0);
+        expect(f('')).toBe('');
+        expect(f('')).toBe('');
+        expect(f('0')).toBe('0');
+        expect(f('0')).toBe('0');
+
+        expect(f(null)).toBe(null);
+        expect(f(null)).toBe(null);
+        expect(f(undefined)).toBe(undefined);
+        expect(f(undefined)).toBe(undefined);
+
+        expect(called).toBe(6);
+    });
+
+
+    it('测试原型构造函数', function testProtoFunctions() {
+        var fcalled = 0;
+        var gcalled = 0;
+        var Class = function(x) {
+            this.x = x;
+            this.f = memo.memoize(function(y) {
+                fcalled++;
+                return this.x + y;
+            });
+        };
+        Class.prototype.g = memo.memoize(function(z) {
+            gcalled++;
+            return this.x - z;
+        });
+
+        var obj1 = new Class(10);
+        var obj2 = new Class(20);
+
+        expect(obj1.f(1)).toBe(11);
+        expect(obj1.f(2)).toBe(12);
+        expect(obj1.f(2)).toBe(12);
+        expect(fcalled).toBe(2);
+
+        expect(obj1.g(1)).toBe(9);
+        expect(obj1.g(2)).toBe(8);
+        expect(obj1.g(2)).toBe(8);
+        expect(gcalled).toBe(2);
+
+        expect(obj2.f(1)).toBe(21);
+        expect(obj2.f(2)).toBe(22);
+        expect(obj2.f(2)).toBe(22);
+        expect(fcalled).toBe(4);
+
+        expect(obj2.g(1)).toBe(19);
+        expect(obj2.g(2)).toBe(18);
+        expect(obj2.g(2)).toBe(18);
+        expect(gcalled).toBe(4);
+    });
+
+
+    it('测试自定义序列化方法', function testCustomSerializer() {
+        var called = 0;
+        var serializer = function(this_context, args) {
+            return String(args[0].getTime());
+        };
+        var getYear = memo.memoize(function(date) {
+            called++;
+            return date.getFullYear();
+        }, serializer);
+
+        expect(getYear(new Date(2008, 0, 1))).toBe(2008);
+        expect(getYear(new Date(2008, 0, 1))).toBe(2008);
+        expect(called).toBe(1);
+
+        expect(getYear(new Date(2007, 0, 1))).toBe(2007);
+        expect(called).toBe(2);
+
+    });
+
+
+    it('测试清空缓存', function testClearCache() {
+        var computed = 0;
+        var identity = memo.memoize(function(x) {
+            computed++;
+            return x;
+        });
+
+        expect(identity(1)).toBe(1);
+        expect(identity(1)).toBe(1);
+        expect(identity(1)).toBe(1);
+        expect(computed).toBe(1);
+
+        memo.clearCache(util.global);
+
+        expect(identity(1)).toBe(1);
+        expect(identity(1)).toBe(1);
+        expect(computed).toBe(2);
+    });
+
+
+    it('测试关闭Memoize', function testDisableMemoize() {
+        var computed = 0;
+        var identity = memo.memoize(function(x) {
+            computed++;
+            return x;
+        });
+
+        expect(identity(1)).toBe(1);
+        expect(identity(1)).toBe(1);
+        expect(computed).toBe(1);
+
+        memo.ENABLE_MEMOIZE = false;
+
+        try {
+            expect(identity(1)).toBe(1);
+            expect(computed).toBe(2);
+        } finally {
+            memo.ENABLE_MEMOIZE = true;
+        }
+
+        expect(identity(1)).toBe(1);
+        expect(computed).toBe(2);
+    });
+
+});
+
+</script>
+</body>
+</html>

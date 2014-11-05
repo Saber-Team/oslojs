@@ -1,5 +1,5 @@
 <!--
-	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
 	Use of this source code is governed by the Apache License, Version 2.0.
 	See the COPYING file for details.
 -->
@@ -8,13 +8,19 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>SogouJS单元测试集 - Sogou.*</title>
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
     <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
     <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
-
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
 
     <!-- include source files here... -->
     <script src="../../src/require.js"></script>
@@ -33,13 +39,13 @@
     <!-- include spec files here... -->
     <script>
 
-        describe('Sogou.Util模块', function() {
+        describe('Oslo.util模块', function() {
 
             var global = window;
             var f1 = document.getElementById('f1'),
                 f2 = document.getElementById('f2');
 
-            var util = Sogou.Util;
+            var util = Oslo.util;
 
             it('测试util.global', function() {
                 expect(util.global).toBe(global);
