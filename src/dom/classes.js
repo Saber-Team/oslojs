@@ -1,16 +1,16 @@
 /**
  * @fileoverview 添加、移除、设置类名的实用函数集.
- *     更喜欢用dom.classlist因为dom.classlist更贴近语义上的Element.classList,
- *     由于使用了原生方法所以更快, 编译后的代码也更小.
- * @modified Leo.Zhang
+ * 更喜欢用dom.classlist因为dom.classlist更贴近语义上的Element.classList,
+ * 由于使用了原生方法所以更快, 编译后的代码也更小.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  *
  * Note: 这个模块主要是操作html元素也就是实现了HTMLElements接口的实例,对于实现了其他接口的元素‘
  * (SVGElements等)都无效.
  */
 
-define('Sogou.Dom.Classes',
-    ['Sogou.Util','Sogou.Array'],
+define('@dom.classes',
+    ['@util','@array'],
     function(util, array) {
 
         'use strict';

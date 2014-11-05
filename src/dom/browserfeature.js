@@ -1,11 +1,10 @@
 /**
  * @fileoverview dom模块里浏览器的兼容特性.
- * @modified leo.Zhang
+ * @author leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Dom.BrowserFeature',
-    ['Sogou.UA.Util'],
+define('@dom.browserfeature', ['@ua.util'],
     function(ua) {
 
         'use strict';

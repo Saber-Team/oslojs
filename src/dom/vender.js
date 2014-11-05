@@ -1,10 +1,10 @@
 /**
  * @fileoverview 获得浏览器厂商的前缀(Vendor prefix getters).
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Dom.Vender', ['Sogou.UA.Util'], function(ua) {
+define('@dom.Vender', ['@ua.util'], function(ua) {
 
     'use strict';
 
