@@ -3,12 +3,12 @@
  * @see <a href="http://www.useragentstring.com/">User agent strings</a>
  *     使用userAgent.product检测浏览器厂商.
  * @see ../../demos/useragent.html
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.UA.Util',
-    ['Sogou.String.Util'],
+define('@ua.util',
+    ['@string.util'],
     function(string) {
 
         'use strict';

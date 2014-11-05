@@ -1,11 +1,11 @@
 /**
  * @fileoverview Flash检测模块.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/useragent.html
  */
 
-define('Sogou.UA.Flash', ['Sogou.String.Util'], function(string) {
+define('@ua.flash', ['@string.util'], function(string) {
 
     'use strict';
 

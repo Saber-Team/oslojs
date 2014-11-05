@@ -1,11 +1,10 @@
 /**
  * @fileoverview 操作字符串的方法.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.String.Util',
-    ['Sogou.Util'],
+define('@string.util', ['@util'],
     function(util) {
 
         'use strict';
