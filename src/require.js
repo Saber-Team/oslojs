@@ -32,7 +32,7 @@
         // Parentheses added to eliminate strict JS warning in FireFox.
         for (var part; parts.length && (part = parts.shift());) {
             if (!cur[part]) {
-                throw name +'\'s ' + part + ' do not exist';
+                throw new Error(name +'\'s ' + part + ' do not exist');
             }
             cur = cur[part];
         }
@@ -123,8 +123,8 @@
                 exportPath(name, factory.apply(global, dList));
             }
             else {
-                throw 'When define a module, the export should be an object' +
-                    ' or a factory function. It is illegal for module ' + name;
+                throw new Error('When define a module, the export should be an object' +
+                    ' or a factory function. It is illegal for module ' + name);
             }
         };
         global.require = function(deps, factory) {

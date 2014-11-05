@@ -1,10 +1,10 @@
 /**
- * @fileoverview 搜狗JavaScript框架基础函数
- * @modified Leo.Zhang
+ * @fileoverview Oslo框架基础函数
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Util', [], function() {
+define('@util', [], function() {
 
     'use strict';
 
@@ -13,7 +13,8 @@ define('Sogou.Util', [], function() {
      * @type {string}
      * @private
      */
-    var UID_PROP = 'sogou_uid_' + ((Math.random() * 1e9) >>> 0);
+    var UID_PROP = 'oslo_uid_' + ((Math.random() * 1e9) >>> 0);
+
 
     /**
      * UID计数, 简单的整形递增
@@ -22,8 +23,10 @@ define('Sogou.Util', [], function() {
      */
     var uidCounter_ = 0;
 
+
     var AP = Array.prototype,
         OP = Object.prototype;
+
 
     /**
      * 原生的bind实现. fn.bind(self_obj, var_args)
@@ -38,6 +41,7 @@ define('Sogou.Util', [], function() {
         // fn.call(fn.bind, fn, selfObj, war_args)
         return /** @type {!Function} */ (fn.call.apply(fn.bind, arguments));
     }
+
 
     /**
      * 纯原生JavaScript实现的bind
@@ -64,6 +68,7 @@ define('Sogou.Util', [], function() {
         }
     }
 
+
     /**
      * 判断对象是否一个真数组.
      * @param {*} val 测试的对象.
@@ -72,6 +77,7 @@ define('Sogou.Util', [], function() {
     function isArray(val) {
         return OP.toString.call(val) === '[object Array]';
     }
+
 
     /**
      * 判断对象是否类数组. NodeList或者一个带有length属性的对象都会通过测试.
@@ -84,6 +90,7 @@ define('Sogou.Util', [], function() {
         var type = typeof val;
         return isArray(val) || type === 'object' && typeof val.length === 'number';
     }
+
 
     /**
      * 判断给定值是否一个对象. typeof对于null也会返回'object'所以要剔除.
@@ -99,6 +106,7 @@ define('Sogou.Util', [], function() {
         return type === 'object' && val !== null || type === 'function';
         // 用Object(val) === val也能达到目的但性能较慢,特别是val不是个object的时候.
     }
+
 
     /**
      * 类型功能在bind方法里也有, 这个方法不需要'this object'. 
@@ -122,26 +130,27 @@ define('Sogou.Util', [], function() {
         };
     }
 
+
     /**
      * 在脚本加载的时候判断应该使用的bind版本
      * @return {Function}
      */
     var bindFn = (function() {
         var fn;
-        // NOTE: 如果开发者在Chrome插件环境中引入了sogoujs,
-        // this means that for Chrome extensions, they get
-        // the implementation of Function.prototype.bind that calls util.bind
-        // instead of the native one. Even worse, we don't want to introduce a
-        // circular dependency between util.bind and Function.prototype.bind, so
-        // we have to hack this to make sure it works correctly.
+        // NOTE: 如果开发者在Chrome插件环境中引入了Oslo框架, 意味着插件环境中的
+        // Function.prototype.bind实现会调用util.bind而不是原生方法. 还有,我们不能
+        // 在util.bind和Function.prototype.bind之间产生循环调用, 所以我在这里做个
+        // 判断保证调用正确的代码.
         if (Function.prototype.bind &&
-            Function.prototype.bind.toString().indexOf('native code') !== -1)
+            Function.prototype.bind.toString().indexOf('native code') !== -1) {
             fn = bindNative_;
-        else
+        } else {
             fn = bindJs_;
+        }
 
         return fn;
     })();
+
 
     return {
         /**
@@ -185,13 +194,17 @@ define('Sogou.Util', [], function() {
          * @param {*} val
          * @return {boolean}
          */
-        isFunction: function(val) { return typeof val === 'function'; },
+        isFunction: function(val) {
+            return typeof val === 'function';
+        },
         /**
          * 判断是否一个数字
          * @param {*} val
          * @return {boolean}
          */
-        isNumber: function(val) { return typeof val === 'number'; },
+        isNumber: function(val) {
+            return typeof val === 'number';
+        },
         /**
          * 返回是否一个字符串. 这里调用Object.prototype.toString比较多余.
          * @param {*} val 要测试的对象.
@@ -206,7 +219,9 @@ define('Sogou.Util', [], function() {
          * @param val
          * @return {Boolean}
          */
-        isNull: function(val) { return val === (void 0) || val === null; },
+        isNull: function(val) {
+            return val === (void 0) || val === null;
+        },
         /**
          * 测试对象是否一个undefined值. 
          * Note: 如果只是比较obj === undefined不可靠. 特别是如果一个对象的属性设为undefined
@@ -224,9 +239,9 @@ define('Sogou.Util', [], function() {
          * @return {number} UID.
          */
         getUid: function(obj) {
-            if (obj === null) 
+            if (obj === null) {
                 throw new Error('Can not get uid from null');
-
+            }
             // Opera中有window.hasOwnProperty方法但永远返回false. 所以我们不用这个方法检测. 
             // As a consequence the unique ID generated for BaseClass.prototype
             // and SubClass.prototype will be the same.
@@ -237,7 +252,8 @@ define('Sogou.Util', [], function() {
          * @param {Object} obj 要移除属性的对象.
          */
         removeUid: function(obj) {
-            if (obj === null) throw new Error('Can not remove a uid from null');
+            if (obj === null)
+                throw new Error('Can not remove a uid from null');
 
             // IE中, DOM节点并非是Object的实例并且delete dom节点的属性会抛出异常.
             // 所以要用removeAttribute.
@@ -292,8 +308,7 @@ define('Sogou.Util', [], function() {
          * @return {number} 返回1970年1月1日0时至今的毫秒数.
          */
         now: Date.now || function() {
-            // Unary plus operator converts its operand to a number which in the case of
-            // a date is done by calling getTime().
+            // 相当于调用getTime().
             return +new Date();
         }
     };

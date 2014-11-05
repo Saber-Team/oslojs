@@ -1,11 +1,11 @@
 /**
  * @fileoverview 缓存执行结果的模块.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see http://en.wikipedia.org/wiki/Memoization
  */
 
-define('Sogou.Memo', ['Sogou.Util'], function(util) {
+define('@memo', ['@util'], function(util) {
 
     'use strict';
 
@@ -20,11 +20,11 @@ define('Sogou.Memo', ['Sogou.Util'], function(util) {
      * @type {string}
      * @private
      */
-    var CACHE_PROPERTY_ = 'sogou_memoize_cache_';
+    var CACHE_PROPERTY_ = 'oslo_memoize_cache_';
 
 
     /**
-     * 简单的参数序列化函数 for Sogou.Memo. 对简单类型的参数 string, number, boolean,
+     * 简单的参数序列化函数. 对简单类型的参数 string, number, boolean,
      * null 和 undefined好用. 不支持带有 \x0B 字符的字符串.
      * @param {number} functionUid function uid.
      * @param {Object} args 形参. Note: 是类数组对象.
