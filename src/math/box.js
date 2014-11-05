@@ -1,11 +1,11 @@
 /**
  * @fileoverview 盒子类.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Math.Box',
-    ['Sogou.Util', 'Sogou.Math.Coordinate'],
+define('@math.box',
+    ['@util', '@math.coordinate'],
     function(util, Coordinate) {
 
         'use strict';

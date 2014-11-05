@@ -1,10 +1,10 @@
 /**
  * @fileoverview 表示二维元素的尺寸的类.这里面很多方法同Coordinate类相同
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Math.Size', [], function() {
+define('@math.size', [], function() {
 
     'use strict';
 

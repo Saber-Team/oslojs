@@ -1,11 +1,10 @@
 /**
  * @fileoverview 一个表示二维坐标点的类.或者理解直接作为平面上的一个像素点.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Math.Coordinate',
-    ['Sogou.Util', 'Sogou.Math.Util'],
+define('@math.coordinate', ['@util', '@math.util'],
     function(util, math) {
 
     'use strict';

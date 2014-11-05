@@ -1,11 +1,10 @@
 /**
  * @fileoverview 数学相关的函数. 都在math包里
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Math.Util',
-    ['Sogou.Array'],
+define('@math.util', ['@array'],
     function(array) {
 
         'use strict';

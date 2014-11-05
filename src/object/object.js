@@ -1,10 +1,10 @@
 /**
  * @fileoverview 操作键-值对结构的方法.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Object', [], function() {
+define('@object', [], function() {
 
     'use strict';
 

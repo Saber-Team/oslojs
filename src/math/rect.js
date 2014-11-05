@@ -1,11 +1,11 @@
 /**
  * @fileoverview 二维矩形类.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Math.Rect',
-    ['Sogou.Util', 'Sogou.Math.Box', 'Sogou.Math.Coordinate', 'Sogou.Math.Size'],
+define('@math.rect',
+    ['@util', '@math.box', '@math.coordinate', '@math.size'],
     function(util, Box, Coordinate, Size) {
 
         'use strict';
