@@ -4,13 +4,13 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.eventtarget',
+define('@events.eventTarget',
     [
         '@util',
-        '@disposable',
+        '@Disposable',
         '@array',
-        '@events.eventbase',
-        '@events.listenermap',
+        '@events.eventBase',
+        '@events.listenerMap',
         '@object'
     ],
     function(util, Disposable, array, EventBase, ListenerMap, object) {

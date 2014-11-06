@@ -2,26 +2,26 @@
  * @fileoverview 拖拽动画. 提供一些拖拽,释放可扩展的功能.
  * @see ../../demos/drag.html
  * @see ../../demos/dragger.html
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.Dragger',
+define('@fx.dragger',
     [
-        'Sogou.Util',
-        'Sogou.Dom.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.EventBase',
-        'Sogou.Events.HandlerManager',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.EventType',
-        'Sogou.Math.Coordinate',
-        'Sogou.Math.Rect',
-        'Sogou.Style.Util',
-        'Sogou.Style.Bidi',
-        'Sogou.UA.Util',
-        'Sogou.FX.DraggerEventType',
-        'Sogou.FX.DragEvent'
+        '@util',
+        '@dom.util',
+        '@events.util',
+        '@events.eventBase',
+        '@events.handlerManager',
+        '@events.eventTarget',
+        '@events.eventType',
+        '@math.coordinate',
+        '@math.rect',
+        '@style.util',
+        '@style.bidi',
+        '@ua.util',
+        '@fx.draggerEventType',
+        '@fx.dragEvent'
     ],
     function(util, dom, EventsUtil, EventBase, HandlerManager, EventTarget, EventType,
              Coordinate, Rect, style, bidi, ua, DraggerEventType, DragEvent) {

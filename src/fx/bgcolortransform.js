@@ -1,18 +1,18 @@
 /**
  * @fileoverview BgColorTransform
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.BgColorTransform',
+define('@fx.bgColorTransform',
     [
-        'Sogou.Util',
-        'Sogou.Color',
-        'Sogou.Events.Util',
-        'Sogou.FX.EventType',
-        'Sogou.Style.Util',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@colors',
+        '@events.util',
+        '@fx.eventType',
+        '@style.util',
+        '@fx.effectBase'
     ],
     function(util, color, EventUtil, EventType, style, EffectBase) {
 

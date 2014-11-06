@@ -42,9 +42,9 @@
 define('@events.util',
     [
         '@util',
-        '@events.browserevent',
-        '@events.browserfeature',
-        '@events.eventtarget',
+        '@events.browserEvent',
+        '@events.browserFeature',
+        '@events.eventTarget',
         '@events.listener',
         '@array',
         '@object'

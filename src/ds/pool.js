@@ -7,8 +7,8 @@
  * When an object is released, it is attempted to be reused.
  */
 
-define('@ds.pool',
-    ['@util', '@disposable', '@ds.util', '@ds.queue', '@ds.set'],
+define('@ds.Pool',
+    ['@util', '@Disposable', '@ds.util', '@ds.Queue', '@ds.Set'],
     function(util, Disposable, ds, Queue, Set) {
 
         'use strict';

@@ -1,7 +1,7 @@
 require([
         '@util',
-        '@async.delay',
-        '@async.throttle',
+        '@async.Delay',
+        '@async.Throttle',
         '@events.util',
         '@timer',
         '@dom.util'

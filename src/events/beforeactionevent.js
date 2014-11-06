@@ -4,11 +4,11 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.beforeactionevent',
+define('@events.beforeActionEvent',
     [
         '@util',
-        '@events.browserevent',
-        '@events.actioneventtype'
+        '@events.browserEvent',
+        '@events.actionEventType'
     ],
     function(util, BrowserEvent, ActionEventType) {
 

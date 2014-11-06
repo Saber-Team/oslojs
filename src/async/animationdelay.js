@@ -4,10 +4,10 @@
  * @email zmike86@gmail.com
  */
 
-define('@async.animationdelay',
+define('@async.animationDelay',
     [
         '@util',
-        '@disposable',
+        '@Disposable',
         '@events.util',
         '@functions'
     ],

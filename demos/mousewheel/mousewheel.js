@@ -1,7 +1,7 @@
 require([
         '@events.util',
-        '@events.mousewheeleventtype',
-        '@events.mousewheelhandler'
+        '@events.mouseWheelEventType',
+        '@events.mouseWheelHandler'
     ],
     function(EventUtil, EventType, MouseWheelHandler) {
         var MOUSEWHEEL = EventType.MOUSEWHEEL;

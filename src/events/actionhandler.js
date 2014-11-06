@@ -15,17 +15,17 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.actionhandler',
+define('@events.actionHandler',
     [
         '@util',
         '@events.util',
-        '@events.browserevent',
-        '@events.eventtarget',
-        '@events.eventtype',
-        '@events.keycodes',
+        '@events.browserEvent',
+        '@events.eventTarget',
+        '@events.eventType',
+        '@events.keyCodes',
         '@ua.util',
-        '@events.actionevent',
-        '@events.beforeactionevent'
+        '@events.actionEvent',
+        '@events.beforeActionEvent'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, ua,
              ActionEvent, BeforeActionEvent) {

@@ -1,14 +1,14 @@
 /**
  * @fileoverview slide
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.Slide',
+define('@fx.slide',
     [
-        'Sogou.Util',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@fx.effectBase'
     ],
     function(util, EffectBase) {
 

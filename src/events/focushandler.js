@@ -7,12 +7,12 @@
  * @see ../../demos/focushandler.html
  */
 
-define('@events.focushandler',
+define('@events.focusHandler',
     [
         '@util',
         '@events.util',
-        '@events.browserevent',
-        '@events.eventtarget',
+        '@events.browserEvent',
+        '@events.eventTarget',
         '@ua.util'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, ua) {

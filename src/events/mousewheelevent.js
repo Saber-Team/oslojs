@@ -4,11 +4,11 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.mousewheelevent',
+define('@events.mouseWheelEvent',
     [
         '@util',
-        '@events.browserevent',
-        '@events.mousewheeleventtype'
+        '@events.browserEvent',
+        '@events.mouseWheelEventType'
     ],
     function(util, BrowserEvent, EventType) {
 

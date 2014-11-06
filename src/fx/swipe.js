@@ -1,6 +1,6 @@
 /**
  * @fileoverview swipe
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  * @notes  direction是dom中不常用的属性，标识文本的流动方向
@@ -8,11 +8,11 @@
  *
  */
 
-define('Sogou.FX.Swipe',
+define('@fx.swipe',
     [
-        'Sogou.Util',
-        'Sogou.Style.Bidi',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@style.bidi',
+        '@fx.effectBase'
     ],
     function(util, bidi, EffectBase) {
 

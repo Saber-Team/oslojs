@@ -5,7 +5,7 @@
  * @see ../../demos/keyhandler.html
  */
 
-define('@events.keycodes',
+define('@events.keyCodes',
     ['@util','@ua.util'],
     function(util, ua) {
 

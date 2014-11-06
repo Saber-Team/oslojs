@@ -5,10 +5,10 @@
  * @see ../../demos/timers.html
  */
 
-define('@async.throttle',
+define('@async.Throttle',
     [
         '@util',
-        '@disposable',
+        '@Disposable',
         '@timer'
     ],
     function(util, Disposable, Timer) {

@@ -7,7 +7,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@async.deferred',
+define('@async.Deferred',
     [
         '@util',
         '@array',

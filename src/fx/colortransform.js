@@ -1,13 +1,13 @@
 /**
  * @fileoverview ColorTransform
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.ColorTransform',
+define('@fx.colorTransform',
     [
-        'Sogou.Util',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@fx.effectBase'
     ],
     function(util, EffectBase) {
 

@@ -4,12 +4,12 @@
  * @email zmike86@gmail.com
  */
 
-define('@history.html5history',
+define('@history.html5History',
     [
         '@util',
         '@events.util',
-        '@events.eventtarget',
-        '@events.eventtype',
+        '@events.eventTarget',
+        '@events.eventType',
         '@history.event'
     ],
     function(util, EventUtil, EventTarget, EventType, HistoryEvent) {

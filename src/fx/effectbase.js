@@ -1,15 +1,15 @@
 /**
  * @fileoverview 预定义动画类型
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.EffectBase',
+define('@fx.effectBase',
     [
-        'Sogou.Util',
-        'Sogou.Style.Util',
-        'Sogou.FX.Animation'
+        '@util',
+        '@style.util',
+        '@fx.animation'
     ],
     function(util, style, Animation) {
 

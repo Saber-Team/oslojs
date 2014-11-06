@@ -1,10 +1,10 @@
 /**
  * @fileoverview 一些预设的加速函数. 代码copy自dojo library.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.Easing', [], function() {
+define('@fx.easing', [], function() {
 
     'use strict';
 

@@ -86,15 +86,15 @@
  * @see ../../demos/keyhandler.html
  */
 
-define('@events.keyhandler',
+define('@events.keyHandler',
     [
         '@util',
         '@events.util',
-        '@events.browserevent',
-        '@events.eventtarget',
-        '@events.eventtype',
-        '@events.keycodes',
-        '@events.keyevent',
+        '@events.browserEvent',
+        '@events.eventTarget',
+        '@events.eventType',
+        '@events.keyCodes',
+        '@events.keyEvent',
         '@ua.util'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, KeyEvent, ua) {

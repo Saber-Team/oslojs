@@ -1,6 +1,6 @@
 /**
  * @fileoverview Python风格的迭代器.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * 一个Iterable对象是一类对象,具有如下特征之一:
  *     a. 是本模块提供的Iterator类的实例
@@ -8,8 +8,8 @@
  *     c. 是一个对象,有__iterator__属性
  */
 
-define('Sogou.Iter.Iterator',
-    ['Sogou.Iter.StopIteration'],
+define('@iter.iterator',
+    ['@iter.stopIteration'],
     function(StopIteration) {
 
         'use strict';

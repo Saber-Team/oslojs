@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@dom.browserfeature', ['@ua.util'],
+define('@dom.browserFeature', ['@ua.util'],
     function(ua) {
 
         'use strict';

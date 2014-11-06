@@ -9,7 +9,7 @@
  */
 
 define('@timer',
-    ['@util', '@events.eventtarget'],
+    ['@util', '@events.eventTarget'],
     function(util, EventTarget) {
 
         'use strict';

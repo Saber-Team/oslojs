@@ -20,15 +20,15 @@
  * @see ../../demos/inputhandler.html
  */
 
-define('@events.inputhandler',
+define('@events.inputHandler',
     [
         '@util',
         '@timer',
         '@dom.util',
-        '@events.browserevent',
-        '@events.handlermanager',
-        '@events.eventtarget',
-        '@events.keycodes',
+        '@events.browserEvent',
+        '@events.handlerManager',
+        '@events.eventTarget',
+        '@events.keyCodes',
         '@ua.util'
     ],
     function(util, Timer, dom, BrowserEvent, HandlerManager, EventTarget, KeyCodes, ua) {

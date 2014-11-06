@@ -1,2 +1,2 @@
 /** Oslo JavaScript Framework. */
-define("@events.keyeventtype",[],{KEY:"key"});
+define("@events.keyEventType",[],{KEY:"key"});

@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@disposable', ['@util'], function(util) {
+define('@Disposable', ['@util'], function(util) {
 
     'use strict';
 

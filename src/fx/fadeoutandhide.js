@@ -1,14 +1,14 @@
 /**
  * @fileoverview fade out and hide
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.FadeOutAndHide',
+define('@fx.fadeOutAndHide',
     [
-        'Sogou.Util',
-        'Sogou.FX.Fade'
+        '@util',
+        '@fx.fade'
     ],
     function(util, Fade) {
 

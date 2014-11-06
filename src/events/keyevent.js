@@ -5,8 +5,8 @@
  * @see ../../demos/keyhandler.html
  */
 
-define('@events.keyevent',
-    ['@util','@events.browserevent','@events.keyeventtype'],
+define('@events.keyEvent',
+    ['@util','@events.browserEvent','@events.keyEventType'],
     function(util, BrowserEvent, KeyEventType) {
 
         'use strict';

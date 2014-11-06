@@ -1,15 +1,15 @@
 /**
  * @fileoverview scroll
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.Scroll',
+define('@fx.scroll',
     [
-        'Sogou.Util',
-        'Sogou.Style.Bidi',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@style.bidi',
+        '@fx.effectBase'
     ],
     function(util, bidi, EffectBase) {
 

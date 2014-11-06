@@ -4,6 +4,6 @@
  * @email zmike86@gmail.com
  */
 
-define('@history.eventtype',[], {
+define('@history.eventType',[], {
     NAVIGATE: 'navigate'
 });

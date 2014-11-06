@@ -8,7 +8,7 @@
  * 因为是不同引用.
  */
 
-define('@ds.set', ['@util', '@ds.util', '@ds.map'],
+define('@ds.Set', ['@util', '@ds.util', '@ds.Map'],
     function(util, ds, Map) {
 
         'use strict';

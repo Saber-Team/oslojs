@@ -126,15 +126,15 @@
  */
 
 
-define('@history.history',
+define('@history.History',
     [
         '@util',
         '@timer',
         '@dom.util',
-        '@events.handlermanager',
-        '@events.eventtarget',
-        '@events.eventtype',
-        '@history.eventtype',
+        '@events.handlerManager',
+        '@events.eventTarget',
+        '@events.eventType',
+        '@history.eventType',
         '@history.event',
         '@memo',
         '@string.util',

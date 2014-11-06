@@ -1,12 +1,12 @@
 /**
  * @fileoverview fade in and show
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.FadeInAndShow',
-    ['Sogou.Util','Sogou.FX.Fade'],
+define('@fx.fadeInAndShow',
+    ['@util','@fx.fade'],
     function(util, Fade) {
 
         'use strict';

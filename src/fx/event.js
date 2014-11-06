@@ -1,14 +1,14 @@
 /**
  * @fileoverview 动画事件
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.AnimationEvent',
+define('@fx.animationevent',
     [
-        'Sogou.Util',
-        'Sogou.Array',
-        'Sogou.Events.EventBase'
+        '@util',
+        '@array',
+        '@events.eventBase'
     ],
     function(util, array, EventBase) {
 

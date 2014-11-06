@@ -1,2 +1,2 @@
 /** Oslo JavaScript Framework. */
-define("Sogou.Iter.Iterator",["Sogou.Iter.StopIteration"],function(a){"use strict";var b=function(){};return b.prototype.next=function(){throw a},b.prototype.__iterator__=function(){return this},b});
+define("@iter.iterator",["@iter.stopIteration"],function(a){"use strict";var b=function(){};return b.prototype.next=function(){throw a},b.prototype.__iterator__=function(){return this},b});

@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@dom.nodetype', [], {
+define('@dom.nodeType', [], {
     ELEMENT: 1,
     ATTRIBUTE: 2,
     TEXT: 3,

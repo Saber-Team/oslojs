@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.eventtype', ['@ua.util'], function(ua) {
+define('@events.eventType', ['@ua.util'], function(ua) {
 
     'use strict';
 

@@ -1,15 +1,15 @@
 /**
  * @fileoverview fade
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.Fade',
+define('@fx.fade',
     [
-        'Sogou.Util',
-        'Sogou.Style.Util',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@style.util',
+        '@fx.effectbase'
     ],
     function(util, style, EffectBase) {
 

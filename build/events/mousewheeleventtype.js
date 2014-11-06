@@ -1,2 +1,2 @@
 /** Oslo JavaScript Framework. */
-define("@events.mousewheeleventtype",[],{MOUSEWHEEL:"mousewheel"});
+define("@events.mouseWheelEventType",[],{MOUSEWHEEL:"mousewheel"});

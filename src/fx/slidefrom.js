@@ -1,15 +1,15 @@
 /**
  * @fileoverview slidefrom
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.SlideFrom',
+define('@fx.slideFrom',
     [
-        'Sogou.Util',
-        'Sogou.Style.Bidi',
-        'Sogou.FX.Slide'
+        '@util',
+        '@style.bidi',
+        '@fx.slide'
     ],
     function(util, bidi, Slide) {
 

@@ -30,12 +30,12 @@
  *
  */
 
-define('@events.browserevent',
+define('@events.browserEvent',
     [
         '@util',
-        '@events.browserfeature',
-        '@events.eventbase',
-        '@events.eventtype',
+        '@events.browserFeature',
+        '@events.eventBase',
+        '@events.eventType',
         '@ua.util'
     ],
     function(util, BrowserFeature, EventBase, EventType, UA) {

@@ -1,17 +1,17 @@
 /**
  * @fileoverview 动画类
  * @from DojoToolkit
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.Animation',
+define('@fx.animation',
     [
-        'Sogou.Util',
-        'Sogou.FX.TransitionBase',
-        'Sogou.FX.EventType',
-        'Sogou.FX.Util',
-        'Sogou.FX.AnimationEvent'
+        '@util',
+        '@fx.transitionBase',
+        '@fx.eventType',
+        '@fx.util',
+        '@fx.animationEvent'
     ],
     function(util, TransitionBase, FXEventType, fx, AnimationEvent) {
 

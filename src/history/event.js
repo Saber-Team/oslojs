@@ -7,8 +7,8 @@
 define('@history.event',
     [
         '@util',
-        '@events.eventbase',
-        '@history.eventtype'
+        '@events.eventBase',
+        '@history.eventType'
     ],
     function(util, EventBase, HistoryEventType) {
 

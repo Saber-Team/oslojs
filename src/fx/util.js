@@ -1,15 +1,15 @@
 /**
  * @fileoverview 动画控制器，提供通用方法和常规控制
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.Util',
+define('@fx.util',
     [
-        'Sogou.Util',
-        'Sogou.Async.AnimationDelay',
-        'Sogou.Async.Delay',
-        'Sogou.Object'
+        '@util',
+        '@async.animationDelay',
+        '@async.Delay',
+        '@object'
     ],
     function(util, AnimationDelay, Delay, object) {
 

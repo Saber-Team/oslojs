@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.actioneventtype', [],
+define('@events.actionEventType', [],
 {
     ACTION: 'action',
     BEFOREACTION: 'beforeaction'

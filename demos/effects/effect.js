@@ -1,14 +1,14 @@
 require([
-        'Sogou.Events.Util',
-        'Sogou.FX.EventType',
-        'Sogou.FX.Util',
-        'Sogou.FX.Easing',
-        'Sogou.FX.Slide',
-        'Sogou.FX.Resize',
-        'Sogou.FX.FadeOutAndHide',
-        'Sogou.FX.FadeInAndShow',
-        'Sogou.FX.BgColorTransform',
-        'Sogou.Dom.Util'
+        '@events.util',
+        '@fx.eventType',
+        '@fx.util',
+        '@fx.easing',
+        '@fx.slide',
+        '@fx.resize',
+        '@fx.fadeOutAndHide',
+        '@fx.fadeInAndShow',
+        '@fx.bgColorTransform',
+        '@dom.util'
     ],
     function(EventUtil, EventType, fx, easing, Slide, Resize, FadeOutAndHide,
              FadeInAndShow, BgColorTransform, dom) {

@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@ds.queue', ['@array'], function(array) {
+define('@ds.Queue', ['@array'], function(array) {
 
     'use strict';
 

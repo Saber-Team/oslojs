@@ -1,14 +1,14 @@
 /**
  * @fileoverview 动画过渡处理基类。
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.FX.TransitionBase',
+define('@fx.transitionBase',
     [
-        'Sogou.Util',
-        'Sogou.Events.EventTarget',
-        'Sogou.FX.EventType'
+        '@util',
+        '@events.eventTarget',
+        '@fx.eventType'
     ],
     function(util, EventTarget, EventType) {
 

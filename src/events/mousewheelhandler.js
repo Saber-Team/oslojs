@@ -11,17 +11,17 @@
  * @see ../../demos/mousewheelhandler.html
  */
 
-define('@events.mousewheelhandler',
+define('@events.mouseWheelHandler',
     [
         '@util',
         '@dom.util',
         '@events.util',
-        '@events.browserevent',
-        '@events.eventtarget',
+        '@events.browserEvent',
+        '@events.eventTarget',
         '@math.util',
         '@style.util',
         '@ua.util',
-        '@events.mousewheelevent'
+        '@events.mouseWheelEvent'
     ],
     function(util, dom, EventUtil, BrowserEvent, EventTarget, math, style, ua, MouseWheelEvent) {
 

@@ -4,6 +4,6 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.mousewheeleventtype', [], {
+define('@events.mouseWheelEventType', [], {
     MOUSEWHEEL: 'mousewheel'
 });

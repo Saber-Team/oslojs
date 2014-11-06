@@ -6,11 +6,11 @@
  * @email zmike86@gmail.com
  */
 
-define('@ds.map',
+define('@ds.Map',
     [
         '@util',
         '@iter.iterator',
-        '@iter.stopiteration',
+        '@iter.stopIteration',
         '@object'
     ],
     function(util, Iterator, StopIteration, object) {

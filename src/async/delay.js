@@ -6,10 +6,10 @@
  * @see ../../demos/timers.html
  */
 
-define('@async.delay',
+define('@async.Delay',
     [
         '@util',
-        '@disposable',
+        '@Disposable',
         '@timer'
     ],
     function(util, Disposable, Timer) {

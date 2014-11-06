@@ -1,12 +1,12 @@
 /**
  * @fileoverview fade－out
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.FadeOut',
-    ['Sogou.Util','Sogou.FX.Fade'],
+define('@fx.fadeOut',
+    ['@util','@fx.fade'],
     function(util, Fade) {
 
         'use strict';

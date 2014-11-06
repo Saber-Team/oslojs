@@ -15,8 +15,8 @@ define('@dom.util',
         '@util', '@object', '@array',
         '@ua.util', '@string.util',
         '@math.size', '@math.coordinate',
-        '@dom.nodetype', '@dom.classes',
-        '@dom.browserfeature'
+        '@dom.nodeType', '@dom.classes',
+        '@dom.browserFeature'
     ],
     function(util, object, array, ua, string, Size, Coordinate, NodeType, classes, BrowserFeature) {
 

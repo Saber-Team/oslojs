@@ -1,2 +1,2 @@
 /** Oslo JavaScript Framework. */
-define("@events.actionevent",["@util","@events.browserevent","@events.actioneventtype"],function(a,b,c){"use strict";var d=function(a){b.call(this,a.getBrowserEvent()),this.type=c.ACTION};return a.inherits(d,b),d});
+define("@events.actionEvent",["@util","@events.browserEvent","@events.actionEventType"],function(a,b,c){"use strict";var d=function(a){b.call(this,a.getBrowserEvent()),this.type=c.ACTION};return a.inherits(d,b),d});

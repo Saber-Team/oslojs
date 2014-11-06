@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.eventbase', [], function() {
+define('@events.eventBase', [], function() {
 
     'use strict';
 

@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.listenermap',
+define('@events.listenerMap',
     [
         '@util',
         '@array',

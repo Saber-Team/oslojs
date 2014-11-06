@@ -4,6 +4,6 @@
  * @email zmike86@gmail.com
  */
 
-define('@events.keyeventtype', [], {
+define('@events.keyEventType', [], {
     KEY: 'key'
 });

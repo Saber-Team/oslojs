@@ -1,14 +1,14 @@
 /**
  * @fileoverview resize height only
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/effects.html
  */
 
-define('Sogou.FX.ResizeHeight',
+define('@fx.resizeHeight',
     [
-        'Sogou.Util',
-        'Sogou.FX.EffectBase'
+        '@util',
+        '@fx.effectBase'
     ],
     function(util, EffectBase) {
 

@@ -41,10 +41,10 @@
  * </pre>
  */
 
-define('@events.handlermanager',
+define('@events.handlerManager',
     [
         '@util',
-        '@disposable',
+        '@Disposable',
         '@events.util',
         '@object'
     ],
