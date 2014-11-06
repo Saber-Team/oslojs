@@ -14,7 +14,7 @@ define('@dom.util',
     [
         '@util', '@object', '@array',
         '@ua.util', '@string.util',
-        '@math.size', '@math.coordinate',
+        '@math.Size', '@math.Coordinate',
         '@dom.nodeType', '@dom.classes',
         '@dom.browserFeature'
     ],

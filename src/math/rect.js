@@ -4,8 +4,8 @@
  * @email zmike86@gmail.com
  */
 
-define('@math.rect',
-    ['@util', '@math.box', '@math.coordinate', '@math.size'],
+define('@math.Rect',
+    ['@util', '@math.Box', '@math.Coordinate', '@math.Size'],
     function(util, Box, Coordinate, Size) {
 
         'use strict';

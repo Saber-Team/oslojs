@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@math.size', [], function() {
+define('@math.Size', [], function() {
 
     'use strict';
 
