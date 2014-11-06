@@ -1,10 +1,10 @@
 /**
  * @fileoverview 创建函数的使用包.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Functions', [], function() {
+define('@functions', [], function() {
 
     'use strict';
 

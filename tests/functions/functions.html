@@ -1,0 +1,273 @@
+<!--
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arraySameElements.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/functions/functions.js"></script>
+</head>
+<body>
+<script>
+
+describe('Oslo.functions模块', function() {
+
+    var util = Oslo.util;
+    var fns = Oslo.functions;
+
+    function makeCallOrderLogger(name, returnValue) {
+        return function() {
+            callOrder.push(name);
+            return returnValue;
+        };
+    }
+
+    var callOrder = [];
+    var fTrue = makeCallOrderLogger('fTrue', true);
+    var gFalse = makeCallOrderLogger('gFalse', false);
+    var hTrue = makeCallOrderLogger('hTrue', true);
+
+    function setUp() {
+        callOrder = [];
+    }
+
+    function assertCallOrderAndReset(expectedArray) {
+        expect(expectedArray).toEqualArray(callOrder);
+        callOrder = [];
+    }
+
+    beforeEach(function() {
+        jasmine.addMatchers(arrayEqual);
+        jasmine.addMatchers(arraySameElements);
+    });
+
+    // Test methods.
+
+    it('测试True', function testTrue() {
+        expect(fns.TRUE()).toBe(true);
+    });
+
+
+    it('测试False', function testFalse() {
+        expect(fns.FALSE()).toBe(false);
+    });
+
+
+    it('测试Lock', function testLock() {
+        function add(var_args) {
+            var result = 0;
+            for (var i = 0; i < arguments.length; i++) {
+                result += arguments[i];
+            }
+            return result;
+        }
+
+        expect(add(1, 2, 3)).toBe(6);
+        expect(fns.lock(add)(1, 2, 3)).toBe(0);
+        expect(fns.lock(add, 2)(1, 2, 3)).toBe(3);
+        expect(util.partial(add, 1, 2)(3)).toBe(6);
+        expect(fns.lock(util.partial(add, 1, 2))(3)).toBe(3);
+    });
+
+
+    it('测试Identity', function testIdentity() {
+        expect(fns.identity(3)).toBe(3);
+        expect(fns.identity(3, 4, 5, 6)).toBe(3);
+        expect(fns.identity('Hi there')).toBe('Hi there');
+        expect(fns.identity(null)).toBeNull();
+        expect(fns.identity()).toBeUndefined();
+
+        var arr = [1, 'b', null];
+        expect(fns.identity(arr)).toEqual(arr);
+        var obj = {
+            a: 'ay',
+            b: 'bee',
+            c: 'see'
+        };
+        expect(fns.identity(obj)).toEqual(obj);
+    });
+
+
+    it('测试Constant', function testConstant() {
+        expect(fns.constant(3)()).toBe(3);
+        expect(fns.constant()()).toBeUndefined();
+    });
+
+
+    it('测试Error', function testError() {
+        var f = fns.error('x');
+        expect(f).toThrow();
+        var ex;
+        try {
+            f();
+        } catch (err) {
+            ex = err;
+        }
+        expect(ex.message).toBe('x');
+    });
+
+
+    it('测试Fail', function testFail() {
+        var obj = {};
+        var f = fns.fail(obj);
+        expect(f).toThrow();
+        var ex;
+        try {
+            f();
+        } catch (err) {
+            ex = err;
+        }
+        expect(obj).toEqual(ex);
+    });
+
+
+    xit('测试Compose', function testCompose() {
+        var add2 = function(x) {
+            return x + 2;
+        };
+
+        var double = function(x) {
+            return x * 2;
+        };
+
+        assertEquals(6, fns.compose(double, add2)(1));
+        assertEquals(4, fns.compose(add2, double)(1));
+        assertEquals(6, fns.compose(add2, add2, double)(1));
+        assertEquals(12, fns.compose(double, add2, add2, double)(1));
+        assertUndefined(fns.compose()(1));
+        assertEquals(3, fns.compose(add2)(1));
+
+        var add2Numbers = function(x, y) {
+            return x + y;
+        };
+        assertEquals(17, fns.compose(add2Numbers)(10, 7));
+        assertEquals(34, fns.compose(double, add2Numbers)(10, 7));
+    });
+
+
+    it('测试Add', function testAdd() {
+        expect(fns.sequence()()).toBeUndefined();
+        assertCallOrderAndReset([]);
+
+        expect(fns.sequence(fTrue)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue']);
+
+        expect(fns.sequence(fTrue, gFalse)()).toBe(false);
+        assertCallOrderAndReset(['fTrue', 'gFalse']);
+
+        expect(fns.sequence(fTrue, gFalse, hTrue)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue', 'gFalse', 'hTrue']);
+
+        expect(fns.sequence(fns.identity)(true)).toBeTruthy();
+        expect(fns.sequence(fns.identity)(false)).toBe(false);
+    });
+
+
+    it('测试And', function testAnd() {
+        // the return value is unspecified for an empty and
+        fns.and()();
+        assertCallOrderAndReset([]);
+
+        expect(fns.and(fTrue)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue']);
+
+        expect(fns.and(fTrue, gFalse)()).toBe(false);
+        assertCallOrderAndReset(['fTrue', 'gFalse']);
+
+        expect(fns.and(fTrue, gFalse, hTrue)()).toBe(false);
+        assertCallOrderAndReset(['fTrue', 'gFalse']);
+
+        expect(fns.and(fns.identity)(true)).toBeTruthy();
+        expect(fns.and(fns.identity)(false)).toBe(false);
+    });
+
+
+    it('测试Or', function testOr() {
+        // the return value is unspecified for an empty or
+        fns.or()();
+        assertCallOrderAndReset([]);
+
+        expect(fns.or(fTrue)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue']);
+
+        expect(fns.or(fTrue, gFalse)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue']);
+
+        expect(fns.or(fTrue, gFalse, hTrue)()).toBeTruthy();
+        assertCallOrderAndReset(['fTrue']);
+
+        expect(fns.or(fns.identity)(true)).toBeTruthy();
+        expect(fns.or(fns.identity)(false)).toBe(false);
+    });
+
+
+    it('测试Not', function testNot() {
+        expect(fns.not(gFalse)()).toBe(true);
+        assertCallOrderAndReset(['gFalse']);
+
+        expect(fns.not(fns.identity)(false)).toBe(true);
+        expect(fns.not(fns.identity)(true)).toBe(false);
+
+        var f = function(a, b) {
+            expect(a).toBe(1);
+            expect(b).toBe(2);
+            return false;
+        };
+
+        expect(fns.not(f)(1, 2)).toBe(true);
+    });
+
+
+    it('测试Create', function testCreate() {
+        var tempConstructor = function(a, b) {
+            this.foo = a;
+            this.bar = b;
+        };
+
+        var factory = util.partial(fns.create, tempConstructor, 'baz');
+        var instance = factory('qux');
+
+        expect(instance instanceof tempConstructor).toBeTruthy();
+        expect(instance.foo).toBe('baz');
+        expect(instance.bar).toBe('qux');
+    });
+
+
+    xit('测试WithReturnValue', function testWithReturnValue() {
+        var obj = {};
+        var f = function(a, b) {
+            expect(obj).toEqual(this);
+            expect(a).toBe(1);
+            expect(b).toBe(2);
+        };
+        assertTrue(fns.withReturnValue(f, true).call(obj, 1, 2));
+        assertFalse(fns.withReturnValue(f, false).call(obj, 1, 2));
+    });
+
+});
+
+</script>
+</body>
+</html>
