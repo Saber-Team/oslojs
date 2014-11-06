@@ -1,5 +1,5 @@
 <!--
-	Copyright 2014 The SogouJS Library Authors. All Rights Reserved.
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
 	Use of this source code is governed by the Apache License, Version 2.0.
 	See the COPYING file for details.
 -->
@@ -8,14 +8,21 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>SogouJS单元测试集 - Sogou.Disposable</title>
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
     <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
     <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
-
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
     <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
     <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arraySameElements.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
 
     <!-- include source files here... -->
     <script src="../../src/require.js"></script>
@@ -25,11 +32,9 @@
 <body>
 <script>
 
-describe('Sogou.Object模块', function() {
+describe('Oslo.object模块', function() {
 
-    var global = window;
-    var util = Sogou.Util;
-    var object = Sogou.Object;
+    var object = Oslo.object;
 
     function stringifyObject(m) {
         var keys = object.getKeys(m);
@@ -243,8 +248,12 @@ describe('Sogou.Object模块', function() {
 
 
     it('测试ImmutableView', function testImmutableView() {
-        if (!Object.isFrozen)
+
+        if (!Object.isFrozen) {
+            expect(1).toBe(1);
             return;
+        }
+
 
         var x = {propA: 3};
         var y = object.createImmutableView(x);
@@ -270,10 +279,14 @@ describe('Sogou.Object模块', function() {
     it('测试ImmutableViewStrict', function testImmutableViewStrict() {
         'use strict';
 
-        if (!Object.isFrozen)
+        if (!Object.isFrozen) {
+            expect(1).toBe(1);
             return;
+        }
 
-        var x = {propA: 3};
+        var x = {
+            propA: 3
+        };
         var y = object.createImmutableView(x);
 
         expect(function() {

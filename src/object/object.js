@@ -173,6 +173,7 @@ define('@object', [], function() {
         some: some,
         every: every,
         extend: extend,
+
         /**
          * 返回对象的值作为数组.
          * @param {Object.<K,V>} obj 对象.
@@ -186,6 +187,7 @@ define('@object', [], function() {
                 res[i++] = obj[key];
             return res;
         },
+
         /**
          * 返回对象的键作为数组.
          * @param {Object} obj 对象.
@@ -198,10 +200,13 @@ define('@object', [], function() {
                 res[i++] = key;
             return res;
         },
+
         /**
          * 创建对象的不可变版本,前提是浏览器支持immutable objects.
          * 默认模式写入不可变对象静默失败. 严格模式下抛出异常.
-         * 具体参见: ECMA262- [15.2.3.9]
+         * 具体参见: ECMA262- [15.2.3.9].
+         * 有个特例是IE9支持freeze方法但不支持严格模式, 见:
+         * http://msdn.microsoft.com/zh-cn/library/ie/br230269(v=vs.94).aspx
          * @param {!Object.<K,V>} obj 对象.
          * @return {!Object.<K,V>} 对象的不可变版本, 或对象自身.
          * @template K,V
@@ -217,6 +222,7 @@ define('@object', [], function() {
             }
             return result;
         },
+
         /**
          * 判断对象是否被冻结. ES5特性
          * @param {!Object} obj 测试对象.
@@ -226,6 +232,7 @@ define('@object', [], function() {
             // isFrozen不会判断对象嵌套的情况
             return !!Object.isFrozen && Object.isFrozen(obj);
         },
+
         /**
          * 判断一个哈希结构是否为空.
          * @param {Object} obj 测试的对象.
