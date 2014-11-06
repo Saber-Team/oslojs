@@ -5,7 +5,7 @@
  * @see ../../demos/effects.html
  */
 
-define('@fx.scroll',
+define('@fx.Scroll',
     [
         '@util',
         '@style.bidi',

@@ -9,7 +9,7 @@ define('@fx.effectBase',
     [
         '@util',
         '@style.util',
-        '@fx.animation'
+        '@fx.Animation'
     ],
     function(util, style, Animation) {
 

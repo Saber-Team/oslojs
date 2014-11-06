@@ -4,7 +4,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@fx.animationevent',
+define('@fx.animationEvent',
     [
         '@util',
         '@array',

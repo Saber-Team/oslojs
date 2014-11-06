@@ -5,7 +5,7 @@
  * @see ../../demos/effects.html
  */
 
-define('@fx.resize',
+define('@fx.Resize',
     [
         '@util',
         '@fx.effectBase'

@@ -5,7 +5,7 @@
  * @see ../../demos/effects.html
  */
 
-define('@fx.slide',
+define('@fx.Slide',
     [
         '@util',
         '@fx.effectBase'

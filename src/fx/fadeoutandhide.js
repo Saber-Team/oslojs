@@ -8,7 +8,7 @@
 define('@fx.fadeOutAndHide',
     [
         '@util',
-        '@fx.fade'
+        '@fx.Fade'
     ],
     function(util, Fade) {
 

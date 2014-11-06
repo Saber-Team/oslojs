@@ -5,7 +5,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@fx.animation',
+define('@fx.Animation',
     [
         '@util',
         '@fx.transitionBase',

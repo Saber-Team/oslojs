@@ -6,7 +6,7 @@
  */
 
 define('@fx.fadeIn',
-    ['@util','@fx.fade'],
+    ['@util','@fx.Fade'],
     function(util, Fade) {
 
         'use strict';

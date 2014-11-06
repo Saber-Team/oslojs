@@ -8,7 +8,7 @@
  *
  */
 
-define('@fx.swipe',
+define('@fx.Swipe',
     [
         '@util',
         '@style.bidi',

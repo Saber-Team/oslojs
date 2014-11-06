@@ -50,13 +50,6 @@ define('@ua.util',
             return string.contains(ua, 'MSIE') || string.contains(ua, 'Trident');
         })();
 
-        /**
-         * 是否使用了Gecko引擎. Mozilla Firefox, Camino and more.
-         * @return {boolean}
-         */
-        var isGECKO = (function() {
-            return string.contains(ua, 'Gecko') && !isWebKit && !isTrident;
-        })();
 
         /**
          * @return {boolean} 渲染引擎是否Trident.
@@ -66,6 +59,7 @@ define('@ua.util',
             return string.contains('Trident') || string.contains('MSIE');
         })();
 
+
         /**
          * 渲染引擎是否WebKit. Safari, Android and others.
          * @return {boolean}
@@ -73,7 +67,18 @@ define('@ua.util',
         var isWebKit = (function() {
             return string.caseInsensitiveContains(ua, 'WebKit');
         })();
-        // WebKit also gives navigator.product string equal to 'Gecko'.
+
+
+        /**
+         * 是否使用了Gecko引擎. Mozilla Firefox, Camino and more.
+         * 因为WebKit浏览器也可能含有'Gecko' 并且navigator.product就是'Gecko',
+         * 所以这部判断要在isWebKit之后.
+         * @return {boolean}
+         */
+        var isGECKO = (function() {
+            return string.contains(ua, 'Gecko') && !isWebKit && !isTrident;
+        })();
+
 
         /**
          * 是否移动设备.

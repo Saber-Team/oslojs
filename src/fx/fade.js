@@ -5,11 +5,11 @@
  * @see ../../demos/effects.html
  */
 
-define('@fx.fade',
+define('@fx.Fade',
     [
         '@util',
         '@style.util',
-        '@fx.effectbase'
+        '@fx.effectBase'
     ],
     function(util, style, EffectBase) {
 

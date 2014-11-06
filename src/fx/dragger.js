@@ -6,7 +6,7 @@
  * @email zmike86@gmail.com
  */
 
-define('@fx.dragger',
+define('@fx.Dragger',
     [
         '@util',
         '@dom.util',
