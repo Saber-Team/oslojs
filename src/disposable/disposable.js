@@ -1,13 +1,11 @@
 /**
  * @fileoverview 所有可以析构对象的基类.这个是整个库的一个基础组件,大型复杂APP
- *     不论在老IE还是Chrome都有可能造成内存泄露,当组件销毁或者页面卸载需要析构所有对象.
- * @modified Leo.Zhang
+ * 不论在老IE还是Chrome都有可能造成内存泄露,当组件销毁或者页面卸载需要析构所有对象.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Disposable',
-    ['Sogou.Util'],
-    function(util) {
+define('@disposable', ['@util'], function(util) {
 
     'use strict';
 
@@ -125,5 +123,4 @@ define('Sogou.Disposable',
 
     return Disposable;
 
-    }
-);
+});
