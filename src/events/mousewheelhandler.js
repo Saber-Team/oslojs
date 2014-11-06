@@ -1,27 +1,27 @@
 /**
- * @fileoverview 专门为mousewheel事件提供了处理器类.这个处理器会在元素上滚轮的时候分发标准事件.
- *    开发人员可以通过滚轮事件的deltaX和deltaY属性获取滚动方向.
- *    多平台多浏览器下的mousewheel事件存在很大分歧,具体可以看看冰山一角:
- *        http://www.javascriptkit.com/javatutors/onmousewheel.shtml
- *    这个类主要为了消除这些异同,但很难面对所有情况,有时候deltas会给出非常大的值.
- *    如果避免这些应该用setMaxDeltaX和setMaxDeltaY APIs防止值过大.
+ * @fileoverview 专门为mousewheel事件提供了处理器类.这个处理器会在元素上滚轮的时候
+ * 分发标准事件. 开发人员可以通过滚轮事件的deltaX和deltaY属性获取滚动方向.
+ * 多平台多浏览器下的mousewheel事件存在很大分歧,具体可以看看冰山一角:
+ *  http://www.javascriptkit.com/javatutors/onmousewheel.shtml
+ * 这个类主要为了消除这些异同,但很难面对所有情况,有时候deltas会给出非常大的值.
+ * 如果避免这些应该用setMaxDeltaX和setMaxDeltaY APIs防止值过大.
  *
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/mousewheelhandler.html
+ * @see ../../demos/mousewheelhandler.html
  */
 
-define('Sogou.Events.MouseWheelHandler',
+define('@events.mousewheelhandler',
     [
-        'Sogou.Util',
-        'Sogou.Dom.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.EventTarget',
-        'Sogou.Math.Util',
-        'Sogou.Style.Util',
-        'Sogou.UA.Util',
-        'Sogou.Events.MouseWheelEvent'
+        '@util',
+        '@dom.util',
+        '@events.util',
+        '@events.browserevent',
+        '@events.eventtarget',
+        '@math.util',
+        '@style.util',
+        '@ua.util',
+        '@events.mousewheelevent'
     ],
     function(util, dom, EventUtil, BrowserEvent, EventTarget, math, style, ua, MouseWheelEvent) {
 

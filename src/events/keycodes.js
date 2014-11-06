@@ -1,12 +1,12 @@
 /**
  * @fileoverview 包含按键码值的常量. 代码模块来自于国外的库
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/keyhandler.html
+ * @see ../../demos/keyhandler.html
  */
 
-define('Sogou.Events.KeyCodes',
-    ['Sogou.Util','Sogou.UA.Util'],
+define('@events.keycodes',
+    ['@util','@ua.util'],
     function(util, ua) {
 
         'use strict';

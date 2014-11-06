@@ -1,6 +1,6 @@
 /**
  * @fileoverview 一个总览原生浏览器事件和自定义js事件的事件管理器,提供了经过抽象的事件体系.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  *
  * 这个文件还提供了模拟IE9以下浏览器在W3C标准事件模型中缺失的事件捕获阶段.
@@ -39,15 +39,15 @@
 //       back in the tree
 //   sources_: src uid -> [Listener]
 
-define('Sogou.Events.Util',
+define('@events.util',
     [
-        'Sogou.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.BrowserFeature',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.Listener',
-        'Sogou.Array',
-        'Sogou.Object'
+        '@util',
+        '@events.browserevent',
+        '@events.browserfeature',
+        '@events.eventtarget',
+        '@events.listener',
+        '@array',
+        '@object'
     ],
     function(util, BrowserEvent, BrowserFeature, EvtTarget, Listener, array, object) {
 

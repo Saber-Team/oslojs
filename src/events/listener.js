@@ -1,13 +1,14 @@
 /**
- * @fileoverview 事件的监听函数, 通常称作句柄对象, 对它封装成类
- * @modified Leo.Zhang
+ * @fileoverview 事件的监听函数, 通常称作句柄对象, 对它封装
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.Listener', [], function() {
+define('@events.listener', [], function() {
 
     'use strict';
 
+    // 生成key
     function reserveKey() {
         return ++reserveKey.counter_;
     }
@@ -26,7 +27,7 @@ define('Sogou.Events.Listener', [], function() {
      */
     function Listener(listener, proxy, src, type, capture, opt_context) {
         /**
-         * Callback function.
+         * 回调函数.
          * @type {Function}
          */
         this.listener = listener;
@@ -37,17 +38,17 @@ define('Sogou.Events.Listener', [], function() {
          */
         this.proxy = proxy;
         /**
-         * Object or node that callback is listening to
+         * 监听的事件源
          * @type {EventTarget}
          */
         this.src = src;
         /**
-         * The event type.
+         * 事件类型.
          * @const {string}
          */
         this.type = type;
         /**
-         * Whether the listener is being called in the capture or bubble phase
+         * 当前句柄在捕获还是冒泡阶段触发.
          * @const {boolean}
          */
         this.capture = !!capture;
@@ -55,7 +56,7 @@ define('Sogou.Events.Listener', [], function() {
          * 句柄执行时的上下文.
          * @type {Object|undefined}
          */
-        this.handler = opt_context;
+        this.context = opt_context;
         /**
          * 每个句柄对象都有一个key.
          * @const {number}
@@ -75,15 +76,14 @@ define('Sogou.Events.Listener', [], function() {
     }
 
     /**
-     * Marks this listener as removed. This also remove references held by
-     * this listener object (such as listener and event source).
+     * 记录当前句柄被移除.
      */
     Listener.prototype.markAsRemoved = function() {
         this.removed = true;
         this.listener = null;
         this.proxy = null;
         this.src = null;
-        this.handler = null;
+        this.context = null;
     };
 
     return Listener;

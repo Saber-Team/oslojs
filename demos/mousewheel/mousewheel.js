@@ -1,7 +1,7 @@
 require([
-        'Sogou.Events.Util',
-        'Sogou.Events.MouseWheelEventType',
-        'Sogou.Events.MouseWheelHandler'
+        '@events.util',
+        '@events.mousewheeleventtype',
+        '@events.mousewheelhandler'
     ],
     function(EventUtil, EventType, MouseWheelHandler) {
         var MOUSEWHEEL = EventType.MOUSEWHEEL;

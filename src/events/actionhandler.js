@@ -1,31 +1,31 @@
 /**
- * @fileoverview 这个模块对于点击和键盘事件做了统一的门面. 页面逻辑层代码可以更容易组织
- *     处理器代码只监听一个统一的事件.
+ * @fileoverview 这个模块对于点击和键盘事件做了统一的门面. 页面逻辑层代码可以
+ * 更容易组织处理器代码只监听一个统一的事件.
  * 如果有如下代码-:
  * <code>
- *     this.eventmanager.listen(el, CLICK, this.onClick_);
+ *     this.handlermanager.listen(el, CLICK, this.onClick_);
  * <code>
  *
  * 可以替换为新的方式:
  * <code>
- *     this.eventmanager.listen(new ActionHandler(el), ACTION, this.onAction_);
- *<code>
+ *     this.handlermanager.listen(new ActionHandler(el), ACTION, this.onAction_);
+ * <code>
  *
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.ActionHandler',
+define('@events.actionhandler',
     [
-        'Sogou.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.EventType',
-        'Sogou.Events.KeyCodes',
-        'Sogou.UA.Util',
-        'Sogou.Events.ActionEvent',
-        'Sogou.Events.BeforeActionEvent'
+        '@util',
+        '@events.util',
+        '@events.browserevent',
+        '@events.eventtarget',
+        '@events.eventtype',
+        '@events.keycodes',
+        '@ua.util',
+        '@events.actionevent',
+        '@events.beforeactionevent'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, ua,
              ActionEvent, BeforeActionEvent) {

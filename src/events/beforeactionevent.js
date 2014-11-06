@@ -1,14 +1,14 @@
 /**
  * @fileoverview BeforeActionEvent事件对象
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.BeforeActionEvent',
+define('@events.beforeactionevent',
     [
-        'Sogou.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.ActionEventType'
+        '@util',
+        '@events.browserevent',
+        '@events.actioneventtype'
     ],
     function(util, BrowserEvent, ActionEventType) {
 
@@ -16,9 +16,8 @@ define('Sogou.Events.BeforeActionEvent',
 
         /**
          * ActionEventType.BEFOREACTION的事件对象类.
-         * BEFOREACTION gives a chance to the application so the keyboard focus
-         * can be restored back, if required.
-         * @param {!BrowserEvent} browserEvent Browser event object.
+         * 这种类型的事件使得程序有可以保留键盘的focus状态用于日后恢复.
+         * @param {!BrowserEvent} browserEvent 浏览器事件对象.
          * @constructor
          * @extends {BrowserEvent}
          */
@@ -26,6 +25,7 @@ define('Sogou.Events.BeforeActionEvent',
             BrowserEvent.call(this, browserEvent.getBrowserEvent());
             this.type = ActionEventType.BEFOREACTION;
         };
+
         util.inherits(BeforeActionEvent, BrowserEvent);
 
         return BeforeActionEvent;

@@ -1,16 +1,9 @@
 /**
  * @fileoverview Event types for history.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.History.EventType',[],
-    function() {
-
-        'use strict';
-
-        return {
-            NAVIGATE: 'navigate'
-        };
-    }
-);
+define('@history.eventtype',[], {
+    NAVIGATE: 'navigate'
+});

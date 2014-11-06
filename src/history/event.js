@@ -4,11 +4,11 @@
  * @email zmike86@gmail.com
  */
 
-define('Sogou.History.Event',
+define('@history.event',
     [
-        'Sogou.Util',
-        'Sogou.Events.EventBase',
-        'Sogou.History.EventType'
+        '@util',
+        '@events.eventbase',
+        '@history.eventtype'
     ],
     function(util, EventBase, HistoryEventType) {
 
@@ -36,6 +36,7 @@ define('Sogou.History.Event',
              */
             this.isNavigation = isNavigation;
         }
+
         util.inherits(HistoryEvent, EventBase);
 
         return HistoryEvent;

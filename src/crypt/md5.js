@@ -134,17 +134,18 @@ define('@crypt.md5', [], function() {
 
         // We allocate the array every time, but it's cheap in practice.
         var X = new Array(16);
+        var i;
 
         // Get 16 little endian words. It is not worth unrolling this for Chrome 11.
         if (typeof buf === 'string') {
-            for (var i = 0; i < 16; ++i) {
+            for (i = 0; i < 16; ++i) {
                 X[i] = (buf.charCodeAt(opt_offset++)) |
                     (buf.charCodeAt(opt_offset++) << 8) |
                     (buf.charCodeAt(opt_offset++) << 16) |
                     (buf.charCodeAt(opt_offset++) << 24);
             }
         } else {
-            for (var i = 0; i < 16; ++i) {
+            for (i = 0; i < 16; ++i) {
                 X[i] = (buf[opt_offset++]) |
                     (buf[opt_offset++] << 8) |
                     (buf[opt_offset++] << 16) |
@@ -365,7 +366,7 @@ define('@crypt.md5', [], function() {
             // input buffer (assuming it contains sufficient data). This gives ~30%
             // speedup on Chrome 14 and ~70% speedup on Firefox 6.0, but requires that
             // the data is provided in large chunks (or in multiples of 64 bytes).
-            if (blockLength == 0) {
+            if (blockLength === 0) {
                 while (i <= lengthMinusBlock) {
                     this.compress_(bytes, i);
                     i += 64;
@@ -375,7 +376,7 @@ define('@crypt.md5', [], function() {
             if (typeof bytes === 'string') {
                 while (i < opt_length) {
                     block[blockLength++] = bytes.charCodeAt(i++);
-                    if (blockLength == 64) {
+                    if (blockLength === 64) {
                         this.compress_(block);
                         blockLength = 0;
                         // Jump to the outer loop so we use the full-block optimization.
@@ -385,7 +386,7 @@ define('@crypt.md5', [], function() {
             } else {
                 while (i < opt_length) {
                     block[blockLength++] = bytes[i++];
-                    if (blockLength == 64) {
+                    if (blockLength === 64) {
                         this.compress_(block);
                         blockLength = 0;
                         // Jump to the outer loop so we use the full-block optimization.
@@ -408,15 +409,16 @@ define('@crypt.md5', [], function() {
         // This must accommodate at least 1 padding byte (0x80), 8 bytes of
         // total bitlength, and must end at a 64-byte boundary.
         var pad = new Array((this.blockLength_ < 56 ? 64 : 128) - this.blockLength_);
+        var i;
 
         // Add padding: 0x80 0x00*
         pad[0] = 0x80;
-        for (var i = 1; i < pad.length - 8; ++i) {
+        for (i = 1; i < pad.length - 8; ++i) {
             pad[i] = 0;
         }
         // Add the total number of bits, little endian 64-bit integer.
         var totalBits = this.totalLength_ * 8;
-        for (var i = pad.length - 8; i < pad.length; ++i) {
+        for (i = pad.length - 8; i < pad.length; ++i) {
             pad[i] = totalBits & 0xff;
             totalBits /= 0x100; // Don't use bit-shifting here!
         }
@@ -424,7 +426,7 @@ define('@crypt.md5', [], function() {
 
         var digest = new Array(16);
         var n = 0;
-        for (var i = 0; i < 4; ++i) {
+        for (i = 0; i < 4; ++i) {
             for (var j = 0; j < 32; j += 8) {
                 digest[n++] = (this.chain_[i] >>> j) & 0xff;
             }

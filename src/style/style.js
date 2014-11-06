@@ -9,7 +9,7 @@
 
 define('@style.util',
     [
-        '@Util',
+        '@util',
         '@array',
         '@dom.util',
         '@dom.nodetype',

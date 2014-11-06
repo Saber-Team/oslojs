@@ -1,11 +1,8 @@
 /**
  * @fileoverview 本模块包含的类处理键盘事件在各浏览器及系统的兼容性问题.
- *     包括重复触发和key code问题.
- *
- * Different web browsers have very different keyboard event handling. Most
- * importantly is that only certain browsers repeat keydown events:
- * IE, Opera, FF/Win32, and Safari 3 repeat keydown events.
- * FF/Mac and Safari 2 do not.
+ * 包括重复触发和key code问题.
+ * 不同的浏览器对键盘事件处理不同, 其中最重要的是只有几个浏览器会repeat
+ * keydown events: IE, Opera, FF/Win32, Safari 3.而FF/Mac和Safari 2不会.
  *
  * For the purposes of this code, "Safari 3" means WebKit 525+, when WebKit
  * decided that they should try to match IE's key handling behavior.
@@ -84,21 +81,21 @@
  * p:     undefined      80 undefined
  * P:     undefined      80 undefined
  *
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/keyhandler.html
+ * @see ../../demos/keyhandler.html
  */
 
-define('Sogou.Events.KeyHandler',
+define('@events.keyhandler',
     [
-        'Sogou.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.EventType',
-        'Sogou.Events.KeyCodes',
-        'Sogou.Events.KeyEvent',
-        'Sogou.UA.Util'
+        '@util',
+        '@events.util',
+        '@events.browserevent',
+        '@events.eventtarget',
+        '@events.eventtype',
+        '@events.keycodes',
+        '@events.keyevent',
+        '@ua.util'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, KeyEvent, ua) {
 
@@ -200,6 +197,7 @@ define('Sogou.Events.KeyHandler',
                 this.attach(opt_element, opt_capture);
             }
         };
+
         util.inherits(KeyHandler, EventTarget);
 
         /**

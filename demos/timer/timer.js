@@ -1,10 +1,10 @@
 require([
-        'Sogou.Util',
-        'Sogou.Async.Delay',
-        'Sogou.Async.Throttle',
-        'Sogou.Events.Util',
-        'Sogou.Timer',
-        'Sogou.Dom.Util'
+        '@util',
+        '@async.delay',
+        '@async.throttle',
+        '@events.util',
+        '@timer',
+        '@dom.util'
     ],
     function(util, Delay, Throttle, EventsUtil, Timer, dom) {
 

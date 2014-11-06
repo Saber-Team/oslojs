@@ -41,21 +41,20 @@
  * </pre>
  */
 
-define('Sogou.Events.HandlerManager',
+define('@events.handlermanager',
     [
-        'Sogou.Util',
-        'Sogou.Disposable',
-        'Sogou.Events.Util',
-        'Sogou.Object'
+        '@util',
+        '@disposable',
+        '@events.util',
+        '@object'
     ],
     function(util, Disposable, EventUtil, object) {
 
         'use strict';
 
         /**
-         * Utility array used to unify the cases of listening for an array of types
-         * and listening for a single event, without using recursion or allocating
-         * an array each time.
+         * 用一个数组保存listen事件时单个事件或者事件数组,见listen方法.
+         * 为的是不需要每次都生成新的数组.
          * @type {Array.<string>}
          * @private
          */
@@ -78,6 +77,7 @@ define('Sogou.Events.HandlerManager',
              */
             this.keys_ = {};
         }
+
         util.inherits(HandlerManager, Disposable);
 
         // 原型方法
@@ -113,6 +113,7 @@ define('Sogou.Events.HandlerManager',
 
                 return this;
             },
+
             /**
              * 添加一次性事件监听.
              * @param {EventTarget} src 事件源
@@ -136,6 +137,7 @@ define('Sogou.Events.HandlerManager',
 
                 return this;
             },
+
             /**
              * @return {number} 绑定事件句柄数量
              */
@@ -148,6 +150,7 @@ define('Sogou.Events.HandlerManager',
                 }
                 return count;
             },
+
             /**
              * 移除处理器.
              * @param {EventTarget} src 事件源
@@ -174,6 +177,7 @@ define('Sogou.Events.HandlerManager',
 
                 return this;
             },
+
             /**
              * 移除所有句柄
              */
@@ -181,6 +185,7 @@ define('Sogou.Events.HandlerManager',
                 object.forEach(this.keys_, EventUtil.unlistenByKey);
                 this.keys_ = {};
             },
+
             /**
              * 析构当前对象
              * @override
@@ -190,13 +195,15 @@ define('Sogou.Events.HandlerManager',
                 HandlerManager.superClass_.disposeInternal.call(this);
                 this.removeAll();
             },
+
             /**
-             * Default event handler
+             * 默认的事件句柄.
              * @param {Event} e Event object.
              */
             handleEvent: function(e) {
                 throw Error('HandlerManager.handleEvent not implemented');
             },
+
             /**
              * 用一个特定的EventWrapper对象在Node节点或者EventTarget实例上添加事件监听.
              * @param {EventTarget} src The node to listen to events on.
@@ -211,6 +218,7 @@ define('Sogou.Events.HandlerManager',
                     this);
                 return this;
             },
+
             /**
              * 移除通过listenWithWrapper()添加的事件监听.
              * @param {EventTarget} src The target to stop listening to events on.

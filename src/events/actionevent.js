@@ -1,14 +1,14 @@
 /**
  * @fileoverview ActionEvent事件对象
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.ActionEvent',
+define('@events.actionevent',
     [
-        'Sogou.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.ActionEventType'
+        '@util',
+        '@events.browserevent',
+        '@events.actioneventtype'
     ],
     function(util, BrowserEvent, ActionEventType) {
 
@@ -24,6 +24,7 @@ define('Sogou.Events.ActionEvent',
             BrowserEvent.call(this, browserEvent.getBrowserEvent());
             this.type = ActionEventType.ACTION;
         };
+
         util.inherits(ActionEvent, BrowserEvent);
 
         return ActionEvent;

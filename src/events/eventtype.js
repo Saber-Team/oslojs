@@ -1,12 +1,10 @@
 /**
  * @fileoverview Event Types.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.EventType',
-    ['Sogou.UA.Util'],
-    function(ua) {
+define('@events.eventtype', ['@ua.util'], function(ua) {
 
     'use strict';
 

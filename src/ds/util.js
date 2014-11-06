@@ -1,12 +1,12 @@
 /**
  * @fileoverview 这个模块是一个函数集合. 支持所有实现了collection-like的类
  *     诸如Map, Set, Array, Object.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.DS.Util',
-    ['Sogou.Util','Sogou.Array','Sogou.Object'],
+define('@ds.util',
+    ['@util','@array','@object'],
     function(util, array, object) {
 
         'use strict';

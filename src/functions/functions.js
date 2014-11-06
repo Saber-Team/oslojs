@@ -178,12 +178,12 @@ define('@functions', [], function() {
      */
     function create(constructor, var_args) {
         /** @constructor */
-        var temp = function() {};
-        temp.prototype = constructor.prototype;
+        var F = function() {};
+        F.prototype = constructor.prototype;
 
         // obj will have constructor's prototype in its chain and
         // 'obj instanceof constructor' will be true.
-        var obj = new temp();
+        var obj = new F();
 
         // obj is initialized by constructor.
         // arguments is only array-like so lacks shift(), but can be used with

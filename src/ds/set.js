@@ -1,6 +1,6 @@
 /**
  * @fileoverview Datastructure: Set.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  *
  * 这个模块实现了Set数据结构. 增删元素复杂度 O(1). 元素可以是值类型或者引用类型.
@@ -8,7 +8,7 @@
  * 因为是不同引用.
  */
 
-define('Sogou.DS.Set', ['Sogou.Util', 'Sogou.DS.Util', 'Sogou.DS.Map'],
+define('@ds.set', ['@util', '@ds.util', '@ds.map'],
     function(util, ds, Map) {
 
         'use strict';

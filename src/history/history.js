@@ -126,19 +126,19 @@
  */
 
 
-define('Sogou.History.History',
+define('@history.history',
     [
-        'Sogou.Util',
-        'Sogou.Timer',
-        'Sogou.Dom.Util',
-        'Sogou.Events.HandlerManager',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.EventType',
-        'Sogou.History.EventType',
-        'Sogou.History.Event',
-        'Sogou.Memo',
-        'Sogou.String.Util',
-        'Sogou.UA.Util'
+        '@util',
+        '@timer',
+        '@dom.util',
+        '@events.handlermanager',
+        '@events.eventtarget',
+        '@events.eventtype',
+        '@history.eventtype',
+        '@history.event',
+        '@memo',
+        '@string.util',
+        '@ua.util'
     ],
     function(util, Timer, dom, HandlerManager, EvtTarget, EventType,
              HistoryEventType, HistoryEvent, memo, string, UA) {

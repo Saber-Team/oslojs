@@ -1,10 +1,10 @@
 /**
  * @fileoverview Class for FIFO Queue data structure.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.DS.Queue', ['Sogou.Array'], function(array) {
+define('@ds.queue', ['@array'], function(array) {
 
     'use strict';
 

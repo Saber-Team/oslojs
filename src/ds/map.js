@@ -1,17 +1,17 @@
 /**
- * @fileoverview Hash Map structure的实现. Map累实现了很多ds包下的方法所以这些方法在hash对象
- *     依然可用. 对于复杂的key types也适用. 简单key如numbers或strings, 特殊key如__proto__
- *     也不必担心.
- * @modified Leo.Zhang
+ * @fileoverview Hash Map structure的实现. Map累实现了很多ds包下的方法所以这些方法在
+ * hash对象依然可用. 对于复杂的key types也适用. 简单key如numbers或strings, 特殊key如
+ * __proto__也不必担心.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.DS.Map',
+define('@ds.map',
     [
-        'Sogou.Util',
-        'Sogou.Iter.Iterator',
-        'Sogou.Iter.StopIteration',
-        'Sogou.Object'
+        '@util',
+        '@iter.iterator',
+        '@iter.stopiteration',
+        '@object'
     ],
     function(util, Iterator, StopIteration, object) {
 

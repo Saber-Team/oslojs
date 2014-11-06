@@ -1,7 +1,7 @@
 /**
- * @fileoverview 本模块提供一个类封装了textarea元素的text change事件处理器,同时也对
- *     type=text|password的input元素生效. 事件发生在文本变化之后. 如果通过程序改变了
- *     元素的文本值则不触发该事件.
+ * @fileoverview 本模块提供一个类封装了textarea元素的text change事件处理器,
+ * 同时也对type=text|password的input元素生效. 事件发生在文本变化之后. 如果
+ * 通过程序改变了元素的文本值则不触发该事件.
  * <br>
  * <br>
  * 注意: 本模块不对事件对象的keyCode或charCode做正确性校验, 也不会跨浏览器统一它们的值.
@@ -15,21 +15,21 @@
  *     对于这些浏览器做一个基于key, clipboard, drop events事件的模拟. 因此事件在模拟
  *     环境中如果右键改变了文本的话(撤销|删除等操作)不会触发事件分发.
  * </ul>
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/inputhandler.html
+ * @see ../../demos/inputhandler.html
  */
 
-define('Sogou.Events.InputHandler',
+define('@events.inputhandler',
     [
-        'Sogou.Util',
-        'Sogou.Timer',
-        'Sogou.Dom.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.HandlerManager',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.KeyCodes',
-        'Sogou.UA.Util'
+        '@util',
+        '@timer',
+        '@dom.util',
+        '@events.browserevent',
+        '@events.handlermanager',
+        '@events.eventtarget',
+        '@events.keycodes',
+        '@ua.util'
     ],
     function(util, Timer, dom, BrowserEvent, HandlerManager, EventTarget, KeyCodes, ua) {
 
@@ -75,13 +75,18 @@ define('Sogou.Events.InputHandler',
                 emulateInputEvents ? ['keydown', 'paste', 'cut', 'drop', 'input'] : 'input',
                 this);
         };
+
         util.inherits(InputHandler, EventTarget);
+
 
         /**
          * input handler触发的事件类型
          * @enum {string}
          */
-        InputHandler.EventType = { INPUT: 'input' };
+        InputHandler.EventType = {
+            INPUT: 'input'
+        };
+
 
         /**
          * 模拟模式下需要一定延时触发input event事件.
@@ -89,6 +94,7 @@ define('Sogou.Events.InputHandler',
          * @private
          */
         InputHandler.prototype.timer_ = null;
+
 
         /**
          * 事件处理器分发一个新的事件.
@@ -146,6 +152,7 @@ define('Sogou.Events.InputHandler',
             }
         };
 
+
         /**
          * 取消定时器.
          * @private
@@ -156,6 +163,7 @@ define('Sogou.Events.InputHandler',
                 this.timer_ = null;
             }
         };
+
 
         /**
          * 创建input event.
@@ -169,6 +177,7 @@ define('Sogou.Events.InputHandler',
             return e;
         };
 
+
         /** @override */
         InputHandler.prototype.disposeInternal = function() {
             InputHandler.superClass_.disposeInternal.call(this);
@@ -176,6 +185,7 @@ define('Sogou.Events.InputHandler',
             this.cancelTimerIfSet_();
             delete this.element_;
         };
+
 
         return InputHandler;
     }

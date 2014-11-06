@@ -1,16 +1,9 @@
 /**
- * @fileoverview 鼠标滚轮事件.
- * @modified Leo.Zhang
+ * @fileoverview 鼠标滚轮事件类型.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.MouseWheelEventType', [],
-    function() {
-
-        'use strict';
-
-        return {
-            MOUSEWHEEL: 'mousewheel'
-        };
-    }
-);
+define('@events.mousewheeleventtype', [], {
+    MOUSEWHEEL: 'mousewheel'
+});

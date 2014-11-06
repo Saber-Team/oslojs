@@ -1,17 +1,17 @@
 /**
  * @fileoverview 自定义可分发事件的对象基类,是整个框架事件系统的基础.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.EventTarget',
+define('@events.eventtarget',
     [
-        'Sogou.Util',
-        'Sogou.Disposable',
-        'Sogou.Array',
-        'Sogou.Events.EventBase',
-        'Sogou.Events.ListenerMap',
-        'Sogou.Object'
+        '@util',
+        '@disposable',
+        '@array',
+        '@events.eventbase',
+        '@events.listenermap',
+        '@object'
     ],
     function(util, Disposable, array, EventBase, ListenerMap, object) {
 
@@ -23,6 +23,7 @@ define('Sogou.Events.EventTarget',
          * @private
          */
         var MAX_ANCESTORS_ = 100;
+
 
         /**
          * 在祖先树上依次触发事件.
@@ -80,6 +81,7 @@ define('Sogou.Events.EventTarget',
             return rv;
         };
 
+
         /**
          * EventTarget继承了Disposable.
          * 拥有W3C的EventTarget-like特性(捕获/冒泡机制, 停止冒泡和组织默认行为等)
@@ -121,7 +123,9 @@ define('Sogou.Events.EventTarget',
              */
             this.actualEventTarget_ = this;
         }
+
         util.inherits(EventTarget, Disposable);
+
 
         util.mixin(EventTarget.prototype, {
             /**
@@ -129,12 +133,14 @@ define('Sogou.Events.EventTarget',
              * 此构造函数的实例是可被监听的.
              */
             isListenable: true,
+
             /**
              * 冒泡阶段的父级对象.
              * @type {EventTarget}
              * @private
              */
             parentEventTarget_: null,
+
             /**
              * 返回冒泡时用到的逻辑父组件.
              * @return {EventTarget} 逻辑父组件或者null.
@@ -143,6 +149,7 @@ define('Sogou.Events.EventTarget',
             getParentEventTarget: function() {
                 return this.parentEventTarget_;
             },
+
             /**
              * 设置父节点,用于捕获冒泡
              * @param {EventTarget} parent
@@ -150,6 +157,7 @@ define('Sogou.Events.EventTarget',
             setParentEventTarget: function(parent) {
                 this.parentEventTarget_ = parent;
             },
+
             /** @override */
             dispatchEvent: function(e) {
                 var ancestorsTree,
@@ -168,6 +176,7 @@ define('Sogou.Events.EventTarget',
                 // 这步是真正的分发事件, 前面只是构建了ancestorsTree
                 return dispatchEventInternal_(this.actualEventTarget_, e, ancestorsTree);
             },
+
             /**
              * 从当前对象移除所有句柄. EventTarget的子类可能需要重写此方法解除所有dom绑定
              * 和额外的句柄.
@@ -178,25 +187,30 @@ define('Sogou.Events.EventTarget',
                 this.removeAllListeners();
                 this.parentEventTarget_ = null;
             },
+
             /** @override */
             listen: function(type, listener, opt_useCapture, opt_listenerScope) {
                 return this.eventTargetListeners_.add(
                     type, listener, false /* callOnce */, opt_useCapture, opt_listenerScope);
             },
+
             /** @override */
             listenOnce: function(type, listener, opt_useCapture, opt_listenerScope) {
                 return this.eventTargetListeners_.add(
                     type, listener, true /* callOnce */, opt_useCapture, opt_listenerScope);
             },
+
             /** @override */
             unlisten: function(type, listener, opt_useCapture, opt_listenerScope) {
                 return this.eventTargetListeners_.remove(
                     type, listener, opt_useCapture, opt_listenerScope);
             },
+
             /** @override */
             unlistenByKey: function(key) {
                 return this.eventTargetListeners_.removeByKey(key);
             },
+
             /** @override */
             removeAllListeners: function(opt_type) {
                 // TODO: 这步判断可以移除.
@@ -204,6 +218,7 @@ define('Sogou.Events.EventTarget',
                     return 0;
                 return this.eventTargetListeners_.removeAll(opt_type);
             },
+
             /** @override */
             fireListeners: function(type, capture, eventObject) {
                 // TODO: 这段代码在listenerArray为空的情况下不会创建数组.
@@ -220,26 +235,29 @@ define('Sogou.Events.EventTarget',
                     // listener被标记为removed.
                     if (listener && !listener.removed && listener.capture === capture) {
                         var listenerFn = listener.listener;
-                        var listenerHandler = listener.handler || listener.src;
+                        var context = listener.context || listener.src;
 
                         if (listener.callOnce) {
                             this.unlistenByKey(listener);
                         }
-                        rv = listenerFn.call(listenerHandler, eventObject) !== false && rv;
+                        rv = listenerFn.call(context, eventObject) !== false && rv;
                     }
                 }
 
                 return rv && eventObject.returnValue_ !== false;
             },
+
             /** @override */
             getListeners: function(type, capture) {
                 return this.eventTargetListeners_.getListeners(type, capture);
             },
+
             /** @override */
             getListener: function(type, listener, capture, opt_listenerScope) {
                 return this.eventTargetListeners_.getListener(
                     type, listener, capture, opt_listenerScope);
             },
+
             /** @override */
             hasListener: function(opt_type, opt_capture) {
                 return this.eventTargetListeners_.hasListener(opt_type, opt_capture);

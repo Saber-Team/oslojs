@@ -1,19 +1,19 @@
 /**
  * @fileoverview 这个模块提供的类可以在某个元素上监听它子孙元素的focusin和focusout事件.
- *     "focus"和"blur"事件由于不能冒泡(或者表现不一致), 因此必须在元素本身上添加监听.
- *     本模块提供的方法可以只在组父级元素上绑定处理器函数, 并且在子孙元素焦点状态改变时收到通知.
- * @modified Leo.Zhang
+ * "focus"和"blur"事件由于不能冒泡(或者表现不一致), 因此必须在元素本身上添加监听.
+ * 本模块提供的方法可以只在组父级元素上绑定处理器函数, 并且在子孙元素焦点状态改变时收到通知.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/focushandler.html
+ * @see ../../demos/focushandler.html
  */
 
-define('Sogou.Events.FocusHandler',
+define('@events.focushandler',
     [
-        'Sogou.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.EventTarget',
-        'Sogou.UA.Util'
+        '@util',
+        '@events.util',
+        '@events.browserevent',
+        '@events.eventtarget',
+        '@ua.util'
     ],
     function(util, EventsUtil, BrowserEvent, EventTarget, ua) {
 

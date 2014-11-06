@@ -1,16 +1,16 @@
 /**
  * @fileoverview 一个句柄的映射关系, 提供了eventtarget的一些实用方法
  * 这个类的实例被EventTarget类的实例组合使用
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.ListenerMap',
+define('@events.listenermap',
     [
-        'Sogou.Util',
-        'Sogou.Array',
-        'Sogou.Events.Listener',
-        'Sogou.Object'
+        '@util',
+        '@array',
+        '@events.listener',
+        '@object'
     ],
     function(util, array, Listener, object) {
 
@@ -231,7 +231,7 @@ define('Sogou.Events.ListenerMap',
                 if (!listenerObj.removed &&
                     listenerObj.listener === listener &&
                     listenerObj.capture === opt_useCapture &&
-                    listenerObj.handler === opt_context) {
+                    listenerObj.context === opt_context) {
                     return i;
                 }
             }

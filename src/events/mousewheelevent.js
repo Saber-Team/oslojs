@@ -1,14 +1,14 @@
 /**
- * @fileoverview mousewheel event
- * @modified Leo.Zhang
+ * @fileoverview 滚轮事件
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.MouseWheelEvent',
+define('@events.mousewheelevent',
     [
-        'Sogou.Util',
-        'Sogou.Events.BrowserEvent',
-        'Sogou.Events.MouseWheelEventType'
+        '@util',
+        '@events.browserevent',
+        '@events.mousewheeleventtype'
     ],
     function(util, BrowserEvent, EventType) {
 
@@ -46,6 +46,7 @@ define('Sogou.Events.MouseWheelEvent',
              */
             this.deltaY = deltaY;
         };
+
         util.inherits(MouseWheelEvent, BrowserEvent);
 
         return MouseWheelEvent;

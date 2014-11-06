@@ -1,13 +1,11 @@
 /**
- * @fileoverview 事件基类. 事件系统在任何JS框架中都非常重要.
- *     各大公司的JS团队对于事件模型的填补,有些就是最佳实践。
- * @modified Leo.Zhang
+ * @fileoverview 事件基类.事件系统在任何JS框架中都非常重要.
+ * 各大公司的JS团队对于事件模型的填补,有些就是最佳实践.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.EventBase',
-    [],
-    function() {
+define('@events.eventbase', [], function() {
 
     'use strict';
 

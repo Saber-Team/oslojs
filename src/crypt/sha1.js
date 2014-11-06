@@ -90,10 +90,11 @@ define('@crypt.sha1', [], function() {
         }
 
         var W = this.W_;
+        var i, t;
 
         // get 16 big endian words
         if (typeof buf === 'string') {
-            for (var i = 0; i < 16; i++) {
+            for (i = 0; i < 16; i++) {
                 // TODO(user): [bug 8140122] Recent versions of Safari for Mac OS and iOS
                 // have a bug that turns the post-increment ++ operator into pre-increment
                 // during JIT compilation.  We have code that depends heavily on SHA-1 for
@@ -109,7 +110,7 @@ define('@crypt.sha1', [], function() {
                 opt_offset += 4;
             }
         } else {
-            for (var i = 0; i < 16; i++) {
+            for (i = 0; i < 16; i++) {
                 W[i] = (buf[opt_offset] << 24) |
                     (buf[opt_offset + 1] << 16) |
                     (buf[opt_offset + 2] << 8) |
@@ -119,8 +120,8 @@ define('@crypt.sha1', [], function() {
         }
 
         // expand to 80 words
-        for (var i = 16; i < 80; i++) {
-            var t = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+        for (i = 16; i < 80; i++) {
+            t = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
             W[i] = ((t << 1) | (t >>> 31)) & 0xffffffff;
         }
 
@@ -132,7 +133,7 @@ define('@crypt.sha1', [], function() {
         var f, k;
 
         // TODO(user): Try to unroll this loop to speed up the computation.
-        for (var i = 0; i < 80; i++) {
+        for (i = 0; i < 80; i++) {
             if (i < 40) {
                 if (i < 20) {
                     f = d ^ (b & (c ^ d));
@@ -151,7 +152,7 @@ define('@crypt.sha1', [], function() {
                 }
             }
 
-            var t = (((a << 5) | (a >>> 27)) + f + e + k + W[i]) & 0xffffffff;
+            t = (((a << 5) | (a >>> 27)) + f + e + k + W[i]) & 0xffffffff;
             e = d;
             d = c;
             c = ((b << 30) | (b >>> 2)) & 0xffffffff;
@@ -185,7 +186,7 @@ define('@crypt.sha1', [], function() {
             // input buffer (assuming it contains sufficient data). This gives ~25%
             // speedup on Chrome 23 and ~15% speedup on Firefox 16, but requires that
             // the data is provided in large chunks (or in multiples of 64 bytes).
-            if (inbuf == 0) {
+            if (inbuf === 0) {
                 while (n <= lengthMinusBlock) {
                     this.compress_(bytes, n);
                     n += 64;
@@ -197,7 +198,7 @@ define('@crypt.sha1', [], function() {
                     buf[inbuf] = bytes.charCodeAt(n);
                     ++inbuf;
                     ++n;
-                    if (inbuf == 64) {
+                    if (inbuf === 64) {
                         this.compress_(buf);
                         inbuf = 0;
                         // Jump to the outer loop so we use the full-block optimization.
@@ -209,7 +210,7 @@ define('@crypt.sha1', [], function() {
                     buf[inbuf] = bytes[n];
                     ++inbuf;
                     ++n;
-                    if (inbuf == 64) {
+                    if (inbuf === 64) {
                         this.compress_(buf);
                         inbuf = 0;
                         // Jump to the outer loop so we use the full-block optimization.
@@ -228,6 +229,7 @@ define('@crypt.sha1', [], function() {
     Sha1.prototype.digest = function() {
         var digest = [];
         var totalBits = this.total_ * 8;
+        var i;
 
         // Add pad 0x80 0x00*.
         if (this.inbuf_ < 56) {
@@ -237,7 +239,7 @@ define('@crypt.sha1', [], function() {
         }
 
         // Add # bits.
-        for (var i = 63; i >= 56; i--) {
+        for (i = 63; i >= 56; i--) {
             this.buf_[i] = totalBits & 255;
             totalBits /= 256; // Don't use bit-shifting here!
         }
@@ -245,7 +247,7 @@ define('@crypt.sha1', [], function() {
         this.compress_(this.buf_);
 
         var n = 0;
-        for (var i = 0; i < 5; i++) {
+        for (i = 0; i < 5; i++) {
             for (var j = 24; j >= 0; j -= 8) {
                 digest[n] = (this.chain_[i] >> j) & 255;
                 ++n;

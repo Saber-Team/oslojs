@@ -1,14 +1,14 @@
 /**
  * @fileoverview Datastructure: Pool.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  *
  * A generic class for handling pools of objects.
  * When an object is released, it is attempted to be reused.
  */
 
-define('Sogou.DS.Pool',
-    ['Sogou.Util', 'Sogou.Disposable', 'Sogou.DS.Util', 'Sogou.DS.Queue', 'Sogou.DS.Set'],
+define('@ds.pool',
+    ['@util', '@disposable', '@ds.util', '@ds.queue', '@ds.set'],
     function(util, Disposable, ds, Queue, Set) {
 
         'use strict';
@@ -19,7 +19,7 @@ define('Sogou.DS.Pool',
          * @type {string}
          * @private
          */
-        var ERROR_MIN_MAX_ = '[Sogou.DS.Pool] Min can not be greater than max';
+        var ERROR_MIN_MAX_ = '[Oslo.ds.pool] Min can not be greater than max';
 
 
         /**
@@ -28,7 +28,7 @@ define('Sogou.DS.Pool',
          * @type {string}
          * @private
          */
-        var ERROR_DISPOSE_UNRELEASED_OBJS_ = '[Sogou.DS.Pool] Objects not released';
+        var ERROR_DISPOSE_UNRELEASED_OBJS_ = '[Oslo.ds.pool] Objects not released';
 
 
         /**

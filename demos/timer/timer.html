@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sogou.Timer, Sogou.Async.Throttle, Sogou.Async.Delay</title>
+    <title>Oslo.timer, Oslo.async.throttle, Oslo.async.delay</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="../css/demo.css">
     <style>
@@ -13,7 +13,7 @@
 </head>
 <body>
     <h1>Timer相关的一组Demo</h1>
-    <h2>Sogou.Async.Delay</h2>
+    <h2>Oslo.async.delay</h2>
     <p>在一些延时后执行函数.</p>
     Delay (seconds): <input size="2" type="text" id="delaySeconds" value="2">
     <button onclick="doDelay()">开始计时</button>
@@ -21,7 +21,7 @@
     <br />
     Delay Status: <span class="userStatus" id="delayStatus">Not Set</span>
 
-    <h2>Sogou.Async.Throttle</h2>
+    <h2>Oslo.async.throttle</h2>
     节流机制可以防止在一定时间间隔内动作多次触发。
     <br />
     创建一个Throttle, 尽多次的点击'Do Throttle'按钮. 'Hits'的次数随之不断累积增加.
@@ -38,7 +38,7 @@
         Throttle Action Called: <span class="userStatus" id="throttleStatus"></span>
     </p>
 
-    <h2>Sogou.Timer</h2>
+    <h2>Oslo.timer</h2>
     timer对象在被启用后可以在每次一定时间间隔后触发函数, 它监听的是'tick'事件.
     <p>
         Timer interval (seconds):
@@ -50,7 +50,7 @@
         Timer Status: <span class="userStatus" id="timerStatus">Not Set</span>
     </p>
 
-    <h2>Sogou.Timer.callOnce</h2>
+    <h2>Oslo.timer.callOnce</h2>
     Timer模块有一个很有用的方法在指定时间后触发动作.
     <br />
     这个方法是window.setTimeout的一个包装, 对应的还有个clear方法.
@@ -83,7 +83,7 @@
     <script type="text/javascript" src="../../src/events/browserfeature.js"></script>
     <script type="text/javascript" src="../../src/events/browserevent.js"></script>
     <script type="text/javascript" src="../../src/timer/timer.js"></script>
-    <script type="text/javascript" src="../../src/dom/dom.js"></script>
+    <script type="text/javascript" src="../../src/dom/util.js"></script>
     <script type="text/javascript" src="../../src/events/util.js"></script>
     <script type="text/javascript" src="../../src/async/throttle.js"></script>
     <script type="text/javascript" src="../../src/async/delay.js"></script>

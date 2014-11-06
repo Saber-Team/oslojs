@@ -1,16 +1,16 @@
 /**
  * @fileoverview 基于HTML5的历史状态管理器, 和History兼容
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.History.Html5History',
+define('@history.html5history',
     [
-        'Sogou.Util',
-        'Sogou.Events.Util',
-        'Sogou.Events.EventTarget',
-        'Sogou.Events.EventType',
-        'Sogou.History.Event'
+        '@util',
+        '@events.util',
+        '@events.eventtarget',
+        '@events.eventtype',
+        '@history.event'
     ],
     function(util, EventUtil, EventTarget, EventType, HistoryEvent) {
 

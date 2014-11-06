@@ -1,12 +1,12 @@
 /**
  * @fileoverview 键盘事件封装类.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
- * @see ../demos/keyhandler.html
+ * @see ../../demos/keyhandler.html
  */
 
-define('Sogou.Events.KeyEvent',
-    ['Sogou.Util','Sogou.Events.BrowserEvent','Sogou.Events.KeyEventType'],
+define('@events.keyevent',
+    ['@util','@events.browserevent','@events.keyeventtype'],
     function(util, BrowserEvent, KeyEventType) {
 
         'use strict';
@@ -21,7 +21,9 @@ define('Sogou.Events.KeyEvent',
          * @extends {BrowserEvent}
          */
         var KeyEvent = function(keyCode, charCode, repeat, browserEvent) {
+
             BrowserEvent.call(this, browserEvent);
+
             this.type = KeyEventType.KEY;
 
             /**
@@ -42,6 +44,7 @@ define('Sogou.Events.KeyEvent',
              */
             this.repeat = repeat;
         };
+
         util.inherits(KeyEvent, BrowserEvent);
 
         return KeyEvent;

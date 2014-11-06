@@ -1,6 +1,6 @@
 /**
  * @fileoverview 包含浏览器event的标准化实现
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  *
  * <pre>
@@ -30,13 +30,13 @@
  *
  */
 
-define('Sogou.Events.BrowserEvent',
+define('@events.browserevent',
     [
-        'Sogou.Util',
-        'Sogou.Events.BrowserFeature',
-        'Sogou.Events.EventBase',
-        'Sogou.Events.EventType',
-        'Sogou.UA.Util'
+        '@util',
+        '@events.browserfeature',
+        '@events.eventbase',
+        '@events.eventtype',
+        '@ua.util'
     ],
     function(util, BrowserFeature, EventBase, EventType, UA) {
 
@@ -55,7 +55,9 @@ define('Sogou.Events.BrowserEvent',
                 this.init(opt_e, opt_currentTarget);
             }
         }
+
         util.inherits(BrowserEvent, EventBase);
+
 
         /**
          * 鼠标按键标准化后的常量值.
@@ -67,6 +69,7 @@ define('Sogou.Events.BrowserEvent',
             RIGHT: 2
         };
 
+
         /**
          * IE下左中右的键值有所不同,传递标准值映射出IE下的值.
          * @type {Array.<number>}
@@ -77,6 +80,7 @@ define('Sogou.Events.BrowserEvent',
             2  // RIGHT
         ];
 
+
         // 混入原型对象
         util.mixin(BrowserEvent.prototype, {
             /**
@@ -85,51 +89,61 @@ define('Sogou.Events.BrowserEvent',
              * @type {Node}
              */
             target: null,
+
             /**
              * @override
              * @type {Node|undefined}
              */
             currentTarget: null,
+
             /**
              * mouseover,mouseout事件用到的相关元素.
              * @type {Node}
              */
             relatedTarget: null,
+
             /**
              * X-coordinate relative to target.
              * @type {number}
              */
             offsetX: 0,
+
             /**
              * Y-coordinate relative to target.
              * @type {number}
              */
             offsetY: 0,
+
             /**
              * X-coordinate relative to the window.
              * @type {number}
              */
             clientX: 0,
+
             /**
              * Y-coordinate relative to the window.
              * @type {number}
              */
             clientY: 0,
+
             /**
              * X-coordinate relative to the monitor.
              * @type {number}
              */
             screenX: 0,
+
             /**
              * Y-coordinate relative to the monitor.
              * @type {number}
              */
             screenY: 0,
+
             /**
              * 鼠标按下的键.
              * @type {number}
              */
             button: 0,
+
             /**
              * IE只有keyCode属性,表示按键的ascii码.onkeydown会在任何情况下触发,但是keypress对于
              * 功能键,后退键和方向键失效. keypress中的keyCode对应ascii码正常,keydown中的对应了大写
@@ -137,50 +151,59 @@ define('Sogou.Events.BrowserEvent',
              * @type {number}
              */
             keyCode: 0,
+
             /**
              * 非IE用charCode表示按键的ascii码,在keypress时可用.keydown时此值为0
              * @type {number}
              */
             charCode: 0,
+
             /**
-             * Whether control was pressed at time of event.
+             * 是否按下ctrl键.
              * @type {boolean}
              */
             ctrlKey: false,
+
             /**
-             * Whether alt was pressed at time of event.
+             * 是否按下alt键.
              * @type {boolean}
              */
             altKey: false,
+
             /**
              * Whether shift was pressed at time of event.
              * @type {boolean}
              */
             shiftKey: false,
+
             /**
              * Whether the meta key was pressed at time of event.
              * Windows上Meta键就是windows键, MAC上就是command键..
              * @type {boolean}
              */
             metaKey: false,
+
             /**
              * https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history
              * History事件对象, 只在PopState事件出现, 是pushState或者replaceState时提供的状态对象的一个copy.
              * @type {Object}
              */
             state: null,
+
             /**
              * Whether the default platform modifier key was pressed at time of event.
-             * (除了MAC系统,其他系统上这个键都是ctrl, MAC上是Meta键.
+             * 除了MAC系统,其他系统上这个键都是ctrl, MAC上是Meta键.
              * @type {boolean}
              */
             platformModifierKey: false,
+
             /**
              * 一个私有属性保存原生事件的引用.
              * @type {Event}
              * @private
              */
             event_ : null,
+
             /**
              * 接收浏览器原生事件对象，转化成跨浏览器统一对象。
              * @param {Event} evt 浏览器事件对象.
@@ -240,6 +263,7 @@ define('Sogou.Events.BrowserEvent',
                 }
                 delete this.propagationStopped_;
             },
+
             /**
              * 测试事件发生时按下的是哪个鼠标键. 只在IE和Gecko核的浏览器有用.
              * IE里只对mousedown/mouseup事件有用, 因为click只会由左边的按键触发.
@@ -265,6 +289,7 @@ define('Sogou.Events.BrowserEvent',
                     return this.event_.button === button;
                 }
             },
+
             /**
              * Whether this has an "action"-producing mouse button.
              * 根据定义, 包括windows/linux系统上的鼠标左键单击, 和Macs系统上的鼠标左键
@@ -277,6 +302,7 @@ define('Sogou.Events.BrowserEvent',
                 return this.isButton(BrowserEvent.MouseButton.LEFT) &&
                     !(UA.isWEBKIT && UA.isMAC && this.ctrlKey);
             },
+
             /**
              * @override
              */
@@ -288,6 +314,7 @@ define('Sogou.Events.BrowserEvent',
                     this.event_.cancelBubble = true;
                 }
             },
+
             /**
              * @override
              */
@@ -327,12 +354,14 @@ define('Sogou.Events.BrowserEvent',
                     be.preventDefault();
                 }
             },
+
             /**
              * @return {Event} 返回原始浏览器事件.
              */
             getBrowserEvent: function() {
                 return this.event_;
             },
+
             /** @override */
             disposeInternal: function() {}
         });

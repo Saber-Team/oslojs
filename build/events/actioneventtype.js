@@ -1,2 +1,2 @@
 /** Oslo JavaScript Framework. */
-define("Sogou.Events.ActionEventType",[],function(){"use strict";return{ACTION:"action",BEFOREACTION:"beforeaction"}});
+define("@events.actioneventtype",[],{ACTION:"action",BEFOREACTION:"beforeaction"});

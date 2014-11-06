@@ -1,11 +1,24 @@
 {
-  "name": "SogouJS",
-  "version": "0.1.0",
-  "author": "Leo.Zhang",
-  "email": "zmike86@gmail.com",
+  "name": "Oslo",
+  "version": "0.2.0",
+  "contributors": [
+    {
+      "name": "Leo.Zhang",
+      "email": "zmike86@gmail.com"
+    }
+  ],
   "scripts": {
     "test": "grunt default"
   },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "licenses": [
+    {
+      "type": "",
+      "url": ""
+    }
+  ],
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-csslint": "~0.1.2",

@@ -1,10 +1,10 @@
 /**
- * @fileoverview 根据浏览器的厂商和版本号进行特性的判断, 一般情况下不建议这么做.
- * @modified Leo.Zhang
+ * @fileoverview 根据浏览器的厂商和版本号进行特性的判断.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Events.BrowserFeature', ['Sogou.UA.Util'], function(ua) {
+define('@events.browserfeature', ['@ua.util'], function(ua) {
 
     'use strict';
 
