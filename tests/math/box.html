@@ -1,0 +1,309 @@
+<!--
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/array/array.js"></script>
+    <script src="../../src/math/util.js"></script>
+    <script src="../../src/math/coordinate.js"></script>
+    <script src="../../src/math/box.js"></script>
+</head>
+<body>
+    <!-- include spec files here... -->
+    <script>
+
+    describe('Oslo.math.util模块', function() {
+
+        var Coordinate = Oslo.math.Coordinate;
+        var Box = Oslo.math.Box;
+
+        it('测试clone方法', function testBoxClone() {
+            var b = new Box(0, 0, 0, 0);
+            expect(Box.equals(b, b.clone())).toBe(true);
+
+            b.left = 0;
+            b.top = 1;
+            b.right = 2;
+            b.bottom = 3;
+
+            expect(Box.equals(b, b.clone())).toBe(true);
+        });
+
+
+        it('测试BoxRelativePositionX方法', function testBoxRelativePositionX() {
+            var box = new Box(50, 100, 100, 50);
+
+            expect(Box.relativePositionX(box, new Coordinate(75, 0))).toBe(0);
+            expect(Box.relativePositionX(box, new Coordinate(75, 75))).toBe(0);
+            expect(0, Box.relativePositionX(box, new Coordinate(75, 105))).toBe(0);
+            expect(-5, Box.relativePositionX(box, new Coordinate(45, 75))).toBe(-5);
+            expect(5, Box.relativePositionX(box, new Coordinate(105, 75))).toBe(5);
+        });
+
+
+        it('测试BoxRelativePositionY方法', function testBoxRelativePositionY() {
+            var box = new Box(50, 100, 100, 50);
+
+            expect(Box.relativePositionY(box, new Coordinate(0, 75))).toBe(0);
+            expect(Box.relativePositionY(box, new Coordinate(75, 75))).toBe(0);
+            expect(Box.relativePositionY(box, new Coordinate(105, 75))).toBe(0);
+            expect(Box.relativePositionY(box, new Coordinate(75, 45))).toBe(-5);
+            expect(Box.relativePositionY(box, new Coordinate(75, 105))).toBe(5);
+        });
+
+
+        it('测试BoxDistance方法', function testBoxDistance() {
+            var box = new Box(50, 100, 100, 50);
+
+            expect(Box.distance(box, new Coordinate(75, 75))).toBe(0);
+            expect(Box.distance(box, new Coordinate(75, 25))).toBe(25);
+            expect(Box.distance(box, new Coordinate(40, 80))).toBe(10);
+            expect(Box.distance(box, new Coordinate(46, 47))).toBe(5);
+            expect(Box.distance(box, new Coordinate(106, 108))).toBe(10);
+        });
+
+
+        it('测试BoxContains方法', function testBoxContains() {
+            var box = new Box(50, 100, 100, 50);
+
+            expect(Box.contains(box, new Coordinate(75, 75))).toBe(true);
+            expect(Box.contains(box, new Coordinate(50, 100))).toBe(true);
+            expect(Box.contains(box, new Coordinate(100, 99))).toBe(true);
+            expect(Box.contains(box, new Coordinate(100, 101))).toBe(false);
+            expect(Box.contains(box, new Coordinate(49, 50))).toBe(false);
+            expect(Box.contains(box, new Coordinate(25, 25))).toBe(false);
+        });
+
+
+        it('测试BoxContainsBox方法', function testBoxContainsBox() {
+            var box = new Box(50, 100, 100, 50);
+
+            function assertContains(boxB) {
+                expect(Box.contains(box, boxB)).toBe(true);
+            }
+
+            function assertNotContains(boxB) {
+                expect(Box.contains(box, boxB)).toBe(false);
+            }
+
+            assertContains(new Box(60, 90, 90, 60));
+            assertNotContains(new Box(1, 3, 4, 2));
+            assertNotContains(new Box(30, 90, 60, 60));
+            assertNotContains(new Box(60, 110, 60, 60));
+            assertNotContains(new Box(60, 90, 110, 60));
+            assertNotContains(new Box(60, 90, 60, 40));
+        });
+
+
+        it('测试BoxesIntersect方法', function testBoxesIntersect() {
+            var box = new Box(50, 100, 100, 50);
+
+            function assertIntersects(boxB) {
+                expect(Box.intersects(box, boxB)).toBe(true);
+            }
+            function assertNotIntersects(boxB) {
+                expect(Box.intersects(box, boxB)).toBe(false);
+            }
+
+            assertIntersects(box);
+            assertIntersects(new Box(20, 80, 80, 20));
+            assertIntersects(new Box(50, 80, 100, 20));
+            assertIntersects(new Box(80, 80, 120, 20));
+            assertIntersects(new Box(20, 100, 80, 50));
+            assertIntersects(new Box(80, 100, 120, 50));
+            assertIntersects(new Box(20, 120, 80, 80));
+            assertIntersects(new Box(50, 120, 100, 80));
+            assertIntersects(new Box(80, 120, 120, 80));
+            assertIntersects(new Box(20, 120, 120, 20));
+            assertIntersects(new Box(70, 80, 80, 70));
+            assertNotIntersects(new Box(10, 30, 30, 10));
+            assertNotIntersects(new Box(10, 70, 30, 30));
+            assertNotIntersects(new Box(10, 100, 30, 50));
+            assertNotIntersects(new Box(10, 120, 30, 80));
+            assertNotIntersects(new Box(10, 140, 30, 120));
+            assertNotIntersects(new Box(30, 30, 70, 10));
+            assertNotIntersects(new Box(30, 140, 70, 120));
+            assertNotIntersects(new Box(50, 30, 100, 10));
+            assertNotIntersects(new Box(50, 140, 100, 120));
+            assertNotIntersects(new Box(80, 30, 120, 10));
+            assertNotIntersects(new Box(80, 140, 120, 120));
+            assertNotIntersects(new Box(120, 30, 140, 10));
+            assertNotIntersects(new Box(120, 70, 140, 30));
+            assertNotIntersects(new Box(120, 100, 140, 50));
+            assertNotIntersects(new Box(120, 120, 140, 80));
+            assertNotIntersects(new Box(120, 140, 140, 120));
+        });
+
+
+        it('测试BoxesIntersectWithPadding方法', function testBoxesIntersectWithPadding() {
+            var box = new Box(50, 100, 100, 50);
+
+            function assertIntersects(boxB, padding) {
+                expect(Box.intersectsWithPadding(box, boxB, padding)).toBe(true);
+            }
+            function assertNotIntersects(boxB, padding) {
+                expect(Box.intersectsWithPadding(box, boxB, padding)).toBe(false);
+            }
+
+            assertIntersects(box, 10);
+            assertIntersects(new Box(20, 80, 80, 20), 10);
+            assertIntersects(new Box(50, 80, 100, 20), 10);
+            assertIntersects(new Box(80, 80, 120, 20), 10);
+            assertIntersects(new Box(20, 100, 80, 50), 10);
+            assertIntersects(new Box(80, 100, 120, 50), 10);
+            assertIntersects(new Box(20, 120, 80, 80), 10);
+            assertIntersects(new Box(50, 120, 100, 80), 10);
+            assertIntersects(new Box(80, 120, 120, 80), 10);
+            assertIntersects(new Box(20, 120, 120, 20), 10);
+            assertIntersects(new Box(70, 80, 80, 70), 10);
+            assertIntersects(new Box(10, 30, 30, 10), 20);
+            assertIntersects(new Box(10, 70, 30, 30), 20);
+            assertIntersects(new Box(10, 100, 30, 50), 20);
+            assertIntersects(new Box(10, 120, 30, 80), 20);
+            assertIntersects(new Box(10, 140, 30, 120), 20);
+            assertIntersects(new Box(30, 30, 70, 10), 20);
+            assertIntersects(new Box(30, 140, 70, 120), 20);
+            assertIntersects(new Box(50, 30, 100, 10), 20);
+            assertIntersects(new Box(50, 140, 100, 120), 20);
+            assertIntersects(new Box(80, 30, 120, 10), 20);
+            assertIntersects(new Box(80, 140, 120, 120), 20);
+            assertIntersects(new Box(120, 30, 140, 10), 20);
+            assertIntersects(new Box(120, 70, 140, 30), 20);
+            assertIntersects(new Box(120, 100, 140, 50), 20);
+            assertIntersects(new Box(120, 120, 140, 80), 20);
+            assertIntersects(new Box(120, 140, 140, 120), 20);
+            assertNotIntersects(new Box(10, 30, 30, 10), 10);
+            assertNotIntersects(new Box(10, 70, 30, 30), 10);
+            assertNotIntersects(new Box(10, 100, 30, 50), 10);
+            assertNotIntersects(new Box(10, 120, 30, 80), 10);
+            assertNotIntersects(new Box(10, 140, 30, 120), 10);
+            assertNotIntersects(new Box(30, 30, 70, 10), 10);
+            assertNotIntersects(new Box(30, 140, 70, 120), 10);
+            assertNotIntersects(new Box(50, 30, 100, 10), 10);
+            assertNotIntersects(new Box(50, 140, 100, 120), 10);
+            assertNotIntersects(new Box(80, 30, 120, 10), 10);
+            assertNotIntersects(new Box(80, 140, 120, 120), 10);
+            assertNotIntersects(new Box(120, 30, 140, 10), 10);
+            assertNotIntersects(new Box(120, 70, 140, 30), 10);
+            assertNotIntersects(new Box(120, 100, 140, 50), 10);
+            assertNotIntersects(new Box(120, 120, 140, 80), 10);
+            assertNotIntersects(new Box(120, 140, 140, 120), 10);
+        });
+
+
+        it('测试expandToInclude方法', function testExpandToInclude() {
+            var box = new Box(10, 50, 50, 10);
+            box.expandToInclude(new Box(60, 70, 70, 60));
+            expect(box.left).toBe(10);
+            expect(box.top).toBe(10);
+            expect(box.right).toBe(70);
+            expect(box.bottom).toBe(70);
+
+            box.expandToInclude(new Box(30, 40, 40, 30));
+            expect(box.left).toBe(10);
+            expect(box.top).toBe(10);
+            expect(box.right).toBe(70);
+            expect(box.bottom).toBe(70);
+
+            box.expandToInclude(new Box(0, 100, 100, 0));
+            expect(box.left).toBe(0);
+            expect(box.top).toBe(0);
+            expect(box.right).toBe(100);
+            expect(box.bottom).toBe(100);
+        });
+
+
+        it('测试BoundingBox方法', function testBoundingBox() {
+            expect(new Box(1, 10, 11, 0)).toEqual(
+                   Box.boundingBox(
+                        new Coordinate(5, 5),
+                        new Coordinate(5, 11),
+                        new Coordinate(0, 5),
+                        new Coordinate(5, 1),
+                        new Coordinate(10, 5)));
+        });
+
+
+        it('测试ceil方法', function testBoxCeil() {
+            var box = new Box(11.4, 26.6, 17.8, 9.2);
+            expect(box).toEqual(box.ceil());
+            expect(new Box(12, 27, 18, 10)).toEqual(box);
+        });
+
+
+        it('测试floor方法', function testBoxFloor() {
+            var box = new Box(11.4, 26.6, 17.8, 9.2);
+            expect(box).toEqual(box.floor());
+            expect(new Box(11, 26, 17, 9)).toEqual(box);
+        });
+
+
+        it('测试round方法', function testBoxRound() {
+            var box = new Box(11.4, 26.6, 17.8, 9.2);
+            expect(box.round()).toEqual(box);
+            expect(new Box(11, 27, 18, 9)).toEqual(box);
+        });
+
+
+        it('测试TranslateCoordinate方法', function testBoxTranslateCoordinate() {
+            var box = new Box(10, 30, 20, 5);
+            var c = new Coordinate(10, 5);
+            expect(box.translate(c)).toEqual(box);
+            expect(new Box(15, 40, 25, 15)).toEqual(box);
+        });
+
+
+        it('测试TranslateXY方法', function testBoxTranslateXY() {
+            var box = new Box(10, 30, 20, 5);
+            expect(box.translate(5, 2)).toEqual(box);
+            expect(new Box(12, 35, 22, 10)).toEqual(box);
+        });
+
+
+        it('测试TranslateX方法', function testBoxTranslateX() {
+            var box = new Box(10, 30, 20, 5);
+            expect(box.translate(3)).toEqual(box);
+            expect(new Box(10, 33, 20, 8)).toEqual(box);
+        });
+
+
+        it('测试ScaleXY方法', function testBoxScaleXY() {
+            var box = new Box(10, 20, 30, 5);
+            expect(box.scale(2, 3)).toEqual(box);
+            expect(new Box(30, 40, 90, 10)).toEqual(box);
+        });
+
+
+        it('测试ScaleFactor', function testBoxScaleFactor() {
+            var box = new Box(10, 20, 30, 5);
+            expect(box.scale(2)).toEqual(box);
+            expect(new Box(20, 40, 60, 10)).toEqual(box);
+        });
+
+    });
+
+    </script>
+</body>
+</html>
