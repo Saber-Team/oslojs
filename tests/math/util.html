@@ -1,0 +1,300 @@
+<!--
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/array/array.js"></script>
+    <script src="../../src/math/util.js"></script>
+</head>
+<body>
+    <!-- include spec files here... -->
+    <script>
+
+        describe('Oslo.math.util模块', function() {
+
+            var math = Oslo.math.util;
+
+
+            it('测试randomInt方法', function testRandomInt() {
+                expect(math.randomInt(0)).toBe(0);
+                expect(math.randomInt(1)).toBe(0);
+
+                var r = math.randomInt(3);
+                expect(0 <= r && r < 3).toBe(true);
+            });
+
+
+            it('测试uniformRandom方法', function testUniformRandom() {
+                expect(math.uniformRandom(5.2, 5.2)).toBe(5.2);
+                expect(math.uniformRandom(-6, -6)).toBe(-6);
+
+                var r = math.uniformRandom(-0.5, 0.5);
+                expect(-0.5 <= r && r < 0.5).toBe(true);
+            });
+
+
+            it('测试clamp方法', function testClamp() {
+                expect(math.clamp(3, -5, 5)).toBe(3);
+                expect(math.clamp(5, -5, 5)).toBe(5);
+                expect(math.clamp(-5, -5, 5)).toBe(-5);
+
+                expect(math.clamp(-22, -5, 5)).toBe(-5);
+                expect(math.clamp(6, -5, 5)).toBe(5);
+            });
+
+
+            it('测试modulo方法', function testModulo() {
+                expect(math.modulo(256, 8)).toBe(0);
+
+                expect(math.modulo(7, 8)).toBe(7);
+                expect(math.modulo(23, 8)).toBe(7);
+                expect(math.modulo(-1, 8)).toBe(7);
+
+                // Safari 5.1.7 has a bug in its JS engine where modulo is computed
+                // incorrectly when using variables.
+                var a = 1;
+                var b = -5;
+                if (a % b === 1 % -5) {
+                    expect(math.modulo(1, -5)).toBe(-4);
+                    expect(math.modulo(6, -5)).toBe(-4);
+                }
+
+                expect(math.modulo(-4, -5)).toBe(-4);
+            });
+
+
+            it('测试lerp方法', function testLerp() {
+                expect(math.lerp(0, 0, 0)).toBe(0);
+                expect(math.lerp(0, 6, 0.5)).toBe(3);
+                expect(math.lerp(-1, 1, 2)).toBe(3);
+            });
+
+
+            it('测试nearlyEquals方法', function testNearlyEquals() {
+                expect(math.nearlyEquals(0.000001, 0.000001001)).toBe(true);
+                expect(math.nearlyEquals(0.000001, 0.000003)).toBe(false);
+                expect(math.nearlyEquals(0.001, 0.002, 0.1)).toBe(true);
+                expect(math.nearlyEquals(0.001, -0.1, 0.1)).toBe(false);
+                expect(math.nearlyEquals(87, 85, 3)).toBe(true);
+            });
+
+
+            it('测试standardAngle方法', function testStandardAngle() {
+                expect(math.standardAngle(-360.5)).toBe(359.5);
+                expect(math.standardAngle(-360)).toBe(0);
+                expect(math.standardAngle(-0.5)).toBe(359.5);
+                expect(math.standardAngle(0)).toBe(0);
+                expect(math.standardAngle(0.5)).toBe(0.5);
+                expect(math.standardAngle(360)).toBe(0);
+                expect(math.standardAngle(721)).toBe(1);
+            });
+
+
+            it('测试toRadians方法', function testToRadians() {
+                expect(math.toRadians(-180)).toBe(-Math.PI);
+                expect(math.toRadians(0)).toBe(0);
+                expect(math.toRadians(180)).toBe(Math.PI);
+            });
+
+
+            it('测试toDegrees方法', function testToDegrees() {
+                expect(math.toDegrees(-Math.PI)).toBe(-180);
+                expect(math.toDegrees(0)).toBe(0);
+                expect(math.toDegrees(Math.PI)).toBe(180);
+            });
+
+
+            it('测试angle方法', function testAngle() {
+                expect(math.angle(10, 10, 20, 10)).toBeCloseTo(0, 10);
+                expect(math.angle(10, 10, 10, 20)).toBeCloseTo(90, 10);
+                expect(math.angle(10, 10, 0, 0)).toBeCloseTo(225, 10);
+                expect(math.angle(10, 10, 10, 0)).toBeCloseTo(270, 10);
+
+                // 0 is the conventional result, but mathematically this is undefined.
+                expect(math.angle(10, 10, 10, 10)).toBe(0);
+            });
+
+
+            it('测试angleDifference方法', function testAngleDifference() {
+                expect(math.angleDifference(30, 40)).toBe(10);
+                expect(math.angleDifference(40, 30)).toBe(-10);
+                expect(math.angleDifference(10, 190)).toBe(180);
+                expect(math.angleDifference(190, 10)).toBe(180);
+                expect(math.angleDifference(350, 10)).toBe(20);
+                expect(math.angleDifference(10, 350)).toBe(-20);
+                expect(math.angleDifference(350, 90)).toBe(100);
+                expect(math.angleDifference(350, 270)).toBe(-80);
+                expect(math.angleDifference(15, 15)).toBe(0);
+            });
+
+
+            it('测试sign方法', function testSign() {
+                expect(math.sign(-1)).toBe(-1);
+                expect(math.sign(1)).toBe(1);
+                expect(math.sign(0)).toBe(0);
+                expect(math.sign(-0)).toBe(0);
+                expect(math.sign(0.0001)).toBe(1);
+                expect(math.sign(-0.0001)).toBe(-1);
+                expect(math.sign(-Infinity)).toBe(-1);
+                expect(math.sign(Infinity)).toBe(1);
+                expect(math.sign(3141592653589793)).toBe(1);
+            });
+
+
+            describe('最大共有序列相关方法', function() {
+
+                it('测试longestCommonSubsequence', function testLongestCommonSubsequence() {
+                    var func = math.longestCommonSubsequence;
+
+                    expect(func([1,2], [2,1])).toEqual([2]);
+                    expect(func([1,2,5], [2,1,2])).toEqual([1,2]);
+                    expect(func([1,0,2,3,8,4,9,5], [8,1,2,4,3,6,4,5])).toEqual([1,2,3,4,5]);
+                    expect(func([1,1,1,1,1], [1,1,1,1,1])).toEqual([1,1,1,1,1]);
+                    expect(func([1,2,3,4,5], [5,4,3,2,1])).toEqual([5]);
+                    expect(func([1,6,8,11,13], [1,3,5,8,9,11,12])).toEqual([1,8,11]);
+                });
+
+
+                it('测试longestCommonSubsequence带有自定义比较函数', function testWithCustomComparator() {
+                    var func = math.longestCommonSubsequence;
+
+                    var compareFn = function(a, b) {
+                        return a.field == b.field;
+                    };
+
+                    var a1 = {field: 'a1', field2: 'hello'};
+                    var a2 = {field: 'a2', field2: 33};
+                    var a3 = {field: 'a3'};
+                    var a4 = {field: 'a3'};
+
+                    expect(func([a1,a2,a3], [a3,a1,a2], compareFn)).toEqual([a1,a2]);
+                    expect(func([a1,a3], [a1,a4], compareFn)).toEqual([a1,a3]);
+                    // testing the same arrays without compare function
+                    expect(func([a1,a3], [a1,a4])).toEqual([a1]);
+                });
+
+
+                it('测试longestCommonSubsequence带有自定义收集器', function testWithCustomCollector() {
+                    var func = math.longestCommonSubsequence;
+
+                    var collectorFn = function(a, b) {
+                        return b;
+                    };
+
+                    expect(func([1,0,2,3,8,4,9,5], [8,1,2,4,3,6,4,5], null, collectorFn))
+                            .toEqual([1,2,4,6,7]);
+                });
+
+            });
+
+
+            it('测试sum方法', function testSum() {
+                expect(math.sum()).toBe(0);
+                expect(math.sum(17)).toBe(17);
+                expect(math.sum(1, 2, 3, 4)).toBe(10);
+                expect(math.sum(1, -2, 3, -4.5)).toBe(-2.5);
+                expect(isNaN(math.sum(1, 2, 'foo', 3))).toBe(true);
+            });
+
+
+            it('测试average方法', function testAverage() {
+                expect(isNaN(math.average())).toBe(true);
+                expect(math.average(17)).toBe(17);
+                expect(math.average(1, 2, 3, 4, 5)).toBe(3);
+                expect(math.average(1, -2, 3, -4.5)).toBe(-0.625);
+                expect(isNaN(math.average(1, 2, 'foo', 3))).toBe(true);
+            });
+
+
+            it('测试standardDeviation方法', function testStandardDeviation() {
+                expect(math.standardDeviation()).toBe(0);
+                expect(math.standardDeviation(17)).toBe(0);
+                expect(math.standardDeviation(3, 7, 7, 19)).toBeCloseTo(6.9282, 4);
+                expect(math.standardDeviation(1.23, -2.34, 3.14, -4.56)).toBeCloseTo(3.4660, 4);
+            });
+
+
+            it('测试isInt方法', function testIsInt() {
+                expect(math.isInt(12345.67)).toBe(false);
+                expect(math.isInt(0.123)).toBe(false);
+                expect(math.isInt(.1)).toBe(false);
+                expect(math.isInt(-23.43)).toBe(false);
+                expect(math.isInt(-.1)).toBe(false);
+                expect(math.isInt(1e-1)).toBe(false);
+                expect(math.isInt(1)).toBe(true);
+                expect(math.isInt(0)).toBe(true);
+                expect(math.isInt(-2)).toBe(true);
+                expect(math.isInt(-2.0)).toBe(true);
+                expect(math.isInt(10324231)).toBe(true);
+                expect(math.isInt(1.)).toBe(true);
+                expect(math.isInt(1e3)).toBe(true);
+            });
+
+
+            it('测试isFiniteNumber方法', function testIsFiniteNumber() {
+                expect(math.isFiniteNumber(NaN)).toBe(false);
+                expect(math.isFiniteNumber(-Infinity)).toBe(false);
+                expect(math.isFiniteNumber(+Infinity)).toBe(false);
+                expect(math.isFiniteNumber(0)).toBe(true);
+                expect(math.isFiniteNumber(1)).toBe(true);
+                expect(math.isFiniteNumber(Math.PI)).toBe(true);
+            });
+
+
+            it('测试safeFloor方法', function testSafeFloor() {
+                expect(math.safeFloor(0)).toBe(0);
+                expect(math.safeFloor(1e-15)).toBe(0);
+                expect(math.safeFloor(-1e-15)).toBe(0);
+                expect(math.safeFloor(-3e-15)).toBe(-1);
+                expect(math.safeFloor(5 - 3e-15)).toBe(4);
+                expect(math.safeFloor(5 - 1e-15)).toBe(5);
+                expect(math.safeFloor(-5 - 1e-15)).toBe(-5);
+                expect(math.safeFloor(-5 - 3e-15)).toBe(-6);
+                expect(math.safeFloor(2.91, 0.1)).toBe(3);
+                expect(math.safeFloor(2.89, 0.1)).toBe(2);
+                // Tests some real life examples with the default epsilon value.
+                expect(math.safeFloor(Math.log(1000) / Math.LN10 - 3)).toBe(0);
+                expect(math.safeFloor(Math.log(1e+21) / Math.LN10)).toBe(21);
+            });
+
+
+            it('测试safeCeil方法', function testSafeCeil() {
+                expect(math.safeCeil(0)).toBe(0);
+                expect(math.safeCeil(1e-15)).toBe(0);
+                expect(math.safeCeil(-1e-15)).toBe(0);
+                expect(math.safeCeil(3e-15)).toBe(1);
+                expect(math.safeCeil(5 + 3e-15)).toBe(6);
+                expect(math.safeCeil(5 + 1e-15)).toBe(5);
+                expect(math.safeCeil(-5 + 3e-15)).toBe(-4);
+                expect(math.safeCeil(-5 + 1e-15)).toBe(-5);
+                expect(math.safeCeil(3.09, 0.1)).toBe(3);
+                expect(math.safeCeil(3.11, 0.1)).toBe(4);
+            });
+
+        });
+
+    </script>
+</body>
+</html>

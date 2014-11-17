@@ -9,6 +9,7 @@ define('@math.util', ['@array'],
 
         'use strict';
 
+
         /**
          * 给定一个整数, 返回一个大于等于0 小于此整数{@code a}的随机整数值.
          * @param {number} a 随机数上界 (exclusive).
@@ -17,6 +18,7 @@ define('@math.util', ['@array'],
         function randomInt(a) {
             return Math.floor(Math.random() * a);
         }
+
 
         /**
          * 给定上下界, 返回大于等于a小于b的随机值(非整型 float).
@@ -27,6 +29,7 @@ define('@math.util', ['@array'],
         function uniformRandom(a, b) {
             return a + Math.random() * (b - a);
         }
+
 
         /**
          * 给定一个边界值,输入值若在其中则返回原值,否则返回范围内在数轴上离此值最近的数.(clamp本义是夹板)
@@ -39,32 +42,35 @@ define('@math.util', ['@array'],
             return Math.min(Math.max(value, min), max);
         }
 
+
         /**
          * 求余操作符%在js中返回a/b的余数,但和其他语言不同,余数一定是和被除数同号.
          * 举例, -1 % 8 == -1, 而其他语言的结果是7(Python).
          * 这个函数模拟了正确的求模行为(modulo behavior), 这对于在循环队列中计算偏移量很有用.
          * @param {number} a 被除数.
          * @param {number} b 除数.
-         * @return {number} a % b的结果应在如下范围 0 and b(不论0 <= x < b或b < x <= 0, 由b的符号决定).
+         * @return {number} a % b的结果应在0和b范围内 (不论0 <= x < b或b < x <= 0, 由b的符号决定).
          */
         function modulo(a, b) {
             var r = a % b;
-            // If r and b differ in sign, add b to wrap the result to the correct sign.
+            // 如果r和b符号不同, 对取模结果加上b得到正确的范围.
             return (r * b < 0) ? r + b : r;
         }
+
 
         /**
          * Performs linear interpolation between values a and b. Returns the value
          * between a and b proportional to x (when x is between 0 and 1. When x is
          * outside this range, the return value is a linear extrapolation).
-         * @param {number} a A number.
-         * @param {number} b A number.
+         * @param {number} a 数字1.
+         * @param {number} b 数字2.
          * @param {number} x The proportion between a and b.
          * @return {number} The interpolated value between a and b.
          */
         function lerp(a, b, x) {
             return a + x * (b - a);
         }
+
 
         /**
          * 测试两个数值是否近似相等,js中全部是浮点数表示,进行运算时会产生计算误差.
@@ -77,6 +83,7 @@ define('@math.util', ['@array'],
             return Math.abs(a - b) <= (opt_tolerance || 0.000001);
         }
 
+
         /**
          * 对于一个角度值标准化其为[0-360).
          * 负值会变成正数, 大于360度的会被限定在360之内(modulo 360).
@@ -87,6 +94,7 @@ define('@math.util', ['@array'],
             return modulo(angle, 360);
         }
 
+
         /**
          * 角度转化为弧度.
          * @param {number} angleDegrees 角度.
@@ -96,6 +104,7 @@ define('@math.util', ['@array'],
             return angleDegrees * Math.PI / 180;
         }
 
+
         /**
          * 弧度转化为角度.
          * @param {number} angleRadians 弧度.
@@ -104,6 +113,7 @@ define('@math.util', ['@array'],
         function toDegrees(angleRadians) {
             return angleRadians * 180 / Math.PI;
         }
+
 
         /**
          * 给定一个角度和半径, 取得X轴的位置.
@@ -115,6 +125,7 @@ define('@math.util', ['@array'],
             return radius * Math.cos(toRadians(degrees));
         }
 
+
         /**
          * 给定一个角度和半径, 取得Y轴的位置.
          * @param {number} degrees 角度(zero points in +X direction).
@@ -124,6 +135,7 @@ define('@math.util', ['@array'],
         function angleDy(degrees, radius) {
             return radius * Math.sin(toRadians(degrees));
         }
+
 
         /**
          * 计算两个点之间连线的角度值(x1,y1)和(x2,y2).
@@ -139,6 +151,7 @@ define('@math.util', ['@array'],
         function angle(x1, y1, x2, y2) {
             return standardAngle(toDegrees(Math.atan2(y2 - y1, x2 - x1)));
         }
+
 
         /**
          * 计算两个角度间的差,控制在(-180, 180).
@@ -161,6 +174,7 @@ define('@math.util', ['@array'],
             return d;
         }
 
+
         /**
          * -1,0,1 "sign" or "signum" function.
          * @param {number} x The number to take the sign of.
@@ -169,6 +183,7 @@ define('@math.util', ['@array'],
         function sign(x) {
             return x === 0 ? 0 : (x < 0 ? -1 : 1);
         }
+
 
         /**
          * JS实现的最大公共序列.
@@ -239,6 +254,7 @@ define('@math.util', ['@array'],
             return result;
         }
 
+
         /**
          * 计算总和.
          * @param {...number} var_args Numbers to add.
@@ -251,6 +267,7 @@ define('@math.util', ['@array'],
                 }, 0));
         }
 
+
         /**
          * 计算均值.
          * @param {...number} var_args Numbers to average.
@@ -259,6 +276,7 @@ define('@math.util', ['@array'],
         function average(var_args) {
             return sum.apply(null, arguments) / arguments.length;
         }
+
 
         /**
          * 返回标准方差.
@@ -281,6 +299,7 @@ define('@math.util', ['@array'],
             return Math.sqrt(variance);
         }
 
+
         /**
          * 返回是否整数. 求模运算比对结果比范围检测性能好.
          * @param {number} num 测试数字.
@@ -290,14 +309,17 @@ define('@math.util', ['@array'],
             return isFinite(num) && num % 1 === 0;
         }
 
+
         /**
-         * 判断是否有理数.
+         * 判断是否无穷数. isFinite对正负无穷和NaN返回false.
+         * 见ECMA-262 15.1.2.5
          * @param {number} num 测试数字.
          * @return {boolean}
          */
         function isFiniteNumber(num) {
             return isFinite(num) && !isNaN(num);
         }
+
 
         /**
          * Math.floor的安全版本, 可以允许所给结果无限小地浮动于最近的整数.
@@ -311,9 +333,10 @@ define('@math.util', ['@array'],
             return Math.floor(num + (opt_epsilon || 2e-15));
         }
 
+
         /**
          * Math.ceil的安全版本.
-         * @param {number} num A number.
+         * @param {number} num 数字.
          * @param {number=} opt_epsilon An infinitesimally small positive number, the
          *     rounding error to tolerate.
          * @return {number} The smallest integer greater than or equal to {@code num}.
@@ -321,6 +344,7 @@ define('@math.util', ['@array'],
         function safeCeil(num, opt_epsilon) {
             return Math.ceil(num - (opt_epsilon || 2e-15));
         }
+
 
         return {
             randomInt: randomInt,
@@ -330,12 +354,17 @@ define('@math.util', ['@array'],
             lerp: lerp,
             nearlyEquals: nearlyEquals,
             angle: angle,
+            angleDifference: angleDifference,
             sign: sign,
             sum: sum,
             average: average,
+            standardAngle: standardAngle,
             standardDeviation: standardDeviation,
+            toRadians: toRadians,
+            toDegrees: toDegrees,
             isInt: isInt,
             isFiniteNumber: isFiniteNumber,
+            longestCommonSubsequence: longestCommonSubsequence,
             safeFloor: safeFloor,
             safeCeil: safeCeil
         };
