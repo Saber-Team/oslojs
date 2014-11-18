@@ -1,10 +1,10 @@
 /**
  * @fileoverview network类通用的一些事件.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.EventType', [], function() {
+define('@net.eventType', [], function() {
 
     'use strict';
 

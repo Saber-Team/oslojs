@@ -1,11 +1,11 @@
 /**
  * @fileoverview 底层的处理XMLHttpRequest的操作模块.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.XmlHttp',
-    ['Sogou.Net.DefaultXmlHttpFactory'],
+define('@net.xmlHttp',
+    ['@net.defaultXmlHttpFactory'],
     function(DefaultXmlHttpFactory) {
 
         'use strict';

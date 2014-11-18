@@ -1,11 +1,11 @@
 /**
  * @fileoverview 一个接口. 创建XMLHttpRequest对象和它们元数据(metadata)的抽象工厂.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.XmlHttpFactory',
-    ['Sogou.Util'],
+define('@net.xmlHttpFactory',
+    ['@util'],
     function(util) {
 
         'use strict';

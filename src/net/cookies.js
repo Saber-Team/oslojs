@@ -1,21 +1,22 @@
 /**
  * @fileoverview cookies操作模块.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.Cookies',
-    ['Sogou.Util'],
+define('@net.cookies',
+    ['@util'],
     function(util) {
 
         'use strict';
 
         /**
-         * cookies有大小限制. 根据规范一般来讲是4K. 但确定不能超过这个极值, 我们定为3950 bytes时就截断,
+         * cookies有大小限制. 根据规范一般来讲是4K,但确定不能超过这个极值,我们定为3950字节时就截断,
          * 因为有些老旧浏览器或者一些客户端代理将4K设置为4000而不是4096.
          * @type {number}
          */
         var MAX_COOKIE_LENGTH = 3950;
+
 
         /**
          * 分割cookie字符串的正则.
@@ -23,6 +24,7 @@ define('Sogou.Net.Cookies',
          * @private
          */
         var SPLIT_RE_ = /\s*;\s*/;
+
 
         /**
          * 处理客户端浏览器cookies的类.
@@ -37,7 +39,9 @@ define('Sogou.Net.Cookies',
              */
             this.document_ = context;
         };
+
         Cookies.MAX_COOKIE_LENGTH = MAX_COOKIE_LENGTH;
+
 
         /**
          * 返回客户端的永久cookies是否开启.
@@ -46,6 +50,7 @@ define('Sogou.Net.Cookies',
         Cookies.prototype.isEnabled = function() {
             return navigator.cookieEnabled;
         };
+
 
         /**
          * 名字中不能出现'=', ';', 或者空白符.
@@ -68,6 +73,7 @@ define('Sogou.Net.Cookies',
             return !(/[;=\s]/.test(name));
         };
 
+
         /**
          * cookie值中不能出现 ';' 和断行符 'line break'.
          * 规范没有明确非法字符, 但是分号影响cookie解析, 断行符会截断名字.
@@ -80,6 +86,7 @@ define('Sogou.Net.Cookies',
         Cookies.prototype.isValidValue = function(value) {
             return !(/[;\r\n]/.test(value));
         };
+
 
         /**
          * 设置cookie.max_age可以设成-1让cookie成为session cookie.想要删除cookies用remove()方法.
@@ -157,6 +164,7 @@ define('Sogou.Net.Cookies',
             return opt_default;
         };
 
+
         /**
          * 通过使cookie过期从而删除该cookie.
          * @param {string} name cookie名.
@@ -172,6 +180,7 @@ define('Sogou.Net.Cookies',
             return rv;
         };
 
+
         /**
          * 获得所有cookies名.
          * @return {Array.<string>} cookies名字的数组.
@@ -179,6 +188,7 @@ define('Sogou.Net.Cookies',
         Cookies.prototype.getKeys = function() {
             return this.getKeyValues_().keys;
         };
+
 
         /**
          * 获得所有cookies值.
@@ -188,12 +198,14 @@ define('Sogou.Net.Cookies',
             return this.getKeyValues_().values;
         };
 
+
         /**
          * @return {boolean} cookies是否为空.
          */
         Cookies.prototype.isEmpty = function() {
             return !this.getCookie_();
         };
+
 
         /**
          * @return {number} 返回当前文档中可访问的cookie数.
@@ -206,6 +218,7 @@ define('Sogou.Net.Cookies',
             return this.getParts_().length;
         };
 
+
         /**
          * 是否存在给定名字的cookie.
          * @param {string} key cookie名.
@@ -215,6 +228,7 @@ define('Sogou.Net.Cookies',
             // get方法要么返回字符串要么返回undefined
             return util.isDef(this.get(key));
         };
+
 
         /**
          * 是否存在给定值的cookie. (复杂度O(n))
@@ -232,6 +246,7 @@ define('Sogou.Net.Cookies',
             return false;
         };
 
+
         /**
          * 删除所有当前域下的文档路径下的cookie. 其他域(子域)下的仍然保留.
          */
@@ -242,6 +257,7 @@ define('Sogou.Net.Cookies',
             }
         };
 
+
         /**
          * Private helper function测试设置cookie但不依赖于浏览器.
          * @param {string} s 要设置的cookie string.
@@ -250,6 +266,7 @@ define('Sogou.Net.Cookies',
         Cookies.prototype.setCookie_ = function(s) {
             this.document_.cookie = s;
         };
+
 
         /**
          * Private helper function测试获取cookies但不依赖于浏览器. IE6有可能返回null.
@@ -260,6 +277,7 @@ define('Sogou.Net.Cookies',
             return this.document_.cookie;
         };
 
+
         /**
          * @return {!Array.<string>} 以分号分割cookie串.
          * @private
@@ -267,6 +285,7 @@ define('Sogou.Net.Cookies',
         Cookies.prototype.getParts_ = function() {
             return (this.getCookie_() || '').split(SPLIT_RE_);
         };
+
 
         /**
          * 获得cookies的所有名字和值.
@@ -291,6 +310,7 @@ define('Sogou.Net.Cookies',
             }
             return {keys: keys, values: values};
         };
+
 
         /**
          * 期望是单例.

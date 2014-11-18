@@ -1,10 +1,10 @@
 /**
- * @fileoverview 错误码用于Sogou.Net.IframeIo和Sogou.Net.XhrIo.
- * @modified Leo.Zhang
+ * @fileoverview 错误码用于Oslo.net.IframeIo和Oslo.net.XhrIo.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.ErrorCode', [], function() {
+define('@net.errorCode', [], function() {
 
     'use strict';
 

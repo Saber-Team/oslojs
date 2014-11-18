@@ -1,12 +1,12 @@
 /**
  * @fileoverview 定义一个默认的xhr工厂. 没必要亲自实例化它, 而是通过Sogou.Net.XmlHttp.
- *     实际上xmlhttp.js模块最后一行已经进行了默认设置.
+ * 实际上xmlhttp.js模块最后一行已经进行了默认设置.
  * @extends {XmlHttpFactory}
  * @constructor
  */
 
-define('Sogou.Net.DefaultXmlHttpFactory',
-    ['Sogou.Util','Sogou.Net.XmlHttpFactory'],
+define('@net.defaultXmlHttpFactory',
+    ['@util','@net.xmlHttpFactory'],
     function(util, XmlHttpFactory) {
 
         'use strict';

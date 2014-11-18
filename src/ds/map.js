@@ -1,7 +1,7 @@
 /**
- * @fileoverview Hash Map structure的实现. Map累实现了很多ds包下的方法所以这些方法在
- * hash对象依然可用. 对于复杂的key types也适用. 简单key如numbers或strings, 特殊key如
- * __proto__也不必担心.
+ * @fileoverview Hash Map结构的实现. Map类实现了很多ds包下的方法所以这些方法在
+ * hash对象依然可用. 对于复杂的key类型也适用. 简单key如numbers或strings, 特殊key
+ * 如__proto__也可以.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -9,7 +9,7 @@
 define('@ds.Map',
     [
         '@util',
-        '@iter.iterator',
+        '@iter.Iterator',
         '@iter.stopIteration',
         '@object'
     ],

@@ -8,7 +8,7 @@
  *     c. 是一个对象,有__iterator__属性
  */
 
-define('@iter.iterator',
+define('@iter.Iterator',
     ['@iter.stopIteration'],
     function(StopIteration) {
 

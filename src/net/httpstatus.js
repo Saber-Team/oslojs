@@ -1,10 +1,10 @@
 /**
  * @fileoverview HTTP状态码的常量.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.HttpStatus', [], function() {
+define('@net.httpStatus', [], function() {
 
     'use strict';
 

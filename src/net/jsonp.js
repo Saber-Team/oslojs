@@ -9,15 +9,15 @@
  *   IE 6.0+, Firefox 0.8+, Safari 1.2.4+,
  *   Netscape 7.1+, Mozilla 1.4+, Opera 8.02+.
  *
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.Jsonp',
+define('@net.Jsonp',
     [
-        'Sogou.Util',
-        'Sogou.Uri.Uri',
-        'Sogou.Net.JSloader'
+        '@util',
+        '@uri.Uri',
+        '@net.JSloader'
     ],
     function(util, Uri, jsloader) {
 

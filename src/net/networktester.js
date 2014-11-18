@@ -1,14 +1,14 @@
 /**
  * @fileoverview 这个模块命名为NetworkTester. 用于检测当前网络是否连通.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Net.NetworkTester',
+define('@net.networkTester',
     [
-        'Sogou.Util',
-        'Sogou.Timer',
-        'Sogou.Uri.Uri'
+        '@util',
+        '@timer',
+        '@uri.Uri'
     ],
     function(util, Timer, Uri) {
 
