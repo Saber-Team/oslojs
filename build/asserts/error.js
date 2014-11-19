@@ -1,0 +1,2 @@
+/** Oslo JavaScript Framework. */
+define("@asserts.Error",["@util","@debug.Error"],function(a,b){"use strict";var c=function(a,c){c.unshift(a),b.call(this,string.subs.apply(null,c)),c.shift(),this.messagePattern=a};return a.inherits(c,b),c.prototype.name="AssertionError",c});
