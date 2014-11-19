@@ -1,10 +1,10 @@
 /**
  * @fileoverview 表示logger等级,控制日志输出. 线上代码应该去掉所有log
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Debug.LogLevel', [], function() {
+define('@debug.logLevel', [], function() {
 
     'use strict';
 
@@ -42,7 +42,7 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * @return {string} String representation of the logger level.
+     * @return {string} 返回能表示当前日志等级的字符串.
      * @override
      */
     Level.prototype.toString = function() {
@@ -51,64 +51,60 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * OFF is a special level that can be used to turn off logging.
-     * This level is initialized to <CODE>Infinity</CODE>.
+     * OFF用于关闭日志.
+     * This level is initialized to Infinity.
      * @type {!Level}
      */
     Level.OFF = new Level('OFF', Infinity);
 
 
     /**
-     * SHOUT is a message level for extra debugging loudness.
-     * This level is initialized to <CODE>1200</CODE>.
+     * SHOUT表示严重级别 for extra debugging loudness.
+     * 默认权值1200.
      * @type {!Level}
      */
     Level.SHOUT = new Level('SHOUT', 1200);
 
 
     /**
-     * 客户端程序默认的级别是Level.SEVERE
-     * SEVERE is a message level indicating a serious failure.
-     * This level is initialized to <CODE>1000</CODE>.
+     * 客户端程序默认的级别是Level.SEVERE.
+     * SEVERE表示发生了错误. 默认权值1000.
      * @type {!Level}
      */
     Level.SEVERE = new Level('SEVERE', 1000);
 
 
     /**
-     * WARNING is a message level indicating a potential problem.
-     * This level is initialized to <CODE>900</CODE>.
+     * WARNING是警告级别. 权值900.
      * @type {!Level}
      */
     Level.WARNING = new Level('WARNING', 900);
 
 
     /**
-     * INFO is a message level for informational messages.
-     * This level is initialized to <CODE>800</CODE>.
+     * INFO表示提供一些信息的日志. 权值800.
      * @type {!Level}
      */
     Level.INFO = new Level('INFO', 800);
 
 
     /**
-     * CONFIG is a message level for static configuration messages.
-     * This level is initialized to <CODE>700</CODE>.
+     * CONFIG表示配置信息. 默认权值700.
      * @type {!Level}
      */
     Level.CONFIG = new Level('CONFIG', 700);
 
 
     /**
-     * FINE is a message level providing tracing information.
-     * This level is initialized to <CODE>500</CODE>.
+     * FINE表示提供轨迹追踪信息的消息tracing.
+     * 权值500.
      * @type {!Level}
      */
     Level.FINE = new Level('FINE', 500);
 
 
     /**
-     * FINER indicates a fairly detailed tracing message.
+     * FINER 轨迹信息较为详细.
      * This level is initialized to <CODE>400</CODE>.
      * @type {!Level}
      */
@@ -116,7 +112,7 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * FINEST indicates a highly detailed tracing message.
+     * FINEST 轨迹信息最详细.
      * This level is initialized to <CODE>300</CODE>.
      * @type {!Level}
      */
@@ -124,11 +120,12 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * ALL indicates that all messages should be logged.
+     * 记录所有日志.
      * This level is initialized to <CODE>0</CODE>.
      * @type {!Level}
      */
     Level.ALL = new Level('ALL', 0);
+
 
     /**
      * 预定义的一些等级.
@@ -150,7 +147,7 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * A lookup map used to find the level object based on the name or value of
+     * 缓存对象used to find the level object based on the name or value of
      * the level object.
      * @type {Object}
      * @private
@@ -172,7 +169,7 @@ define('Sogou.Debug.LogLevel', [], function() {
 
 
     /**
-     * Gets the predefined level with the given name.
+     * 依据名字获取等级对象.
      * @param {string} name The name of the level.
      * @return {Level} The level, or null if none found.
      */
@@ -187,7 +184,6 @@ define('Sogou.Debug.LogLevel', [], function() {
 
     /**
      * 返回低于给定级别最近的Logger.Level对象.
-     * Gets the highest predefined level <= #value.
      * @param {number} value Level value.
      * @return {Level} The level, or null if none found.
      */

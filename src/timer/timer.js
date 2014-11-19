@@ -8,7 +8,7 @@
  * @see ../../demos/timers.html
  */
 
-define('@timer',
+define('@Timer',
     ['@util', '@events.eventTarget'],
     function(util, EventTarget) {
 

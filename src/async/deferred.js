@@ -584,7 +584,7 @@ define('@async.Deferred',
                         // 甄别函数执行结果, 如果没结果还用之前的this.result_不会改变, res也不会改变
                         if (util.isDef(ret)) {
                             // Bubble up the error as long as the return value hasn't changed.
-                            this.hadError_ = this.hadError_ && (ret == res || this.isError(ret));
+                            this.hadError_ = this.hadError_ && (ret === res || this.isError(ret));
                             this.result_ = res = ret;
                         }
                         // 返回的是Deferred对象则当前变成blocked_;

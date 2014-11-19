@@ -129,7 +129,7 @@
 define('@history.History',
     [
         '@util',
-        '@timer',
+        '@Timer',
         '@dom.util',
         '@events.handlerManager',
         '@events.eventTarget',

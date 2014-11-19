@@ -1,10 +1,10 @@
 /**
  * @fileoverview 一条日志记录的类.这个类保持简单,尽量不做过多依赖.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('Sogou.Debug.LogRecord', [], function() {
+define('@debug.logRecord', [], function() {
 
     'use strict';
 
@@ -96,7 +96,7 @@ define('Sogou.Debug.LogRecord', [], function() {
      * 为日志记录这条对象设置所有字段.
      * @param {LogLevel} level 级别.
      * @param {string} msg 消息.
-     * @param {string} loggerName The name of the source logger.
+     * @param {string} loggerName logger名字.
      * @param {number=} opt_time 记录时间.
      * @param {number=} opt_sqNumber 序列号. This
      *     should only be passed in when restoring a log record from persistence.
@@ -118,7 +118,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Get the source Logger's name.
+     * 获取Logger名字.
      * @return {string} source logger name (may be null).
      */
     LogRecord.prototype.getLoggerName = function() {
@@ -159,7 +159,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Set the source Logger's name.
+     * 设置日志对象名字.
      * @param {string} loggerName source logger name (may be null).
      */
     LogRecord.prototype.setLoggerName = function(loggerName) {
@@ -168,7 +168,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Get the logging message level, for example Level.SEVERE.
+     * 获取日志等级.
      * @return {LogLevel} the logging message level.
      */
     LogRecord.prototype.getLevel = function() {
@@ -177,7 +177,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Set the logging message level, for example Level.SEVERE.
+     * 设置日志等级, 如Level.SEVERE.
      * @param {LogLevel} level the logging message level.
      */
     LogRecord.prototype.setLevel = function(level) {
@@ -186,7 +186,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Get the "raw" log message, before localization or formatting.
+     * 获取原始的日志消息, 这一步在本地化和格式化之前.
      * @return {string} the raw message string.
      */
     LogRecord.prototype.getMessage = function() {
@@ -195,7 +195,7 @@ define('Sogou.Debug.LogRecord', [], function() {
 
 
     /**
-     * Set the "raw" log message, before localization or formatting.
+     * 设置原始的日志消息, 这一步在本地化和格式化之前.
      * @param {string} msg the raw message string.
      */
     LogRecord.prototype.setMessage = function(msg) {

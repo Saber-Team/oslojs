@@ -1,7 +1,7 @@
 /**
  * @fileoverview 跨域GET请求的解决方案.XMLHttpRequest有这方面的限制,使用动态script插入技术
  * 用法:
- *   var jsonp = new Sogou.Net.Jsonp(new Sogou.Uri('http://my.host.com/servlet'));
+ *   var jsonp = new Jsonp(new Uri('http://my.host.com/servlet'));
  *   var payload = { 'foo': 1, 'bar': true };
  *   jsonp.send(payload, function(reply) { alert(reply) });
  *
@@ -24,7 +24,7 @@ define('@net.Jsonp',
         'use strict';
 
         /**
-         * 创建跨域数据传输的方案。默认5秒没有响应通道定义传输失败并触发complete。
+         * 创建跨域数据传输的方案. 默认5秒没有响应通道定义传输失败并触发complete.
          * @param {Uri|string} uri 服务端数据交互的Uri (e.g., "http://maps.google.com/maps/geo").
          * @param {string=} opt_callbackParamName 回调函数名称. 默认是"callback".
          * @constructor
@@ -93,13 +93,14 @@ define('@net.Jsonp',
          *
          * @param {Object=} opt_payload 键值对.会附加到URI后面.
          * @param {Function=} opt_replyCallback 回调函数接收返回数据作为参数.
-         * @param {Function=} opt_errorCallback 超时回调,若有payload (if given), 或者null.
+         * @param {Function=} opt_errorCallback 超时回调,若有payload则参数为它, 或者null.
          * @param {string=} opt_callbackParamValue 名字作为callbackParamName的值传给服务端.
          *     如果请求确定可以自己提供一个函数名,这样也方便缓存请求结果.
          *     NOTE: 如果有多个相同opt_callbackParamValue的请求, 只有最后一个可以被触发. 因为
          *         global[Jsonp.CALLBACKS][id]只能存一个函数.
          *
-         * @return {Object} 返回一个 request对象的描述符,可被用于取消这次任务, or null, if the message may not be cancelled.
+         * @return {Object} 返回一个 request对象的描述符,可被用于取消这次任务, or null,
+         *     if the message may not be cancelled.
          */
         Jsonp.prototype.send = function(opt_payload,
                                         opt_replyCallback,
