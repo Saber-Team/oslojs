@@ -1,12 +1,220 @@
 /**
- * @fileoverview JSON包. 这个模块并未做原生的JSON对象检测. TODO 合二为一
- * @modified Leo.Zhang
+ * @fileoverview JSON包.
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
 define('@json.util', ['@util'], function(util) {
 
     'use strict';
+
+    // 是否环境中提供原生JSON对象
+    var CAN_USE_NATIVE_JSON = !!util.global.JSON;
+
+
+    /**
+     * 内部使用的一个字符映射 for string.quote
+     * @private
+     * @type {Object}
+     */
+    var charToJsonCharCache_ = {
+        '\"': '\\"',
+        '\\': '\\\\',
+        '/': '\\/',
+        '\b': '\\b',
+        '\f': '\\f',
+        '\n': '\\n',
+        '\r': '\\r',
+        '\t': '\\t',
+
+        '\x0B': '\\u000b' // '\v' is not supported in JScript
+    };
+
+
+    /**
+     * 一些字符需要被替换掉, 用这个正则过滤.
+     * The S60 browser has a bug where unicode characters are not matched by
+     * regular expressions. The condition below detects such behaviour and
+     * adjusts the regular expression accordingly.
+     * @private
+     * @type {RegExp}
+     */
+    var charsToReplace_ = /\uffff/.test('\uffff') ?
+        /[\\\"\x00-\x1f\x7f-\uffff]/g : /[\\\"\x00-\x1f\x7f-\xff]/g;
+
+
+    /**
+     * 序列化类. 参数是stringify时用到的第二个参数, 见15.12.3
+     * @param {?(function(this:Object, string, *): *|Array)} opt_replacer Replacer.
+     * @constructor
+     */
+    var Serializer = function(opt_replacer) {
+        /**
+         * @type {function(this:Object, string, *): *|null|undefined|Array}
+         * @private
+         */
+        this.replacer_ = opt_replacer;
+    };
+
+
+    /**
+     * 序列化.
+     * @param {*} object 对象.
+     * @throws Error 循环引用出现.
+     * @return {string} 返回JSON字符串.
+     */
+    Serializer.prototype.serialize = function(object) {
+        // 原生JSON api在不同浏览器有严重问题, 所以此处不对stringify方法做检测.
+        // See json_test#assertSerialize
+        // for details on the differences from custom json.
+        // This implementation is signficantly faster than custom json, at least on
+        // Chrome.  See json_perf.html for a perf test showing the difference.
+
+        /*if (CAN_USE_NATIVE_JSON) {
+            return util.global.JSON.stringify(object, this.replacer_);
+        }*/
+
+        var sb = [];
+        this.serialize_(object, sb);
+        return sb.join('');
+    };
+
+
+    /**
+     * @private
+     * @param {*} object 要序列化的对象.
+     * @param {Array} sb Array used as a string builder.
+     * @throws Error 循环引用出现.
+     */
+    Serializer.prototype.serialize_ = function(object, sb) {
+        switch (typeof object) {
+            case 'string':
+                this.serializeString_(object, sb);
+                break;
+            case 'number':
+                this.serializeNumber_(object, sb);
+                break;
+            case 'boolean':
+                sb.push(object);
+                break;
+            case 'undefined':
+                sb.push('null');
+                break;
+            case 'object':
+                if (object === null) {
+                    sb.push('null');
+                    break;
+                }
+                if (util.isArray(object)) {
+                    this.serializeArray(object, sb);
+                    break;
+                }
+                // should we allow new String, new Number and new Boolean to be treated
+                // as string, number and boolean? Most implementations do not and the
+                // need is not very big
+                this.serializeObject_(object, sb);
+                break;
+            case 'function':
+                // Skip
+                break;
+            default:
+                throw Error('Unknown type: ' + typeof object);
+        }
+    };
+
+
+    /**
+     * 序列化字符串.
+     * @private
+     * @param {string} s 要被序列化的字符串.
+     * @param {Array} sb 一个数组作为string builder.
+     */
+    Serializer.prototype.serializeString_ = function(s, sb) {
+        // 官方的JSON实现对于 international characters支持不好.
+        sb.push('"', s.replace(charsToReplace_, function(c) {
+            // caching the result improves performance by a factor 2-3
+            if (c in charToJsonCharCache_) {
+                return charToJsonCharCache_[c];
+            }
+
+            var cc = c.charCodeAt(0);
+            var rv = '\\u';
+            // 补位操作
+            if (cc < 16) {
+                rv += '000';
+            } else if (cc < 256) {
+                rv += '00';
+            } else if (cc < 4096) { // \u1000
+                rv += '0';
+            }
+            return charToJsonCharCache_[c] = rv + cc.toString(16);
+        }), '"');
+    };
+
+
+    /**
+     * 序列化数字.
+     * @private
+     * @param {number} n 数字.
+     * @param {Array} sb 一个数组作为string builder.
+     */
+    Serializer.prototype.serializeNumber_ = function(n, sb) {
+        sb.push(isFinite(n) && !isNaN(n) ? n : 'null');
+    };
+
+
+    /**
+     * 序列化数组
+     * @param {Array} arr 数组对象.
+     * @param {Array} sb 一个数组作为string builder.
+     * @protected
+     */
+    Serializer.prototype.serializeArray = function(arr, sb) {
+        var l = arr.length;
+        sb.push('[');
+        var sep = '';
+        for (var i = 0; i < l; i++) {
+            sb.push(sep);
+
+            var value = arr[i];
+            this.serialize_(
+                this.replacer_ ? this.replacer_.call(arr, String(i), value) : value,
+                sb);
+
+            sep = ',';
+        }
+        sb.push(']');
+    };
+
+
+    /**
+     * 序列化对象
+     * @private
+     * @param {Object} obj 序列化的对象.
+     * @param {Array} sb 一个存放字符串的数组作为string builder.
+     */
+    Serializer.prototype.serializeObject_ = function(obj, sb) {
+        sb.push('{');
+        var sep = '';
+        for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                var value = obj[key];
+                // Skip functions.
+                if (typeof value !== 'function') {
+                    sb.push(sep);
+                    this.serializeString_(key, sb);
+                    sb.push(':');
+
+                    this.serialize_(
+                        this.replacer_ ? this.replacer_.call(obj, key, value) : value,
+                        sb);
+
+                    sep = ',';
+                }
+            }
+        }
+        sb.push('}');
+    };
 
 
     /**
@@ -56,12 +264,17 @@ define('@json.util', ['@util'], function(util) {
 
 
     /**
-     * 反序列化成对象. 非法字符串会抛出异常.
+     * 反序列化成对象. 非法字符串会抛出异常. 见15.12.2
      * 在很大的字符串计算下会非常慢. 如果确保字符串没有危险可以用unsafeParse.
      * @param {*} s JSON串.
+     * @param {?function(this:Object, string, *): *} opt_receiver
      * @return {Object} 反序列化得到的对象.
      */
-    function parse(s) {
+    function parse(s, opt_receiver) {
+        if (CAN_USE_NATIVE_JSON) {
+            return util.global.JSON.parse(s, opt_receiver);
+        }
+
         var o = String(s);
         if (isValid_(o)) {
             /** @preserveTry */
@@ -84,25 +297,10 @@ define('@json.util', ['@util'], function(util) {
 
 
     /**
-     * JSON replacer, as defined in Section 15.12.3 of the ES5 spec.
-     * TODO: Array should also be a valid replacer.
-     *
-     * @typedef {function(this:Object, string, *): *}
-     */
-    var Replacer = null;
-
-
-    /**
-     * JSON reviver, as defined in Section 15.12.2 of the ES5 spec.
-     * @typedef {function(this:Object, string, *): *}
-     */
-    var Reviver = null;
-
-
-    /**
      * 将对象序列化成json格式字符串.
      * @param {*} object 要序列化的对象.
-     * @param {?Replacer=} opt_replacer 对每个kv对执行这个替换函数, 决定value如何被序列化.
+     * @param {?function(this:Object, string, *): *} opt_replacer 对每个kv对执行这个替换函数,
+     *     决定value如何被序列化.
      * @throws Error 对象属性循环引用时抛出异常.
      * @return {string} A JSON string.
      */
@@ -120,207 +318,11 @@ define('@json.util', ['@util'], function(util) {
     }
 
 
-    /**
-     * 序列化类.
-     * @param {?Replacer=} opt_replacer Replacer.
-     * @constructor
-     */
-    var Serializer = function(opt_replacer) {
-        /**
-         * @type {Replacer|null|undefined}
-         * @private
-         */
-        this.replacer_ = opt_replacer;
-    };
-
-
-    /**
-     * 序列化.
-     * @param {*} object 对象.
-     * @throws Error if there are loops in the object graph.
-     * @return {string} A JSON string.
-     */
-    Serializer.prototype.serialize = function(object) {
-        var sb = [];
-        this.serialize_(object, sb);
-        return sb.join('');
-    };
-
-
-    /**
-     * @private
-     * @param {*} object 要序列化的对象.
-     * @param {Array} sb Array used as a string builder.
-     * @throws Error 循环引用出现.
-     */
-    Serializer.prototype.serialize_ = function(object, sb) {
-        switch (typeof object) {
-            case 'string':
-                this.serializeString_(object, sb);
-                break;
-            case 'number':
-                this.serializeNumber_(object, sb);
-                break;
-            case 'boolean':
-                sb.push(object);
-                break;
-            case 'undefined':
-                sb.push('null');
-                break;
-            case 'object':
-                if (object === null) {
-                    sb.push('null');
-                    break;
-                }
-                if (util.isArray(object)) {
-                    this.serializeArray(object, sb);
-                    break;
-                }
-                // should we allow new String, new Number and new Boolean to be treated
-                // as string, number and boolean? Most implementations do not and the
-                // need is not very big
-                this.serializeObject_(object, sb);
-                break;
-            case 'function':
-                // Skip functions.
-                break;
-            default:
-                throw Error('Unknown type: ' + typeof object);
-        }
-    };
-
-
-    /**
-     * Character mappings used internally for string.quote
-     * @private
-     * @type {Object}
-     */
-    Serializer.charToJsonCharCache_ = {
-        '\"': '\\"',
-        '\\': '\\\\',
-        '/': '\\/',
-        '\b': '\\b',
-        '\f': '\\f',
-        '\n': '\\n',
-        '\r': '\\r',
-        '\t': '\\t',
-
-        '\x0B': '\\u000b' // '\v' is not supported in JScript
-    };
-
-
-    /**
-     * Regular expression used to match characters that need to be replaced.
-     * The S60 browser has a bug where unicode characters are not matched by
-     * regular expressions. The condition below detects such behaviour and
-     * adjusts the regular expression accordingly.
-     * @private
-     * @type {RegExp}
-     */
-    Serializer.charsToReplace_ = /\uffff/.test('\uffff') ?
-        /[\\\"\x00-\x1f\x7f-\uffff]/g : /[\\\"\x00-\x1f\x7f-\xff]/g;
-
-
-    /**
-     * 序列化字符串.
-     * @private
-     * @param {string} s The string to serialize.
-     * @param {Array} sb Array used as a string builder.
-     */
-    Serializer.prototype.serializeString_ = function(s, sb) {
-        // The official JSON implementation does not work with international
-        // characters.
-        sb.push('"', s.replace(Serializer.charsToReplace_, function(c) {
-            // caching the result improves performance by a factor 2-3
-            if (c in Serializer.charToJsonCharCache_) {
-                return Serializer.charToJsonCharCache_[c];
-            }
-
-            var cc = c.charCodeAt(0);
-            var rv = '\\u';
-            if (cc < 16) {
-                rv += '000';
-            } else if (cc < 256) {
-                rv += '00';
-            } else if (cc < 4096) { // \u1000
-                rv += '0';
-            }
-            return Serializer.charToJsonCharCache_[c] = rv + cc.toString(16);
-        }), '"');
-    };
-
-
-    /**
-     * 序列化数字.
-     * @private
-     * @param {number} n 数字.
-     * @param {Array} sb Array used as a string builder.
-     */
-    Serializer.prototype.serializeNumber_ = function(n, sb) {
-        sb.push(isFinite(n) && !isNaN(n) ? n : 'null');
-    };
-
-
-    /**
-     * 序列化数组
-     * @param {Array} arr The array to serialize.
-     * @param {Array} sb Array used as a string builder.
-     * @protected
-     */
-    Serializer.prototype.serializeArray = function(arr, sb) {
-        var l = arr.length;
-        sb.push('[');
-        var sep = '';
-        for (var i = 0; i < l; i++) {
-            sb.push(sep);
-
-            var value = arr[i];
-            this.serialize_(
-                this.replacer_ ? this.replacer_.call(arr, String(i), value) : value,
-                sb);
-
-            sep = ',';
-        }
-        sb.push(']');
-    };
-
-
-    /**
-     * 序列化对象
-     * @private
-     * @param {Object} obj The object to serialize.
-     * @param {Array} sb Array used as a string builder.
-     */
-    Serializer.prototype.serializeObject_ = function(obj, sb) {
-        sb.push('{');
-        var sep = '';
-        for (var key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                var value = obj[key];
-                // Skip functions.
-                if (typeof value !== 'function') {
-                    sb.push(sep);
-                    this.serializeString_(key, sb);
-                    sb.push(':');
-
-                    this.serialize_(
-                        this.replacer_ ? this.replacer_.call(obj, key, value) : value,
-                        sb);
-
-                    sep = ',';
-                }
-            }
-        }
-        sb.push('}');
-    };
-
-
     // exports
     return {
         parse: parse,
         unsafeParse: unsafeParse,
         serialize: serialize,
-        stringify: serialize,
-        Serializer: Serializer
+        stringify: serialize
     };
 });

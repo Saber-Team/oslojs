@@ -1,0 +1,258 @@
+<!--
+	Copyright 2014 The OsloJS Framework Authors. All Rights Reserved.
+	Use of this source code is governed by the Apache License, Version 2.0.
+	See the COPYING file for details.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Oslo单元测试集</title>
+
+    <!-- testing framework -->
+    <script type="text/javascript" src="../../lib/json2.js"></script>
+    <script type="text/javascript" src="../../lib/jQuery/jq1.11.1.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="../../lib/jasmine-2.0.3/jasmine_favicon.png">
+    <link rel="stylesheet" type="text/css" href="../../lib/jasmine-2.0.3/jasmine.css">
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/jasmine-html.js"></script>
+    <script type="text/javascript" src="../../lib/jasmine-2.0.3/boot.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arrayEquals.js"></script>
+    <script type="text/javascript" src="../../lib/jMatchers/arraySameElements.js"></script>
+
+    <script type="text/javascript" src="../../lib/sinon/sinon.js"></script>
+
+    <!-- include source files here... -->
+    <script src="../../src/require.js"></script>
+    <script src="../../src/util/util.js"></script>
+    <script src="../../src/functions/functions.js"></script>
+    <script src="../../src/string/util.js"></script>
+    <script src="../../src/ua/util.js"></script>
+    <script src="../../src/json/json.js"></script>
+</head>
+<body>
+    <!-- include spec files here... -->
+    <script>
+
+    describe('Oslo.json.util模块', function() {
+
+        var util = Oslo.util;
+        var ua = Oslo.ua.util;
+        var json = Oslo.json.util;
+
+        /**
+         * 判断对象序列化后的结果.
+         * 如果浏览器实现了JSON.serialize, 我们需要改代码保持一致.
+         */
+        function assertSerialize(expected, obj, opt_replacer) {
+            expect(json.serialize(obj, opt_replacer)).toEqual(expected);
+
+            // I'm pretty sure that the json.serialize behavior is correct by the ES5
+            // spec, but JSON.stringify(undefined) is undefined on all browsers.
+            if (obj === undefined)
+                return;
+
+            // Browsers don't serialize undefined properties, but json.serialize does
+            if (util.isObject(obj) && ('a' in obj) && obj['a'] === undefined)
+                return;
+
+            // Replacers are broken on IE and older versions of firefox.
+            if (opt_replacer && !ua.isWEBKIT)
+                return;
+
+            // json.serialize does not stringify dates the same way.
+            if (obj instanceof Date)
+                return;
+
+            // json.serialize does not stringify functions the same way.
+            if (obj instanceof Function)
+                return;
+
+            // json.serialize doesn't use the toJSON method.
+            if (util.isObject(obj) && util.isFunction(obj.toJSON))
+                return;
+
+            if (typeof JSON != 'undefined') {
+                // 'json.serialize does not match JSON.stringify',
+                expect(JSON.stringify(obj, opt_replacer)).toEqual(expected);
+            }
+        }
+
+        /**
+         * @param {string} a
+         * @param {string} b
+         * @return {string} any common character between two strings a and b.
+         */
+        function findCommonChar(a, b) {
+            for (var i = 0; i < b.length; i++) {
+                if (a.indexOf(b.charAt(i)) >= 0) {
+                    return b.charAt(i);
+                }
+            }
+            return '';
+        }
+
+        function allChars(start, end, opt_allowControlCharacters) {
+            var sb = [];
+            for (var i = start; i < end; i++) {
+                // unicode without the control characters 0x00 - 0x1f
+                if (opt_allowControlCharacters || i > 0x1f) {
+                    sb.push(String.fromCharCode(i));
+                }
+            }
+            return sb.join('');
+        }
+
+        // 序列化
+
+        it('序列化字符串', function testStringSerialize() {
+
+            assertSerialize('""', '');
+
+            // unicode
+            var str = allChars(0, 10000);
+            eval(json.serialize(str));
+
+            assertSerialize('"true"', 'true');
+            assertSerialize('"false"', 'false');
+            assertSerialize('"null"', 'null');
+            assertSerialize('"0"', '0');
+        });
+
+
+        it('序列化Null', function testNullSerialize() {
+            assertSerialize('null', null);
+            assertSerialize('null', undefined);
+            assertSerialize('null', NaN);
+
+            assertSerialize('0', 0);
+            assertSerialize('""', '');
+            assertSerialize('false', false);
+        });
+
+
+        it('null属性', function testNullPropertySerialize() {
+            assertSerialize('{"a":null}', {'a': null});
+            assertSerialize('{"a":null}', {'a': undefined});
+        });
+
+
+        it('序列化数字', function testNumberSerialize() {
+            assertSerialize('0', 0);
+            assertSerialize('12345', 12345);
+            assertSerialize('-12345', -12345);
+
+            assertSerialize('0.1', 0.1);
+            // the leading zero may not be omitted
+            assertSerialize('0.1', .1);
+
+            // no leading +
+            assertSerialize('1', +1);
+
+            // either format is OK
+            var s = json.serialize(1e50);
+            expect(s == "1e50" ||
+                   s == "1E50" ||
+                   s == "1e+50" ||
+                   s == "1E+50").toBe(true);
+
+            // either format is OK
+            s = json.serialize(1e-50);
+            expect(s == "1e-50" || s == "1E-50").toBe(true);
+
+            // These numbers cannot be represented in JSON
+            assertSerialize('null', NaN);
+            assertSerialize('null', Infinity);
+            assertSerialize('null', -Infinity);
+        });
+
+
+        it('布尔值', function testBooleanSerialize() {
+            assertSerialize('true', true);
+            assertSerialize('"true"', 'true');
+
+            assertSerialize('false', false);
+            assertSerialize('"false"', 'false');
+        });
+
+
+        it('数组', function testArraySerialize() {
+            assertSerialize('[]', []);
+            assertSerialize('[1]', [1]);
+            assertSerialize('[1,2]', [1,2]);
+            assertSerialize('[1,2,3]', [1,2,3]);
+            assertSerialize('[[]]', [[]]);
+
+            // '{length:0}'
+            expect(json.serialize({length:0})).not.toEqual('[]');
+        });
+
+
+        function testObjectSerialize_emptyObject() {
+            assertSerialize('{}', {});
+        }
+
+
+        function testObjectSerialize_oneItem() {
+            assertSerialize('{"a":"b"}', {a:'b'});
+        }
+
+
+        function testObjectSerialize_twoItems() {
+            assertEquals('{"a":"b","c":"d"}',
+                    goog.json.serialize({a:'b',c:'d'}),
+                    '{"a":"b","c":"d"}');
+        }
+
+
+        function testObjectSerialize_whitespace() {
+            assertSerialize('{" ":" "}', {' ':' '});
+        }
+
+
+        function testSerializeSkipFunction() {
+            var object = {
+                s: 'string value',
+                b: true,
+                i: 100,
+                f: function() { var x = 'x'; }
+            };
+            assertSerialize('', object.f);
+            assertSerialize('{"s":"string value","b":true,"i":100}', object);
+        }
+
+
+        function testObjectSerialize_array() {
+            assertNotEquals('[0,1]', json.serialize([0,1]), '{"0":"0","1":"1"}');
+        }
+
+        function testObjectSerialize_recursion() {
+            if (goog.userAgent.WEBKIT) {
+                return; // this makes safari 4 crash.
+            }
+
+            var anObject = {};
+            anObject.thisObject = anObject;
+            assertThrows('expected recursion exception', function() {
+                goog.json.serialize(anObject);
+            });
+        }
+
+        function testObjectSerializeWithHasOwnProperty() {
+            var object = {'hasOwnProperty': null};
+            if (ua.isIE && !ua.isVersionOrHigher('9')) {
+                assertEquals('{}', json.serialize(object));
+            } else {
+                assertEquals('{"hasOwnProperty":null}', json.serialize(object));
+            }
+        }
+
+
+
+    });
+
+</script>
+</body>
+</html>
