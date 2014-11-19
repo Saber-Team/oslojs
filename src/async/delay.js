@@ -10,7 +10,7 @@ define('@async.Delay',
     [
         '@util',
         '@Disposable',
-        '@timer'
+        '@Timer'
     ],
     function(util, Disposable, Timer) {
 

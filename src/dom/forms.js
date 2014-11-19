@@ -19,7 +19,7 @@ define('@dom.forms', ['@util', '@ds.Map'], function(util, Map) {
      */
     function getFormDataHelper_(form, result, fnAppend) {
         var els = form.elements;
-        var el, i, input, value;
+        var el, i, input, name, value;
         for (i = 0; el = els[i]; i++) {
             // 非表单元素不要包含进来. els在一些浏览器包含非表单元素.
             // Check for 'form' property.
@@ -32,7 +32,7 @@ define('@dom.forms', ['@util', '@ds.Map'], function(util, Map) {
                 continue;
             }
 
-            var name = el.name;
+            name = el.name;
             switch (el.type.toLowerCase()) {
                 case 'file':
                 // file inputs are not supported

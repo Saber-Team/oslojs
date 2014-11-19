@@ -23,7 +23,7 @@
 define('@events.inputHandler',
     [
         '@util',
-        '@timer',
+        '@Timer',
         '@dom.util',
         '@events.browserEvent',
         '@events.handlerManager',

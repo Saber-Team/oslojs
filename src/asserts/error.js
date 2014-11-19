@@ -4,7 +4,8 @@
  * @email zmike86@gmail.com
  */
 
-define('@asserts.Error', ['@util', '@debug.Error'], function(util, DebugError) {
+define('@asserts.Error',
+    ['@util', '@string.util', '@debug.Error'], function(util, string, DebugError) {
 
     'use strict';
 

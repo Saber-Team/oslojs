@@ -7,7 +7,7 @@
 define('@net.networkTester',
     [
         '@util',
-        '@timer',
+        '@Timer',
         '@uri.Uri'
     ],
     function(util, Timer, Uri) {
