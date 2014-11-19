@@ -11,7 +11,7 @@ define('@async.Deferred',
     [
         '@util',
         '@array',
-        '@debug.error',
+        '@debug.Error',
         '@functions'
     ],
     function(util, array, DebugError, functions) {

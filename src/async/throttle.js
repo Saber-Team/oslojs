@@ -9,7 +9,7 @@ define('@async.Throttle',
     [
         '@util',
         '@Disposable',
-        '@timer'
+        '@Timer'
     ],
     function(util, Disposable, Timer) {
 
