@@ -58,15 +58,14 @@ define('@json.util', ['@util'], function(util) {
 
 
     /**
-     * 序列化.
+     * 序列化. 这个方法和原生的stringify有很大不同.
      * @param {*} object 对象.
      * @throws Error 循环引用出现.
      * @return {string} 返回JSON字符串.
      */
     Serializer.prototype.serialize = function(object) {
         // 原生JSON api在不同浏览器有严重问题, 所以此处不对stringify方法做检测.
-        // See json_test#assertSerialize
-        // for details on the differences from custom json.
+        // 同我们自己实现的json的不同之处详见测试用例 json_test#assertSerialize.
         // This implementation is signficantly faster than custom json, at least on
         // Chrome.  See json_perf.html for a perf test showing the difference.
 
@@ -98,9 +97,11 @@ define('@json.util', ['@util'], function(util) {
                 sb.push(object);
                 break;
             case 'undefined':
+                // 对于undefined值返回'null'
                 sb.push('null');
                 break;
             case 'object':
+                // null返回'null'
                 if (object === null) {
                     sb.push('null');
                     break;
@@ -109,9 +110,8 @@ define('@json.util', ['@util'], function(util) {
                     this.serializeArray(object, sb);
                     break;
                 }
-                // should we allow new String, new Number and new Boolean to be treated
-                // as string, number and boolean? Most implementations do not and the
-                // need is not very big
+                // 通过构造函数生成的new String, new Number, new Boolean也会走到这里,
+                // 未来考虑转化成值类型处理. Not very big deal.
                 this.serializeObject_(object, sb);
                 break;
             case 'function':
@@ -153,10 +153,10 @@ define('@json.util', ['@util'], function(util) {
 
 
     /**
-     * 序列化数字.
-     * @private
+     * 序列化数字. 对于NaN和Infinity返回'null', 这点同原生JSON api保持一致.
      * @param {number} n 数字.
      * @param {Array} sb 一个数组作为string builder.
+     * @private
      */
     Serializer.prototype.serializeNumber_ = function(n, sb) {
         sb.push(isFinite(n) && !isNaN(n) ? n : 'null');
@@ -306,7 +306,6 @@ define('@json.util', ['@util'], function(util) {
      */
     function serialize(object, opt_replacer) {
         // NOTE: Currently, we never use JSON.stringify.
-        //
         // The last time I evaluated this, JSON.stringify had subtle bugs and behavior
         // differences on all browsers, and the performance win was not large enough
         // to justify all the issues. This may change in the future as browser
