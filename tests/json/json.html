@@ -40,6 +40,7 @@
 
         var util = Oslo.util;
         var ua = Oslo.ua.util;
+        var fns = Oslo.functions;
         var json = Oslo.json.util;
 
         /**
@@ -54,15 +55,16 @@
             if (obj === undefined)
                 return;
 
-            // Browsers don't serialize undefined properties, but json.serialize does
+            // 浏览器会跳过属性是undefined的, 但是oslo.json.serialize会返回'null'
             if (util.isObject(obj) && ('a' in obj) && obj['a'] === undefined)
                 return;
 
-            // Replacers are broken on IE and older versions of firefox.
+            // Replacers在IE和一些老版本的Firefox中会broken.
             if (opt_replacer && !ua.isWEBKIT)
                 return;
 
-            // json.serialize does not stringify dates the same way.
+            // 浏览器下new Date序列化后返回"2014-11-20T06:52:08.590Z"
+            // 但我们自己实现的json.serialize会把它当作普通对象处理
             if (obj instanceof Date)
                 return;
 
@@ -70,17 +72,18 @@
             if (obj instanceof Function)
                 return;
 
-            // json.serialize doesn't use the toJSON method.
+            // json.serialize不使用对象的toJSON方法.
             if (util.isObject(obj) && util.isFunction(obj.toJSON))
                 return;
 
-            if (typeof JSON != 'undefined') {
+            if (typeof JSON !== 'undefined') {
                 // 'json.serialize does not match JSON.stringify',
                 expect(JSON.stringify(obj, opt_replacer)).toEqual(expected);
             }
         }
 
         /**
+         * 找到a b字符串中共同出现的第一个字符
          * @param {string} a
          * @param {string} b
          * @return {string} any common character between two strings a and b.
@@ -94,6 +97,7 @@
             return '';
         }
 
+        // 给定范围的unicode码值返回代表的字符
         function allChars(start, end, opt_allowControlCharacters) {
             var sb = [];
             for (var i = start; i < end; i++) {
@@ -122,7 +126,7 @@
         });
 
 
-        it('序列化Null', function testNullSerialize() {
+        it('序列化一些空值', function testNullSerialize() {
             assertSerialize('null', null);
             assertSerialize('null', undefined);
             assertSerialize('null', NaN);
@@ -190,29 +194,27 @@
         });
 
 
-        function testObjectSerialize_emptyObject() {
+        it('空对象', function testEmptyObject() {
             assertSerialize('{}', {});
-        }
+        });
 
 
-        function testObjectSerialize_oneItem() {
+        it('一个属性的对象', function testObjectOneItem() {
             assertSerialize('{"a":"b"}', {a:'b'});
-        }
+        });
 
 
-        function testObjectSerialize_twoItems() {
-            assertEquals('{"a":"b","c":"d"}',
-                    goog.json.serialize({a:'b',c:'d'}),
-                    '{"a":"b","c":"d"}');
-        }
+        it('两个属性的对象', function testObjectTwoItems() {
+            expect(json.serialize({a:'b',c:'d'})).toEqual('{"a":"b","c":"d"}');
+        });
 
 
-        function testObjectSerialize_whitespace() {
+        it('对象键值中含有空格', function testObjectWhitespace() {
             assertSerialize('{" ":" "}', {' ':' '});
-        }
+        });
 
 
-        function testSerializeSkipFunction() {
+        it('跳过函数属性', function testSkipFunction() {
             var object = {
                 s: 'string value',
                 b: true,
@@ -221,35 +223,404 @@
             };
             assertSerialize('', object.f);
             assertSerialize('{"s":"string value","b":true,"i":100}', object);
-        }
+        });
 
 
-        function testObjectSerialize_array() {
-            assertNotEquals('[0,1]', json.serialize([0,1]), '{"0":"0","1":"1"}');
-        }
+        it('数组不会序列化成对象', function testObjectSerialize_array() {
+            expect(json.serialize([0,1])).not.toEqual('{"0":"0","1":"1"}');
+        });
 
-        function testObjectSerialize_recursion() {
-            if (goog.userAgent.WEBKIT) {
-                return; // this makes safari 4 crash.
+
+        it('对象属性循环引用', function testObjectSerialize_recursion() {
+            // this makes safari 4 crash.
+            if (ua.isWEBKIT) {
+                expect(1).toBe(1);
+                return;
             }
 
             var anObject = {};
             anObject.thisObject = anObject;
-            assertThrows('expected recursion exception', function() {
-                goog.json.serialize(anObject);
-            });
-        }
+            expect(function() {
+                json.serialize(anObject);
+            }).toThrow();
+        });
 
-        function testObjectSerializeWithHasOwnProperty() {
+
+        it('带有自定义hasOwnProperty方法的对象', function testObjectWithHasOwnProperty() {
             var object = {'hasOwnProperty': null};
             if (ua.isIE && !ua.isVersionOrHigher('9')) {
-                assertEquals('{}', json.serialize(object));
+                expect(json.serialize(object)).toEqual('{}');
             } else {
-                assertEquals('{"hasOwnProperty":null}', json.serialize(object));
+                expect(json.serialize(object)).toEqual('{"hasOwnProperty":null}');
             }
+        });
+
+
+        // parsing
+
+        it('解析字符串', function testStringParse() {
+
+            expect(json.parse('""')).toBe('');
+            expect(json.parse('" "')).toBe(' ');
+
+            // unicode without the control characters 0x00 - 0x1f, 0x7f - 0x9f
+            var str = allChars(0, 1000);
+            var jsonString = json.serialize(str);
+            var a = eval(jsonString);
+            // unicode string
+            expect(json.parse(jsonString)).toEqual(a);
+
+            expect(json.parse('"true"')).toBe('true');
+            expect(json.parse('"false"')).toBe('false');
+            expect(json.parse('"null"')).toBe('null');
+            expect(json.parse('"0"')).toBe('0');
+        });
+
+
+        it('非安全解析字符串', function testStringUnsafeParse() {
+
+            expect(json.unsafeParse('""')).toBe('');
+            expect(json.unsafeParse('" "')).toBe(' ');
+
+            // unicode
+            var str = allChars(0, 1000);
+            var jsonString = json.serialize(str);
+            var a = eval(jsonString);
+            // unicode string
+            expect(json.unsafeParse(jsonString)).toEqual(a);
+
+            expect(json.unsafeParse('"true"')).toBe('true');
+            expect(json.unsafeParse('"false"')).toBe('false');
+            expect(json.unsafeParse('"null"')).toBe('null');
+            expect(json.unsafeParse('"0"')).toBe('0');
+        });
+
+
+        it('解析空值', function testNullParse() {
+            expect(json.parse('null')).toBe(null);
+
+            expect(json.parse('0')).not.toEqual(null);
+            expect(json.parse('""')).not.toEqual(null);
+            expect(json.parse('false')).not.toEqual(null);
+        });
+
+
+        it('非安全解析空值', function testNullUnsafeParse() {
+            expect(json.unsafeParse('null')).toBe(null);
+
+            expect(json.unsafeParse('0')).not.toEqual(null);
+            expect(json.unsafeParse('""')).not.toEqual(null);
+            expect(json.unsafeParse('false')).not.toEqual(null);
+        });
+
+
+        it('解析数字', function testNumberParse() {
+            expect(json.parse('0')).toBe(0);
+            expect(json.parse('12345')).toBe(12345);
+            expect(json.parse('-12345')).toBe(-12345);
+
+            expect(json.parse('0.1')).toBe(0.1);
+
+            // either format is OK
+            expect(json.parse('1e50')).toBe(1e50);
+            expect(json.parse('1E50')).toBe(1e50);
+            expect(json.parse('1e+50')).toBe(1e50);
+            expect(json.parse('1E+50')).toBe(1e50);
+
+            // either format is OK
+            expect(json.parse('1e-50')).toBe(1e-50);
+            expect(json.parse('1E-50')).toBe(1e-50);
+        });
+
+
+        it('非安全解析数字', function testNumberUnsafeParse() {
+            expect(json.unsafeParse('0')).toBe(0);
+            expect(json.unsafeParse('12345')).toBe(12345);
+            expect(json.unsafeParse('-12345')).toBe(-12345);
+
+            expect(json.unsafeParse('0.1')).toBe(0.1);
+
+            // either format is OK
+            expect(json.unsafeParse('1e50')).toBe(1e50);
+            expect(json.unsafeParse('1E50')).toBe(1e50);
+            expect(json.unsafeParse('1e+50')).toBe(1e50);
+            expect(json.unsafeParse('1E+50')).toBe(1e50);
+
+            // either format is OK
+            expect(json.unsafeParse('1e-50')).toBe(1e-50);
+            expect(json.unsafeParse('1E-50')).toBe(1e-50);
+        });
+
+
+        it('解析布尔值', function testBooleanParse() {
+            expect(json.parse('true')).toBe(true);
+            expect(json.parse('false')).toBe(false);
+
+            expect(json.parse('0')).not.toBe(false);
+            expect(json.parse('"false"')).not.toBe(false);
+            expect(json.parse('null')).not.toBe(false);
+
+            expect(json.parse('1')).not.toBe(true);
+            expect(json.parse('"true"')).not.toBe(true);
+            expect(json.parse('{}')).not.toBe(true);
+            expect(json.parse('[]')).not.toBe(true);
+        });
+
+
+        it('非安全解析布尔值', function testBooleanUnsafeParse() {
+            expect(json.unsafeParse('true')).toBe(true);
+            expect(json.unsafeParse('false')).toBe(false);
+
+            expect(json.unsafeParse('0')).not.toBe(false);
+            expect(json.unsafeParse('"false"')).not.toBe(false);
+            expect(json.unsafeParse('null')).not.toBe(false);
+
+            expect(json.unsafeParse('1')).not.toBe(true);
+            expect(json.unsafeParse('"true"')).not.toBe(true);
+            expect(json.unsafeParse('{}')).not.toBe(true);
+            expect(json.unsafeParse('[]')).not.toBe(true);
+        });
+
+
+        it('解析数组', function testArrayParse() {
+            function arrayEquals(a1, a2) {
+                if (a1.length !== a2.length) {
+                    return false;
+                }
+                for (var i = 0; i < a1.length; i++) {
+                    if (a1[i] != a2[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            expect(arrayEquals(json.parse('[]'), [])).toBe(true);
+            expect(arrayEquals(json.parse('[1]'), [1])).toBe(true);
+            expect(arrayEquals(json.parse('[1,2]'), [1,2])).toBe(true);
+            expect(arrayEquals(json.parse('[1,2,3]'), [1,2,3])).toBe(true);
+            expect(arrayEquals(json.parse('[[]]')[0], [])).toBe(true);
+
+            // make sure we do not get an array for something that looks like an array
+            expect('push' in json.parse('{"length":0}')).toBe(false);
+        });
+
+
+        it('非安全解析数组', function testArrayUnsafeParse() {
+            function arrayEquals(a1, a2) {
+                if (a1.length !== a2.length) {
+                    return false;
+                }
+                for (var i = 0; i < a1.length; i++) {
+                    if (a1[i] != a2[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            expect(arrayEquals(json.unsafeParse('[]'), [])).toBe(true);
+            expect(arrayEquals(json.unsafeParse('[1]'), [1])).toBe(true);
+            expect(arrayEquals(json.unsafeParse('[1,2]'), [1,2])).toBe(true);
+            expect(arrayEquals(json.unsafeParse('[1,2,3]'), [1,2,3])).toBe(true);
+            expect(arrayEquals(json.unsafeParse('[[]]')[0], [])).toBe(true);
+
+            // make sure we do not get an array for something that looks like an array
+            expect('push' in json.unsafeParse('{"length":0}')).toBe(false);
+        });
+
+
+        it('解析对象', function testObjectParse() {
+            function objectEquals(a1, a2) {
+                for (var key in a1) {
+                    if (a1[key] != a2[key]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            expect(objectEquals(json.parse('{}'), {})).toBe(true);
+            expect(objectEquals(json.parse('{"a":"b"}'), {a:'b'})).toBe(true);
+            expect(objectEquals(json.parse('{"a":"b","c":"d"}'), {a:'b',c:'d'})).toBe(true);
+            expect(objectEquals(json.parse('{" ":" "}'), {' ':' '})).toBe(true);
+
+            // make sure we do not get an Object when it is really an array
+            expect('length' in json.parse('[0,1]')).toBe(true);
+        });
+
+
+        it('非安全解析对象', function testObjectUnsafeParse() {
+            function objectEquals(a1, a2) {
+                for (var key in a1) {
+                    if (a1[key] != a2[key]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            expect(objectEquals(json.unsafeParse('{}'), {})).toBe(true);
+            expect(objectEquals(json.unsafeParse('{"a":"b"}'), {a:'b'})).toBe(true);
+            expect(objectEquals(json.unsafeParse('{"a":"b","c":"d"}'), {a:'b',c:'d'})).toBe(true);
+            expect(objectEquals(json.unsafeParse('{" ":" "}'), {' ':' '})).toBe(true);
+
+            // make sure we do not get an Object when it is really an array
+            expect('length' in json.unsafeParse('[0,1]')).toBe(true);
+        });
+
+
+        it('测试检查JSON', function testForValidJson() {
+            function error_(msg, s) {
+                expect(util.partial(json.parse, s)).toThrow();
+                msg += ', Should have raised an exception: ' + s;
+            }
+
+            error_('Non closed string', '"dasdas');
+            error_('undefined is not valid json', 'undefined');
+
+            // These numbers cannot be represented in JSON
+            error_('NaN cannot be presented in JSON', 'NaN');
+            error_('Infinity cannot be presented in JSON', 'Infinity');
+            error_('-Infinity cannot be presented in JSON', '-Infinity');
+        });
+
+
+        function testIsNotValid() {
+            assertFalse(json.isValid_('t'));
+            assertFalse(json.isValid_('r'));
+            assertFalse(json.isValid_('u'));
+            assertFalse(json.isValid_('e'));
+            assertFalse(json.isValid_('f'));
+            assertFalse(json.isValid_('a'));
+            assertFalse(json.isValid_('l'));
+            assertFalse(json.isValid_('s'));
+            assertFalse(json.isValid_('n'));
+            assertFalse(json.isValid_('E'));
+
+            assertFalse(json.isValid_('+'));
+            assertFalse(json.isValid_('-'));
+
+            assertFalse(json.isValid_('t++'));
+            assertFalse(json.isValid_('++t'));
+            assertFalse(json.isValid_('t--'));
+            assertFalse(json.isValid_('--t'));
+            assertFalse(json.isValid_('-t'));
+            assertFalse(json.isValid_('+t'));
+
+            assertFalse(json.isValid_('"\\"')); // "\"
+            assertFalse(json.isValid_('"\\'));  // "\
+
+            // multiline string using \ at the end is not valid
+            assertFalse(json.isValid_('"a\\\nb"'));
+
+
+            assertFalse(json.isValid_('"\n"'));
+            assertFalse(json.isValid_('"\r"'));
+            assertFalse(json.isValid_('"\r\n"'));
+            // Disallow the unicode newlines
+            assertFalse(json.isValid_('"\u2028"'));
+            assertFalse(json.isValid_('"\u2029"'));
+
+            assertFalse(json.isValid_(' '));
+            assertFalse(json.isValid_('\n'));
+            assertFalse(json.isValid_('\r'));
+            assertFalse(json.isValid_('\r\n'));
+
+            assertFalse(json.isValid_('t.r'));
+
+            assertFalse(json.isValid_('1e'));
+            assertFalse(json.isValid_('1e-'));
+            assertFalse(json.isValid_('1e+'));
+
+            assertFalse(json.isValid_('1e-'));
+
+            assertFalse(json.isValid_('"\\\u200D\\"'));
+            assertFalse(json.isValid_('"\\\0\\"'));
+            assertFalse(json.isValid_('"\\\0"'));
+            assertFalse(json.isValid_('"\\0"'));
+            assertFalse(json.isValid_('"\x0c"'));
+
+            assertFalse(json.isValid_('"\\\u200D\\", alert(\'foo\') //"\n'));
         }
 
 
+        function testIsValid() {
+            assertTrue(json.isValid_('\n""\n'));
+            assertTrue(json.isValid_('[1\n,2\r,3\u2028\n,4\u2029]'));
+            assertTrue(json.isValid_('"\x7f"'));
+            assertTrue(json.isValid_('"\x09"'));
+            // Test tab characters in json.
+            assertTrue(json.isValid_('{"\t":"\t"}'));
+        }
+
+
+        it('测试proto对象', function testDoNotSerializeProto() {
+            function F() {}
+            F.prototype = {
+                c: 3
+            };
+
+            var obj = new F;
+            obj.a = 1;
+            obj.b = 2;
+
+            expect(json.serialize(obj)).toEqual('{"a":1,"b":2}');
+        });
+
+
+        it('测试转义', function testEscape() {
+            var unescaped = '1a*/]';
+            // 不转义
+            expect(json.serialize(unescaped)).toEqual('"' + unescaped + '"');
+
+            var escaped = '\n\x7f\u1049';
+            // 转义
+            expect(findCommonChar(escaped, json.serialize(escaped))).toBe('');
+            // Should eval to the same string after escaping
+            expect(json.parse(json.serialize(escaped))).toEqual(escaped);
+        });
+
+
+        it('replacer的应用', function testReplacer() {
+            assertSerialize('[null,null,0]', [,,0]);
+
+            assertSerialize('[0,0,{"x":0}]', [,,{x:0}], function(k, v) {
+                if (v === undefined && util.isArray(this)) {
+                    return 0;
+                }
+                return v;
+            });
+
+            assertSerialize('[0,1,2,3]', [0, 0, 0, 0], function(k, v) {
+                var kNum = Number(k);
+                if (k && !isNaN(kNum)) {
+                    return kNum;
+                }
+                return v;
+            });
+
+            assertSerialize('{"a":1,"b":{"c":2}}',
+                    {'a': 0, 'b': {'c': 1}},
+                    function(k, v) {
+                        return typeof v == 'number' ? v + 1 : v;
+                    });
+        });
+
+
+        it('解析Date对象', function testDateSerialize() {
+            assertSerialize('{}', new Date(0));
+        });
+
+
+        it('带有toJSON的对象', function testToJSONSerialize() {
+            assertSerialize('{}', {
+                toJSON: fns.constant('serialized')
+            });
+            assertSerialize('{"toJSON":"normal"}', {
+                toJSON: 'normal'
+            });
+        });
 
     });
 
