@@ -1,16 +1,16 @@
 /**
  * @fileoverview 日志和调试工具包.
- * @modified Leo.Zhang
+ * @author Leo.Zhang
  * @email zmike86@gmail.com
  * @see ../../demos/debug.html
  */
 
-define('Sogou.Debug.Util',
+define('@debug.util',
     [
-        'Sogou.Util',
-        'Sogou.Array',
-        'Sogou.String.Util',
-        'Sogou.UA.Util'
+        '@util',
+        '@array',
+        '@string.util',
+        '@ua.util'
     ],
     function(util, array, string, ua) {
 
@@ -23,23 +23,25 @@ define('Sogou.Debug.Util',
          */
         var fnNameCache_ = {};
 
+
         /**
-         * Resolves functions to their names.  Resolved function names will be cached.
+         * 根据函数得到一个名字. 得到的结果会被缓存.
          * @type {function(Function):string}
          * @private
          */
         var fnNameResolver_;
 
+
         /**
-         * Max length of stack to try and output
+         * 调用堆栈的最大长度
          * @type {number}
          */
         var MAX_STACK_DEPTH = 50;
 
+
         /**
          * 标准化Error对象.
-         * Normalizes the error/exception object between browsers.
-         * @param {Object} err Raw error object.
+         * @param {Object} err 原生error对象.
          * @return {Object} Normalized error object.
          */
         var normalizeErrorObject = function(err) {
@@ -56,7 +58,6 @@ define('Sogou.Debug.Util',
 
             var lineNumber, fileName;
             var threwError = false;
-
             try {
                 lineNumber = err.lineNumber || err.line || 'Not available';
             } catch (e) {
@@ -91,6 +92,7 @@ define('Sogou.Debug.Util',
             return err;
         };
 
+
         /**
          * Gets the current stack trace, either starting from the caller or starting
          * from a specified function that's currently on the call stack.
@@ -101,6 +103,7 @@ define('Sogou.Debug.Util',
         var getStacktrace = function(opt_fn) {
             return getStacktraceHelper_(opt_fn || arguments.callee.caller, []);
         };
+
 
         /**
          * 获取函数名称
@@ -127,10 +130,11 @@ define('Sogou.Debug.Util',
                 // 这个正则只匹配命名函数,
                 // 但正则写的也有问题, 匹配不了
                 // 命名函数两边的空格, /function(?:\s*)([^\(\s]+)/ 这个好些
-                // 这个问题已经提交到论坛(zmike86: )
+                // 这个问题已经提交到论坛
                 var matches = /function ([^\(]+)/.exec(functionSource);
+                var method;
                 if (matches) {
-                    var method = matches[1];
+                    method = matches[1];
                     fnNameCache_[functionSource] = method;
                 } else {
                     fnNameCache_[functionSource] = '[Anonymous]';
@@ -139,6 +143,7 @@ define('Sogou.Debug.Util',
 
             return fnNameCache_[functionSource];
         };
+
 
         /**
          * Private helper for getStacktrace().
@@ -212,9 +217,11 @@ define('Sogou.Debug.Util',
             return sb.join('');
         };
 
+
         // expose
         return {
             LOGGING_ENABLED: util.DEBUG,
+
             /**
              * Catches onerror events fired by windows and similar objects.
              * @param {function(Object)} logFunc 处理错误信息的函数
@@ -252,6 +259,7 @@ define('Sogou.Debug.Util',
                     return retVal;
                 };
             },
+
             /**
              * 用字符串表示一个对象的全部属性.
              * Creates a string representing an object and all its properties.
@@ -279,7 +287,9 @@ define('Sogou.Debug.Util',
                 }
                 return str.join('\n');
             },
+
             getFunctionName: getFunctionName,
+
             /**
              * 设置一个自定义的函数名字解析器
              * @param {function(Function): string} resolver Resolves functions to their
@@ -288,6 +298,7 @@ define('Sogou.Debug.Util',
             setFunctionResolver: function(resolver) {
                 fnNameResolver_ = resolver;
             },
+
             /**
              * Exposes an exception that has been caught by a try...catch and outputs the
              * error with a stack trace.
@@ -310,6 +321,7 @@ define('Sogou.Debug.Util',
                     return 'Exception trying to expose exception! You win, we lose. ' + e2;
                 }
             },
+
             normalizeErrorObject: normalizeErrorObject
         };
     }

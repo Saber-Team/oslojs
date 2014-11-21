@@ -10,4 +10,10 @@ Oslo JavaScript Framework (OJF) 是一款底层的JavaScript框架. 是大教堂
 框架建设是一项持久的, 艰巨的但鼓舞人心、提高能力的工作. 在web前端高速发展的今天没有一成不变的准则只有与时俱进
 的坚持. 一款成熟的可靠的JS框架不仅需要我们stand on the shoulder of Giants更需要团队的合作和高度的统一.
 
+oslo框架的主体包含四个部分:
+a. 语言增强, 为JavaScript语言使用提供丰富统一的接口
+b. dom操作,包括样式,动画等等常见功能
+c. 事件系统,是整个框架的基础,OO架构也由此而生
+d. 网路通信,任何通过js发起的应用层/传输层请求
+
 To be continued...
