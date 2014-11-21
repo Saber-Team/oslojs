@@ -4,9 +4,11 @@
  * to eliminate the need for each app to implement their own log buffer. The
  * disadvantage to doing this is that log handlers cannot maintain references to
  * log records and expect that they are not overwriten at a later point.
+ * @author Leo.Zhang
+ * @email zmike86@gmail.com
  */
 
-define('Sogou.Debug.LogBuffer', ['Sogou.Debug.LogRecord'], function(LogRecord) {
+define('@debug.logBuffer', ['@debug.logRecord'], function(LogRecord) {
 
     'use strict';
 
