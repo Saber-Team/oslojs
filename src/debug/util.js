@@ -17,7 +17,7 @@ define('@debug.util',
         //'use strict';
 
         /**
-         * Hash map for storing function names that have already been looked up.
+         * 一个哈希结构缓存已经被跟踪的函数.
          * @type {Object}
          * @private
          */
@@ -94,8 +94,7 @@ define('@debug.util',
 
 
         /**
-         * Gets the current stack trace, either starting from the caller or starting
-         * from a specified function that's currently on the call stack.
+         * 获取调用堆栈. 从堆栈中指定的函数开始或者调用getStacktrace方法的函数开始.
          * @param {Function=} opt_fn 一个可选的函数. 从这个函数开始追踪调用堆栈.
          *     如果没传, 默认为调用此方法的函数.
          * @return {string} Stack trace.
@@ -107,7 +106,7 @@ define('@debug.util',
 
         /**
          * 获取函数名称
-         * @param {Function} fn Function to get name of.
+         * @param {Function} fn 函数.
          * @return {string} Function's name.
          */
         var getFunctionName = function(fn) {
@@ -148,8 +147,8 @@ define('@debug.util',
         /**
          * Private helper for getStacktrace().
          * @param {Function} fn 从哪个函数开始追踪.
-         * @param {Array} visited 保留已经遍历过的函数.
-         * @return {string} Stack trace starting from function fn.
+         * @param {Array} visited 一个初始为空的数组保留已经遍历过的函数.
+         * @return {string} 返回从指定函数开始的调用追踪字符串.
          * @private
          */
         var getStacktraceHelper_ = function(fn, visited) {
@@ -160,7 +159,7 @@ define('@debug.util',
             if (array.contains(visited, fn)) {
                 sb.push('[...circular reference...]');
 
-                // Traverse the call stack until function not found or max depth is reached
+            // Traverse the call stack until function not found or max depth is reached
             } else if (fn && visited.length < MAX_STACK_DEPTH) {
                 sb.push(getFunctionName(fn) + '(');
                 // 填入fn的参数信息
@@ -223,9 +222,9 @@ define('@debug.util',
             LOGGING_ENABLED: util.DEBUG,
 
             /**
-             * Catches onerror events fired by windows and similar objects.
+             * 捕获window.onerror.
              * @param {function(Object)} logFunc 处理错误信息的函数
-             * @param {boolean=} opt_cancel 是否阻止错误到达浏览器.
+             * @param {boolean=} opt_cancel 是否阻止错误默认行为.
              * @param {Object=} opt_target 触发onerror事件的对象, 通常是window
              */
             catchErrors: function(logFunc, opt_cancel, opt_target) {
@@ -233,13 +232,13 @@ define('@debug.util',
                 var oldErrorHandler = target.onerror;
                 var retVal = !!opt_cancel;
 
-                // Chrome interprets onerror return value backwards (http://crbug.com/92062)
-                // until it was fixed in webkit revision r94061 (Webkit 535.3). This
-                // workaround still needs to be skipped in Safari after the webkit change
-                // gets pushed out in Safari.
+                // Chrome对onerror的返回值向后兼容 (http://crbug.com/92062)
+                // 直到webkit revision r94061 (Webkit 535.3)才修复.
+                // This workaround still needs to be skipped in Safari after
+                // the webkit change gets pushed out in Safari.
                 // See https://bugs.webkit.org/show_bug.cgi?id=67119
-                // IE中event.returnValue = true是阻止onerror上报浏览器,
-                // 这个其他大部分dom事件不同. false是执行正常行为.
+                // IE中event.returnValue = true是阻止onerror默认行为,
+                // 这个其他大部分dom事件不同. false则是执行正常行为.
                 // 但webkit内核比较主流,仍然false代表阻止,这次要改成和IE一致,
                 // 因为FF也是这么做的.
                 if (ua.isWEBKIT &&
@@ -262,18 +261,19 @@ define('@debug.util',
 
             /**
              * 用字符串表示一个对象的全部属性.
-             * Creates a string representing an object and all its properties.
-             * @param {Object|null|undefined} obj Object to expose.
-             * @param {boolean=} opt_showFn 是否对象的函数也被当做属性, 默认是false.
+             * @param {Object|null|undefined} obj 要上报的对象.
+             * @param {boolean=} opt_showFn 是否对象的方法也被当做属性, 默认是false.
              * @return {string} The string representation of {@code obj}.
              */
             expose: function(obj, opt_showFn) {
-                if (typeof obj == 'undefined') return 'undefined';
-                if (obj == null) return 'NULL';
+                if (typeof obj === 'undefined')
+                    return 'undefined';
+                if (obj === null)
+                    return 'NULL';
 
                 var str = [];
                 for (var x in obj) {
-                    if (!opt_showFn && typeof obj[x] == 'function') {
+                    if (!opt_showFn && typeof obj[x] === 'function') {
                         continue;
                     }
                     var s = x + ' = ';
@@ -300,11 +300,10 @@ define('@debug.util',
             },
 
             /**
-             * Exposes an exception that has been caught by a try...catch and outputs the
-             * error with a stack trace.
-             * @param {Object} err Error object or string.
-             * @param {Function=} opt_fn Optional function to start stack trace from.
-             * @return {string} Details of exception.
+             * 上报通过try...catch捕获到的异常对象并打印发生异常时的调用堆栈.
+             * @param {Object} err 异常对象或者一个错误消息.
+             * @param {Function=} opt_fn 调用堆栈开始的函数.
+             * @return {string} 返回异常的描述细节.
              */
             exposeException: function(err, opt_fn) {
                 /** @preserveTry */
