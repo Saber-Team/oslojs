@@ -1149,18 +1149,17 @@ define('@net.XhrIo',
                 this.getStatus() + ']';
         };
 
-// Register the xhr handler as an entry point, so that
-// it can be monitored for exception handling, etc.
-        /*debug.entryPointRegistry.register(
+        // Register the xhr handler as an entry point, so that
+        // it can be monitored for exception handling, etc.
+        // debug.entryPointRegistry.register(
             /**
              * @param {function(!Function): !Function} transformer The transforming
              *     function.
              */
-        /*
-                function(transformer) {
-                XhrIo.prototype.onReadyStateChangeEntryPoint_ =
-                    transformer(XhrIo.prototype.onReadyStateChangeEntryPoint_);
-            });*/
+        //    function(transformer) {
+        //        XhrIo.prototype.onReadyStateChangeEntryPoint_ =
+        //            transformer(XhrIo.prototype.onReadyStateChangeEntryPoint_);
+        //    });
 
 
         return XhrIo;
