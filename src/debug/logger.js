@@ -95,16 +95,14 @@ define('@debug.Logger',
 
         /**
          * 找寻或创建一个logger符合给定的名字. 如果已创建则返回它.
-         * If a new logger is created its log level will be configured based
-         * on the LogManager configuration and it will configured to also send logging
-         * output to its parent's handlers. It will be registered in the LogManager
-         * global namespace.
-         *
-         * @param {string} name logger的名字, such as Oslo.net.browserChannel.
+         * 创建的logger会注册到loggers_私有对象.
+         * @param {string} name logger的名字, 如Oslo.net.browserChannel.
          * @return {!Logger} The named logger.
          */
         Logger.getLogger = function(name) {
-            return LogManager.getLogger(name);
+            Logger.initialize();
+            var ret = loggers_[name];
+            return ret || Logger.createLogger_(name);
         };
 
 
@@ -479,18 +477,15 @@ define('@debug.Logger',
         var rootLogger_ = null;
 
 
-        /**
-         * 共享的LogManager对象 that is used to maintain a set of
-         * shared state about Loggers and log services.
-         */
-        var LogManager = {};
+        // ====================================================================
+        // 以下静态的方法重构而来,用于维护共享loggers的状态和log services.
+        // ====================================================================
 
 
         /**
-         * 创建一个空名字的logger level设成config作为默认的根
-         * Initializes the LogManager if not already initialized.
+         * 创建一个空名字的logger level设成config作为默认的根.
          */
-        LogManager.initialize = function() {
+        Logger.initialize = function() {
             if (!rootLogger_) {
                 rootLogger_ = new Logger('');
                 loggers_[''] = rootLogger_;
@@ -503,7 +498,7 @@ define('@debug.Logger',
          * Returns all the loggers.
          * @return {!Object} Map of logger names to logger objects.
          */
-        LogManager.getLoggers = function() {
+        Logger.getLoggers = function() {
             return loggers_;
         };
 
@@ -513,23 +508,9 @@ define('@debug.Logger',
          * string as its name.
          * @return {!Logger} The root logger.
          */
-        LogManager.getRoot = function() {
-            LogManager.initialize();
+        Logger.getRoot = function() {
+            Logger.initialize();
             return /** @type {!Logger} */ (rootLogger_);
-        };
-
-
-        /**
-         * 这个方法经常被Logger.getLogger调用来获取给定名字的日志记录器.
-         * @param {string} name A name for the logger. This should be a dot-separated
-         * name and should normally be based on the package name or class name of the
-         * subsystem, such as Oslo.net.browserChannel.
-         * @return {!Logger} The named logger.
-         */
-        LogManager.getLogger = function(name) {
-            LogManager.initialize();
-            var ret = loggers_[name];
-            return ret || LogManager.createLogger_(name);
         };
 
 
@@ -540,9 +521,9 @@ define('@debug.Logger',
          *     Defaults to the root logger.
          * @return {function(Object)} The created function.
          */
-        LogManager.createFunctionForCatchErrors = function(opt_logger) {
+        Logger.createFunctionForCatchErrors = function(opt_logger) {
             return function(info) {
-                var logger = opt_logger || LogManager.getRoot();
+                var logger = opt_logger || Logger.getRoot();
                 logger.severe('Error: ' + info.message + ' (' + info.fileName +
                     ' @ Line: ' + info.line + ')');
             };
@@ -556,14 +537,14 @@ define('@debug.Logger',
          * @return {!Logger} The named logger.
          * @private
          */
-        LogManager.createLogger_ = function(name) {
+        Logger.createLogger_ = function(name) {
             // find parent logger
             var logger = new Logger(name);
             if (Logger.ENABLE_HIERARCHY) {
                 var lastDotIndex = name.lastIndexOf('.');
                 var parentName = name.substr(0, lastDotIndex);
                 var leafName = name.substr(lastDotIndex + 1);
-                var parentLogger = LogManager.getLogger(parentName);
+                var parentLogger = Logger.getLogger(parentName);
 
                 // tell the parent about the child and the child about the parent
                 // addChild_只需要logger名字最右边的部分
