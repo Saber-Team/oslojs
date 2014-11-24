@@ -3,20 +3,18 @@
  * 一次性的ajax请求可以调用XhrIo.send(), 也可以生成一个XhrIo的实例, 发送多次请求.
  * 每个实例有其自己的XmlHttpRequest对象并在请求完成后解绑事件保证没有内存泄露.
  *
- * XhrIo is event based, it dispatches events when a request finishes, fails or
- * succeeds or when the ready-state changes. The ready-state or timeout event
- * fires first, followed by a generic completed event. Then the abort, error,
- * or success event is fired as appropriate. Lastly, the ready event will fire
- * to indicate that the object may be used to make another request.
+ * XhrIo对象完全基于事件, 会在请求完成、失败、成功、状态发生变化时分发事件. 首先会触发
+ * ready-state或者timeout事件, 然后是completed. 还有abort, error, success事件会在
+ * 特定的条件触发. 最后是ready事件,表示xhrio对象已经可以准备发送另外一个请求.
  *
- * The error event may also be called before completed and
- * ready-state-change if the XmlHttpRequest.open() or .send() methods throw.
+ * XmlHttpRequest.open() 和 .send()方法可能抛出异常这时候error事件会在complete和
+ * ready-state-change之前先触发.
  *
  * 这个类并不支持多次请求, 队列请求, or 优先级队列请求.
  * Tested = IE6, FF1.5, Safari, Opera 8.5
  *
- * TODO: Error cases aren't playing nicely in Safari.
- *
+ * TODO: Error cases aren't playing nicely in Safari. 本模块要在严格测试后去掉所有log
+ * 和对log模块的引用
  */
 
 define('@net.XhrIo',
@@ -38,11 +36,19 @@ define('@net.XhrIo',
         '@uri.util',
         '@ua.util'
     ],
-    function(util, Timer, array, EventTarget, Json, log,
+    function(util, Timer, array, EventTarget, JSON, log,
              ErrorCode, EventType, HttpStatus, XmlHttp,
-             object, string, ds, Map, uriutil, ua) {
+             object, string, ds, Map, uri, ua) {
 
         'use strict';
+
+        /**
+         * XhrIo.send每次都会生成新的XhrIo对象. 没析构的对象会保存在这个数组里.
+         * @see XhrIo.cleanup
+         * @private {!Array.<!XhrIo>}
+         */
+        var sendInstances_ = [];
+
 
         /**
          * XMLHttpRequests处理类.
@@ -55,7 +61,7 @@ define('@net.XhrIo',
             EventTarget.call(this);
 
             /**
-             * Map of default headers to add to every request, use:
+             * 默认的每个请求的头部参数, use:
              * XhrIo.headers.set(name, value)
              * @type {!Map}
              */
@@ -69,19 +75,20 @@ define('@net.XhrIo',
 
             /**
              * XMLHttpRequest是否处于活动状态.
-             * 从send()开始直到onReadyStateChange()完成, 或者触发error() or abort().
+             * 从send()开始直到onReadyStateChange()完成, 或者触发error()和abort().
              * @private {boolean}
              */
             this.active_ = false;
 
             /**
-             * 私有的XMLHttpRequest对象.
+             * 私有的XMLHttpRequest对象. GearsHttpRequest是Google开发的
+             * 一个浏览器插件对象. 在前端框架中不常用.
              * @private {XMLHttpRequest|GearsHttpRequest}
              */
             this.xhr_ = null;
 
             /**
-             * The options to use with the current XMLHttpRequest object.
+             * 当前XMLHttpRequest对象的一些可选参数.
              * @private {Object}
              */
             this.xhrOptions_ = null;
@@ -105,13 +112,13 @@ define('@net.XhrIo',
             this.lastErrorCode_ = ErrorCode.NO_ERROR;
 
             /**
-             * Last error message.
+             * 上次的错误消息.
              * @private {Error|string}
              */
             this.lastError_ = '';
 
             /**
-             * Used to ensure that we don't dispatch an multiple ERROR events. This can
+             * 用来确保不会多次触发ERROR事件. This can
              * happen in IE when it does a synchronous load and one error is handled in
              * the ready statte change and one is handled due to send() throwing an
              * exception.
@@ -120,29 +127,26 @@ define('@net.XhrIo',
             this.errorDispatched_ = false;
 
             /**
-             * Used to make sure we don't fire the complete event from inside a send call.
+             * 用于确保我们不会在调用send方法时触发complete事件.
              * @private {boolean}
              */
             this.inSend_ = false;
 
             /**
-             * Used in determining if a call to {@link #onReadyStateChange_} is from
-             * within a call to this.xhr_.open.
+             * 标识调用onReadyStateChange_方法时是否来自调用this.xhr_.open.
              * @private {boolean}
              */
             this.inOpen_ = false;
 
             /**
-             * Used in determining if a call to {@link #onReadyStateChange_} is from
-             * within a call to this.xhr_.abort.
+             * 标识调用onReadyStateChange_方法时是否来自调用this.xhr_.abort.
              * @private {boolean}
              */
             this.inAbort_ = false;
+
             /**
              * 超时的毫秒数.
-             * Number of milliseconds after which an incomplete request will be aborted
-             * and a {@link net.eventType.TIMEOUT} event raised; 0 means no timeout
-             * is set.
+             * 到达这个时限会触发TIMEOUT事件; 0是不设置超时.
              * @private {number}
              */
             this.timeoutInterval_ = 0;
@@ -154,31 +158,29 @@ define('@net.XhrIo',
             this.timeoutId_ = null;
 
             /**
-             * The requested type for the response. The empty string means use the default
-             * XHR behavior.
+             * 响应返回类型. 空字符串表示用默认XHR行为.
              * @private {XhrIo.ResponseType}
              */
             this.responseType_ = XhrIo.ResponseType.DEFAULT;
 
             /**
+             * 在一些现代浏览器中原生支持了跨域ajax请求, 发送这种请求时可以使用withCredential
+             * 属性. 详见:
+             * http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-attribute.
              * Whether a "credentialed" request is to be sent (one that is aware of
-             * cookies and authentication). This is applicable only for cross-domain
-             * requests and more recent browsers that support this part of the HTTP Access
-             * Control standard.
-             *
-             * @see http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-attribute
-             *
+             * cookies and authentication).
              * @private {boolean}
              */
             this.withCredentials_ = false;
 
             /**
-             * 是否可以配置XMLHttpRequest对象的 timeout属性.
+             * 是否可以配置XMLHttpRequest对象的timeout属性.这个只在xhr2中会有
              * @private {boolean}
              */
             this.useXhr2Timeout_ = false;
         };
 
+        // 原型继承
         util.inherits(XhrIo, EventTarget);
 
 
@@ -198,11 +200,11 @@ define('@net.XhrIo',
 
 
         /**
-         * A reference to the XhrIo logger
-         * @private {Sogou.Debug.Logger}
+         * XhrIo实例的logger
+         * @private {Oslo.debug.Logger}
          * @const
          */
-        XhrIo.prototype.logger_ = log.getLogger('Sogou.Net.XhrIo');
+        XhrIo.prototype.logger_ = log.getLogger('Oslo.net.XhrIo');
 
 
         /**
@@ -211,71 +213,63 @@ define('@net.XhrIo',
          */
         XhrIo.CONTENT_TYPE_HEADER = 'Content-Type';
 
+
         /**
          * The pattern matching the 'http' and 'https' URI schemes
          * @type {!RegExp}
          */
         XhrIo.HTTP_SCHEME_PATTERN = /^https?$/i;
 
+
         /**
-         * The methods that typically come along with form data.  We set different
+         * 表单数据提交的时候用到的方法. We set different
          * headers depending on whether the HTTP action is one of these.
          */
         XhrIo.METHODS_WITH_FORM_DATA = ['POST', 'PUT'];
 
+
         /**
-         * url编码的表单的请求头.
-         * The Content-Type HTTP header value for a url-encoded form
+         * url编码的表单的Content-Type HTTP header.
          * @type {string}
          */
         XhrIo.FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded;charset=utf-8';
 
+
         /**
-         * The XMLHttpRequest Level two timeout delay ms property name.
+         * xhr2支持timeout作为延时的属性.
          * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
-         *
          * @private {string}
          * @const
          */
         XhrIo.XHR2_TIMEOUT_ = 'timeout';
 
+
         /**
-         * The XMLHttpRequest Level two ontimeout handler property name.
+         * 设置xhr2对象的ontimeout属性可以添加事件句柄.
          * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
-         *
          * @private {string}
          * @const
          */
         XhrIo.XHR2_ON_TIMEOUT_ = 'ontimeout';
 
-        /**
-         * XhrIo.send每次都会生成新的XhrIo对象. 没被释放的对象会保存在这个数组里.
-         * All non-disposed instances of XhrIo created by {@link XhrIo.send} are in this Array.
-         * @see XhrIo.cleanup
-         * @private {!Array.<!XhrIo>}
-         */
-        XhrIo.sendInstances_ = [];
 
         /**
-         * Static send that creates a short lived instance of XhrIo to send the
-         * request.
+         * 这个静态方法创建一个短生命周期的XhrIo对象发送请求.
          * @see XhrIo.cleanup
          * @param {string|Uri} url 请求地址.
          * @param {Function=} opt_callback 完成时的回调函数.
-         * @param {string=} opt_method 请求方法, default: GET.
+         * @param {string=} opt_method 请求方法, 默认 GET.
          * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
-         *     Body data.
-         * @param {Object|Map=} opt_headers Map of headers to add to the
-         *     request.
-         * @param {number=} opt_timeoutInterval 超时毫秒数. 过时将会aborted;
-         *     0 means no timeout is set.
+         *     发送的数据body data.
+         * @param {Object|Map=} opt_headers 需要加到请求头参数的对象.
+         * @param {number=} opt_timeoutInterval 超时毫秒数.过时将会aborted; 0表示不设置超时.
          * @param {boolean=} opt_withCredentials Whether to send credentials with the
-         *     request. Default to false. See {@link XhrIo#setWithCredentials}.
+         *     request. 默认false. 见setWithCredentials方法.
          */
         XhrIo.send = function(url, opt_callback, opt_method, opt_content,
                               opt_headers, opt_timeoutInterval, opt_withCredentials) {
             var x = new XhrIo();
-            XhrIo.sendInstances_.push(x);
+            sendInstances_.push(x);
             if (opt_callback) {
                 x.listen(EventType.COMPLETE, opt_callback);
             }
@@ -289,12 +283,12 @@ define('@net.XhrIo',
             x.send(url, opt_method, opt_content, opt_headers);
         };
 
+
         /**
-         * 释放所有没被释放的net.XhrIo 实例. 这些实例都是goog.net.XhrIo.send创建的.
-         * {@link XhrIo.send} cleans up the net.XhrIo instance
-         * it creates when the request completes or fails.  However, if
-         * the request never completes, then the net.XhrIo is not disposed.
-         * This can occur if the window is unloaded before the request completes.
+         * 释放所有没被释放的XhrIo实例. 这些实例都是XhrIo.send创建的.
+         * XhrIo.send会在请求complete或者fail的时候析构使用的XhrIo实例.
+         * 但如果请求没有结束never completes, XhrIo实例就不会被析构.
+         * 没有结束可能是因为window卸载但请求还未完成.
          * We could have {@link XhrIo.send} return the net.XhrIo
          * it creates and make the client of {@link XhrIo.send} be
          * responsible for disposing it in this case.  However, this makes things
@@ -305,62 +299,58 @@ define('@net.XhrIo',
          * cleanup on window unload.
          */
         XhrIo.cleanup = function() {
-            var instances = XhrIo.sendInstances_;
+            var instances = sendInstances_;
             while (instances.length) {
                 instances.pop().dispose();
             }
         };
 
+
         /**
-         * todo (by zmike86)
          * Installs exception protection for all entry point introduced by
-         * net.XhrIo instances which are not protected by
+         * XhrIo instances which are not protected by
          * {@link debug.ErrorHandler#protectWindowSetTimeout},
          * {@link debug.ErrorHandler#protectWindowSetInterval}, or
          * {@link events.protectBrowserEventEntryPoint}.
          *
-         * @param {debug.ErrorHandler} errorHandler Error handler with which to
-         *     protect the entry point(s).
+         * @param {ErrorHandler} errorHandler 异常处理器保护entry point(s).
          */
-        /*
         XhrIo.protectEntryPoints = function(errorHandler) {
             XhrIo.prototype.onReadyStateChangeEntryPoint_ =
                 errorHandler.protectEntryPoint(XhrIo.prototype.onReadyStateChangeEntryPoint_);
-        };*/
+        };
+
 
         /**
          * 释放特定的XhrIo, 通常就是this所指.
-         * Disposes of the specified XhrIo created by
-         * {@link XhrIo.send} and removes it from
-         * {@link XhrIo.pendingStaticSendInstances_}.
          * @private
          */
         XhrIo.prototype.cleanupSend_ = function() {
             this.dispose();
-            array.remove(XhrIo.sendInstances_, this);
+            array.remove(sendInstances_, this);
         };
 
+
         /**
-         * Returns the number of milliseconds after which an incomplete request will be
-         * aborted, or 0 if no timeout is set.
+         * 获取超时时限.
          * @return {number} Timeout interval in milliseconds.
          */
         XhrIo.prototype.getTimeoutInterval = function() {
             return this.timeoutInterval_;
         };
 
+
         /**
-         * Sets the number of milliseconds after which an incomplete request will be
-         * aborted and a {@link EventType.TIMEOUT} event raised; 0 means no
-         * timeout is set.
+         * 设置超时时限.
          * @param {number} ms Timeout interval in milliseconds; 0 means none.
          */
         XhrIo.prototype.setTimeoutInterval = function(ms) {
             this.timeoutInterval_ = Math.max(0, ms);
         };
 
+
         /**
-         * Sets the desired type for the response. At time of writing, this is only
+         * 设置响应类型. At time of writing, this is only
          * supported in very recent versions of WebKit (10.0.612.1 dev and later).
          *
          * If this is used, the response may only be accessed via {@link #getResponse}.
@@ -371,43 +361,43 @@ define('@net.XhrIo',
             this.responseType_ = type;
         };
 
+
         /**
-         * Gets the desired type for the response.
+         * 返回响应类型.
          * @return {XhrIo.ResponseType} The desired type for the response.
          */
         XhrIo.prototype.getResponseType = function() {
             return this.responseType_;
         };
 
+
         /**
+         * 设置是否需要通过凭据跨域访问服务.
          * Sets whether a "credentialed" request that is aware of cookie and
-         * authentication information should be made. This option is only supported by
-         * browsers that support HTTP Access Control. As of this writing, this option
-         * is not supported in IE.
-         *
-         * @param {boolean} withCredentials Whether this should be a "credentialed"
-         *     request.
+         * authentication information should be made.
+         * @param {boolean} withCredentials 是否发送"credentialed"请求.
          */
         XhrIo.prototype.setWithCredentials = function(withCredentials) {
             this.withCredentials_ = withCredentials;
         };
 
+
         /**
          * 是否当前请求带有凭据信息.
-         * @return {boolean} The desired type for the response.
+         * @return {boolean} 返回凭据信息.
          */
         XhrIo.prototype.getWithCredentials = function() {
             return this.withCredentials_;
         };
 
+
         /**
-         * 实例方法发送请求.
-         * @param {string|Uri} url Uri to make request to.
-         * @param {string=} opt_method Send method, default: GET.
+         * 发送请求.
+         * @param {string|Uri} url 请求地址.
+         * @param {string=} opt_method 请求方法, 默认 GET.
          * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
-         *     Body data.
-         * @param {Object|Map=} opt_headers Map of headers to add to the
-         *     request.
+         *     发送数据体Body data.
+         * @param {Object|Map=} opt_headers 设置的请求头参数.
          */
         XhrIo.prototype.send = function(url, opt_method, opt_content, opt_headers) {
             if (this.xhr_) {
@@ -422,7 +412,7 @@ define('@net.XhrIo',
             this.lastErrorCode_ = ErrorCode.NO_ERROR;
             this.lastMethod_ = method;
             this.errorDispatched_ = false;
-            // 这里初始化active_为true
+            // 初始化active_为true
             this.active_ = true;
 
             // Use the factory to create the XHR object and options
@@ -464,20 +454,20 @@ define('@net.XhrIo',
                 });
             }
 
-            // Find whether a content type header is set, ignoring case.
+            // 是否设置了content type头, ignoring case.
             // HTTP header names are case-insensitive.  See:
             // http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
             var contentTypeKey = array.find(headers.getKeys(), XhrIo.isContentTypeHeader_);
 
-            var contentIsFormData = (util.global['FormData'] &&
-                (content instanceof util.global['FormData']));
+            var contentIsFormData = (util.global.FormData &&
+                (content instanceof util.global.FormData));
 
-            // 是PUT或POST请求 且 Content-Type没有被设置 且 不是FormData数据(todo)
+            // 是GET或POST请求 且 Content-Type没有被设置 且 不是FormData数据(todo)
             if (array.contains(XhrIo.METHODS_WITH_FORM_DATA, method) &&
                 !contentTypeKey && !contentIsFormData) {
-                // 如果请求用的表单数据, 默认是 url-encoded form content type.
-                // unless this is a FormData request.  For FormData,
-                // the browser will automatically add a multipart/form-data content type
+                // 如果请求用的表单数据, 默认是url-encoded form content type.
+                // 除非是FormData request. 对于FormData请求,
+                // 浏览器自动加上multipart/form-data的content type,
                 // with an appropriate multipart boundary.
                 headers.set(XhrIo.CONTENT_TYPE_HEADER, XhrIo.FORM_CONTENT_TYPE);
             }
@@ -496,7 +486,7 @@ define('@net.XhrIo',
             }
 
             /**
-             * 发送请求, 否则报错 (404 not found).
+             * 发送请求, 否则报错(404 not found).
              * @preserveTry
              */
             try {
@@ -506,11 +496,11 @@ define('@net.XhrIo',
                     log.fine(this.logger_, this.formatMsg_('Will abort after ' +
                         this.timeoutInterval_ + 'ms if incomplete, xhr2 ' +
                         this.useXhr2Timeout_));
-                    // 如果可用timeout属性
+                    // 可用timeout属性
                     if (this.useXhr2Timeout_) {
                         this.xhr_[XhrIo.XHR2_TIMEOUT_] = this.timeoutInterval_;
                         this.xhr_[XhrIo.XHR2_ON_TIMEOUT_] = util.bind(this.timeout_, this);
-                        // 不可用则规定时间执行this.timeout_
+                    // 规定时间执行this.timeout_
                     } else {
                         this.timeoutId_ = Timer.callOnce(this.timeout_,
                             this.timeoutInterval_, this);
@@ -527,10 +517,11 @@ define('@net.XhrIo',
             }
         };
 
+
         /**
-         * timeout属性对于早先版本的xhr不适用, 这个方法用于检测xhr是否支持2级的timeout
-         * 属性和ontimeout回调函数.
-         * 汗……搞来搞去只有IE9支持啊....代码虽然这么写但是chrome已经足够支持了……
+         * timeout属性对于早先版本的xhr不适用, 这个方法用于检测xhr是否支持2级原生的
+         * timeout属性和ontimeout回调函数. todo 检测chrome和safari
+         * 搞来搞去只有IE9以上支持啊....代码虽然这么写但是chrome已经足够支持了……
          *
          * Currently, FF 21.0 OS X has the fields but won't actually call the timeout
          * handler.  Perhaps the confusion in the bug referenced below hasn't
@@ -551,9 +542,9 @@ define('@net.XhrIo',
 
 
         /**
+         * 判断是否设置了content-type头部
          * @param {string} header An HTTP header key.
-         * @return {boolean} Whether the key is a content type header (ignoring
-         *     case.
+         * @return {boolean} 忽略大小写判断是否content type header.
          * @private
          */
         XhrIo.isContentTypeHeader_ = function(header) {
@@ -573,15 +564,13 @@ define('@net.XhrIo',
 
 
         /**
-         * 指定时间 {@link XhrIo#timeoutInterval_} 后请求还未完成;
-         * raises a {@link EventType.TIMEOUT} event and aborts
-         * the request.
+         * 指定时间XhrIo#timeoutInterval_后请求还未完成则中断请求并触发timeout事件.
          * @private
          */
         XhrIo.prototype.timeout_ = function() {
-            if (typeof sogou == 'undefined') {
-                // If sogou is undefined then the callback has occurred as the application
-                // is unloading and will error.  Thus we let it silently fail.
+            if (typeof Oslo === 'undefined') {
+                // Oslo对象为undefined则有可能是回调发生在页面卸载时并引发异常.
+                // Thus we let it silently fail.
             } else if (this.xhr_) {
                 this.lastError_ = 'Timed out after ' + this.timeoutInterval_ +
                     'ms, aborting';
@@ -629,7 +618,7 @@ define('@net.XhrIo',
 
 
         /**
-         * Abort the current XMLHttpRequest
+         * 中断当前XMLHttpRequest
          * @param {ErrorCode=} opt_failureCode Optional error code to use -
          *     defaults to ABORT.
          */
@@ -649,7 +638,7 @@ define('@net.XhrIo',
 
 
         /**
-         * Nullifies all callbacks to reduce risks of leaks.
+         * Nullifies all callbacks.
          * @override
          * @protected
          */
@@ -674,7 +663,12 @@ define('@net.XhrIo',
 
 
         /**
-         * 内部的函数会在xhr每次的readystatechange时触发.
+         * 内部的函数会在xhr每次的readystatechange时触发. 现在浏览器支持如下常量
+         * xhr.UNSENT === 0
+         * xhr.OPENED === 1
+         * xhr.HEADERS_RECEIVED === 2
+         * xhr.LOADING === 3
+         * xhr.DONE === 4
          * This method checks the status and the readystate and fires the correct callbacks.
          * If the request has ended, the handlers are cleaned up and the XHR object is
          * nullified.
@@ -686,8 +680,8 @@ define('@net.XhrIo',
                 return;
             }
             if (!this.inOpen_ && !this.inSend_ && !this.inAbort_) {
-                // Were not being called from within a call to this.xhr_.send
-                // this.xhr_.abort, or this.xhr_.open, so this is an entry point
+                // 不是在this.xhr_.send, this.xhr_.abort, this.xhr_.open时触发的,
+                // 则是一个保护的entry point.
                 this.onReadyStateChangeEntryPoint_();
             } else {
                 this.onReadyStateChangeHelper_();
@@ -696,12 +690,10 @@ define('@net.XhrIo',
 
 
         /**
-         * todo Entry Point具体的意义
-         * Used to protect the onreadystatechange handler entry point.  Necessary
-         * as {#onReadyStateChange_} maybe called from within send or abort, this
-         * method is only called when {#onReadyStateChange_} is called as an
-         * entry point.
-         * {@see #protectEntryPoints}
+         * 多了这个方法是为了保护onreadystatechange处理器作为entry point. 因为
+         * onReadyStateChange_可能会在send或abort时触发调用, 所以很有必要. 这个
+         * 方法只在onReadyStateChange_是一个entry point时才会调用.
+         * {@see XhrIo.protectEntryPoints}
          * @private
          */
         XhrIo.prototype.onReadyStateChangeEntryPoint_ = function() {
@@ -721,7 +713,7 @@ define('@net.XhrIo',
                 return;
             }
 
-            if (typeof sogou == 'undefined') {
+            if (typeof Oslo === 'undefined') {
                 // NOTE(user): If sogou is undefined then the callback has occurred as the
                 // application is unloading and will error.  Thus we let it silently fail.
 
@@ -729,7 +721,7 @@ define('@net.XhrIo',
                 this.xhrOptions_[XmlHttp.OptionType.LOCAL_REQUEST_ERROR] &&
                     this.getReadyState() == XmlHttp.ReadyState.COMPLETE &&
                     this.getStatus() == 2) {
-                // Sogou.Net.DefaultXmlHttpFactory的getOptions方法会把IE下
+                // Oslo.net.defaultXmlHttpFactory的getOptions方法会把IE下
                 // this.xhrOptions_[XmlHttp.OptionType.LOCAL_REQUEST_ERROR]设为1
                 // 所以当前条件只会在IE下出现.
                 // NOTE(user): In IE if send() errors on a *local* request the readystate
@@ -747,7 +739,7 @@ define('@net.XhrIo',
                 // XhrIo is asynchronous.  If that is the case we delay the callback
                 // using a timer.
                 if (this.inSend_ &&
-                    this.getReadyState() == XmlHttp.ReadyState.COMPLETE) {
+                    this.getReadyState() === XmlHttp.ReadyState.COMPLETE) {
                     Timer.callOnce(this.onReadyStateChange_, 0, this);
                     return;
                 }
@@ -813,7 +805,6 @@ define('@net.XhrIo',
                     // used.
                     xhr.onreadystatechange = clearedOnReadyStateChange;
                 } catch (e) {
-                    // todo 什么是Gears HTTP request
                     // This seems to occur with a Gears HTTP request. Delayed the setting of
                     // this onreadystatechange until after READY is sent out and catching the
                     // error to see if we can track down the problem.
@@ -872,7 +863,7 @@ define('@net.XhrIo',
          * @private
          */
         XhrIo.prototype.isLastUriEffectiveSchemeHttp_ = function() {
-            var scheme = uriutil.getEffectiveScheme(String(this.lastUri_));
+            var scheme = uri.getEffectiveScheme(String(this.lastUri_));
             return XhrIo.HTTP_SCHEME_PATTERN.test(scheme);
         };
 
@@ -1030,7 +1021,7 @@ define('@net.XhrIo',
                 responseText = responseText.substring(opt_xssiPrefix.length);
             }
 
-            return Json.parse(responseText);
+            return JSON.parse(responseText);
         };
 
 
