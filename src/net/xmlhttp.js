@@ -42,12 +42,13 @@ define('@net.xmlHttp',
          */
         XmlHttp.OptionType = {
             /**
-             * 是否用util.nullFunction 设置 onreadystatechange 而不是 null.
+             * 还是IE下需要用util.nullFunction设置onreadystatechange而不是null.
              */
             USE_NULL_FUNCTION: 0,
             /**
-             * NOTE(user): 在IE中如果send()发送到本地(*local* request)时会出错,则readystate
-             * 会一直是COMPLETE. 我们得忽略这种情况并且在send()外包裹try/catch 才能捕捉到这个error.
+             * NOTE: 在IE中如果send()发送到本地(*local* request)时会出错,readystate
+             * 会一直是COMPLETE. 我们得忽略这种情况并且在send()外包裹try/catch 才能
+             * 捕捉到这个error.
              */
             LOCAL_REQUEST_ERROR: 1
         };
