@@ -22,7 +22,7 @@ define('@net.xmlHttp',
          * 创建 XMLHttpRequest 对象的静态类.
          * @return {!(XMLHttpRequest|GearsHttpRequest)} A new XMLHttpRequest object.
          */
-        var XmlHttp = function() {
+        var xmlHttp = function() {
             return factory_.createInstance();
         };
 
@@ -31,7 +31,7 @@ define('@net.xmlHttp',
          * 用这个静态方法获得XMLHttpRequest objects的配置对象.
          * @return {Object} The options.
          */
-        XmlHttp.getOptions = function() {
+        xmlHttp.getOptions = function() {
             return factory_.getOptions();
         };
 
@@ -40,7 +40,7 @@ define('@net.xmlHttp',
          * XmlHttp对象中可以含有的选项.
          * @enum {number}
          */
-        XmlHttp.OptionType = {
+        xmlHttp.OptionType = {
             /**
              * 还是IE下需要用util.nullFunction设置onreadystatechange而不是null.
              */
@@ -60,7 +60,7 @@ define('@net.xmlHttp',
          *   en-us/xmlsdk/html/0e6a34e4-f90c-489d-acff-cb44242fafc6.asp
          * @enum {number}
          */
-        XmlHttp.ReadyState = {
+        xmlHttp.ReadyState = {
             UNINITIALIZED: 0,
             LOADING: 1,
             LOADED: 2,
@@ -73,16 +73,16 @@ define('@net.xmlHttp',
          * 设置factory_对象.
          * @param {!XmlHttpFactory} factory New global factory object.
          */
-        XmlHttp.setGlobalFactory = function(factory) {
+        xmlHttp.setGlobalFactory = function(factory) {
             factory_ = factory;
         };
 
 
         // Set the global factory to an instance of the default factory.
-        XmlHttp.setGlobalFactory(new DefaultXmlHttpFactory());
+        xmlHttp.setGlobalFactory(new DefaultXmlHttpFactory());
 
 
-        return XmlHttp;
+        return xmlHttp;
 
     }
 );

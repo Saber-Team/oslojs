@@ -34,11 +34,12 @@ define('@net.XhrIo',
         '@ds.util',
         '@ds.Map',
         '@uri.util',
-        '@ua.util'
+        '@ua.util',
+        '@debug.entryPointRegistry'
     ],
     function(util, Timer, array, EventTarget, JSON, log,
-             ErrorCode, EventType, HttpStatus, XmlHttp,
-             object, string, ds, Map, uri, ua) {
+             ErrorCode, EventType, HttpStatus, xmlHttp,
+             object, string, ds, Map, uri, ua, entryPointRegistry) {
 
         'use strict';
 
@@ -418,7 +419,7 @@ define('@net.XhrIo',
             // Use the factory to create the XHR object and options
             this.xhr_ = this.createXhr();
             this.xhrOptions_ = this.xmlHttpFactory_ ?
-                this.xmlHttpFactory_.getOptions() : XmlHttp.getOptions();
+                this.xmlHttpFactory_.getOptions() : xmlHttp.getOptions();
 
             // 监听onreadystatechange
             this.xhr_.onreadystatechange = util.bind(this.onReadyStateChange_, this);
@@ -559,7 +560,7 @@ define('@net.XhrIo',
          */
         XhrIo.prototype.createXhr = function() {
             return this.xmlHttpFactory_ ?
-                this.xmlHttpFactory_.createInstance() : XmlHttp();
+                this.xmlHttpFactory_.createInstance() : xmlHttp();
         };
 
 
@@ -702,9 +703,9 @@ define('@net.XhrIo',
 
 
         /**
-         * Helper for {@link #onReadyStateChange_}.  This is used so that
-         * entry point calls to {@link #onReadyStateChange_} can be routed through
-         * {@link #onReadyStateChangeEntryPoint_}.
+         * Helper for {@link #onReadyStateChange_}.
+         * 之所以把这个函数单提出来是因为可以让调用onReadyStateChange_的entry point
+         * 得以被分离出来,当然还通过本函数的调用者onReadyStateChangeEntryPoint_.
          * @private
          */
         XhrIo.prototype.onReadyStateChangeHelper_ = function() {
@@ -714,32 +715,27 @@ define('@net.XhrIo',
             }
 
             if (typeof Oslo === 'undefined') {
-                // NOTE(user): If sogou is undefined then the callback has occurred as the
-                // application is unloading and will error.  Thus we let it silently fail.
+                // NOTE: 如果全局没有Oslo对象则说明回调发生在页面卸载时.
+                // Thus we let it silently fail.
 
             } else if (
-                this.xhrOptions_[XmlHttp.OptionType.LOCAL_REQUEST_ERROR] &&
-                    this.getReadyState() == XmlHttp.ReadyState.COMPLETE &&
-                    this.getStatus() == 2) {
+                this.xhrOptions_[xmlHttp.OptionType.LOCAL_REQUEST_ERROR] &&
+                    this.getReadyState() === xmlHttp.ReadyState.COMPLETE &&
+                    this.getStatus() === 2) {
                 // Oslo.net.defaultXmlHttpFactory的getOptions方法会把IE下
-                // this.xhrOptions_[XmlHttp.OptionType.LOCAL_REQUEST_ERROR]设为1
+                // this.xhrOptions_[xmlHttp.OptionType.LOCAL_REQUEST_ERROR]设为true,
                 // 所以当前条件只会在IE下出现.
-                // NOTE(user): In IE if send() errors on a *local* request the readystate
-                // is still changed to COMPLETE.  We need to ignore it and allow the
-                // try/catch around send() to pick up the error.
+                // NOTE: 在IE下如果send()方法在*local* request时发生错误readystate会
+                // 变成COMPLETE. 我们要忽略它，用try-catch包括send()捕获异常. 见send();
                 log.fine(this.logger_, this.formatMsg_(
                     'Local request error detected and ignored'));
 
             } else {
-                // 在IE如果response被缓存了, 我们有时会立即得到readystatechange(甚至在
-                // send方法时), 这种情况其实不是异步回调了, 给了我们假象, 这时候我们需要通过
+                // 在IE如果response被缓存了, 我们有时会立即得到readystatechange(from inside
+                // the send call), 这种情况其实不是异步回调了, 给了我们假象, 这时候需要通过
                 // setTimeout(fn, 0)改成异步回调.
-                // In IE when the response has been cached we sometimes get the callback
-                // from inside the send call and this usually breaks code that assumes that
-                // XhrIo is asynchronous.  If that is the case we delay the callback
-                // using a timer.
                 if (this.inSend_ &&
-                    this.getReadyState() === XmlHttp.ReadyState.COMPLETE) {
+                    this.getReadyState() === xmlHttp.ReadyState.COMPLETE) {
                     Timer.callOnce(this.onReadyStateChange_, 0, this);
                     return;
                 }
@@ -789,7 +785,7 @@ define('@net.XhrIo',
                 // READY event may trigger another request, thus we must nullify this.xhr_
                 var xhr = this.xhr_;
                 var clearedOnReadyStateChange =
-                    this.xhrOptions_[XmlHttp.OptionType.USE_NULL_FUNCTION] ?
+                    this.xhrOptions_[xmlHttp.OptionType.USE_NULL_FUNCTION] ?
                         util.nullFunction : null;
                 this.xhr_ = null;
                 this.xhrOptions_ = null;
@@ -831,6 +827,7 @@ define('@net.XhrIo',
 
 
         /**
+         * 返回是否当前XhrIo实例处于激活状态.
          * @return {boolean} Whether there is an active request.
          */
         XhrIo.prototype.isActive = function() {
@@ -839,27 +836,29 @@ define('@net.XhrIo',
 
 
         /**
+         * 返回是否请求处于complete状态
          * @return {boolean} Whether the request has completed.
          */
         XhrIo.prototype.isComplete = function() {
-            return this.getReadyState() == XmlHttp.ReadyState.COMPLETE;
+            return this.getReadyState() === xmlHttp.ReadyState.COMPLETE;
         };
 
 
         /**
-         * @return {boolean} Whether the request completed with a success.
+         * 请求是否成功返回.
+         * @return {boolean}
          */
         XhrIo.prototype.isSuccess = function() {
             var status = this.getStatus();
-            // A zero status code is considered successful for local files.
+            // status如果是0则认为成功请求了本地文件.
             return HttpStatus.isSuccess(status) ||
                 status === 0 && !this.isLastUriEffectiveSchemeHttp_();
         };
 
 
         /**
-         * @return {boolean} whether the effective scheme of the last URI that was
-         *     fetched was 'http' or 'https'.
+         * 上一次的真实请求是否发生在http或https协议上.
+         * @return {boolean} 返回布尔值.
          * @private
          */
         XhrIo.prototype.isLastUriEffectiveSchemeHttp_ = function() {
@@ -869,32 +868,30 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the readystate from the Xhr object
+         * 获取Xhr对象的readystate.
          * Will only return correct result when called from the context of a callback
-         * @return {XmlHttp.ReadyState} XmlHttp.ReadyState.*.
+         * @return {xmlHttp.ReadyState} xmlHttp.ReadyState.*.
          */
         XhrIo.prototype.getReadyState = function() {
             return this.xhr_ ?
-            /** @type {XmlHttp.ReadyState} */ (this.xhr_.readyState) :
-                XmlHttp.ReadyState.UNINITIALIZED;
+            /** @type {xmlHttp.ReadyState} */ (this.xhr_.readyState) :
+                xmlHttp.ReadyState.UNINITIALIZED;
         };
 
 
         /**
-         * Get the status from the Xhr object
-         * todo: 这句没看懂
+         * 获取Xhr对象的状态值.
          * Will only return correct result when called from the context of a callback
          * @return {number} Http status.
          */
         XhrIo.prototype.getStatus = function() {
             /**
-             * IE doesn't like you checking status until the readystate is greater than 2
-             * (i.e. it is recieving or complete).  The try/catch is used for when the
-             * page is unloading and an ERROR_NOT_AVAILABLE may occur when accessing xhr_.
+             * IE在readystate大于2(LOADED)之前不允许访问xhr对象的status.
+             * 用try/catch可以捕捉页面卸载过程中访问xhr_对象抛出的ERROR_NOT_AVAILABLE异常.
              * @preserveTry
              */
             try {
-                return this.getReadyState() > XmlHttp.ReadyState.LOADED ?
+                return this.getReadyState() > xmlHttp.ReadyState.LOADED ?
                     this.xhr_.status : -1;
             } catch (e) {
                 log.warning(this.logger_, 'Can not get status: ' + e.message);
@@ -902,20 +899,20 @@ define('@net.XhrIo',
             }
         };
 
+
         /**
-         * Get the status text from the Xhr object
+         * 返回xhr对象的statusText.
          * Will only return correct result when called from the context of a callback
          * @return {string} Status text.
          */
         XhrIo.prototype.getStatusText = function() {
             /**
-             * IE doesn't like you checking status until the readystate is greater than 2
-             * (i.e. it is recieving or complete).  The try/catch is used for when the
-             * page is unloading and an ERROR_NOT_AVAILABLE may occur when accessing xhr_.
+             * IE在readystate大于2(LOADED)之前不允许访问xhr对象的status.
+             * 用try/catch可以捕捉页面卸载过程中访问xhr_对象抛出的ERROR_NOT_AVAILABLE异常.
              * @preserveTry
              */
             try {
-                return this.getReadyState() > XmlHttp.ReadyState.LOADED ?
+                return this.getReadyState() > xmlHttp.ReadyState.LOADED ?
                     this.xhr_.statusText : '';
             } catch (e) {
                 log.fine(this.logger_, 'Can not get status: ' + e.message);
@@ -934,7 +931,7 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the response text from the Xhr object
+         * Get the responseText from the Xhr object
          * Will only return correct result when called from the context of a callback.
          * @return {string} Result from the server, or '' if no result available.
          */
@@ -955,8 +952,7 @@ define('@net.XhrIo',
 
 
         /**
-         * 不太常用. 不推荐
-         * Get the response body from the Xhr object. This property is only available
+         * 获取响应体(response body)数据. This property is only available
          * in IE since version 7 according to MSDN:
          * http://msdn.microsoft.com/en-us/library/ie/ms534368(v=vs.85).aspx
          * Will only return correct result when called from the context of a callback.
@@ -969,7 +965,7 @@ define('@net.XhrIo',
          * Another option is to use the VBScript CStr method to convert it into a
          * string as outlined in http://stackoverflow.com/questions/1919972
          *
-         * @return {Object} Binary result from the server or null if not available.
+         * @return {Object} 返回服务端返回的二进制数据, 如果不可用返回null.
          */
         XhrIo.prototype.getResponseBody = function() {
             /** @preserveTry */
@@ -987,7 +983,7 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the response XML from the Xhr object
+         * Get the responseXML from the Xhr object
          * Will only return correct result when called from the context of a callback.
          * @return {Document} The DOM Document representing the XML file, or null
          * if no result available.
@@ -1004,11 +1000,12 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the response and evaluates it as JSON from the Xhr object
+         * 获取响应文本且作为json反序列化.
          * Will only return correct result when called from the context of a callback
-         * @param {string=} opt_xssiPrefix Optional XSSI prefix string to use for
-         *     stripping of the response before parsing. This needs to be set only if
-         *     your backend server prepends the same prefix string to the JSON response.
+         * @param {string=} opt_xssiPrefix 可选的XSSI前缀字符串 to use for
+         *     stripping of the response before parsing. 当服务端返回json时加了这个前缀时
+         *     才有必要在此设置. 关于XSSI的说明见:
+         *     http://stackoverflow.com/questions/8028511/what-is-cross-site-script-inclusion-xssi
          * @return {Object|undefined} JavaScript object.
          */
         XhrIo.prototype.getResponseJson = function(opt_xssiPrefix) {
@@ -1017,7 +1014,7 @@ define('@net.XhrIo',
             }
 
             var responseText = this.xhr_.responseText;
-            if (opt_xssiPrefix && responseText.indexOf(opt_xssiPrefix) == 0) {
+            if (opt_xssiPrefix && responseText.indexOf(opt_xssiPrefix) === 0) {
                 responseText = responseText.substring(opt_xssiPrefix.length);
             }
 
@@ -1026,9 +1023,8 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the response as the type specificed by {@link #setResponseType}. At time
-         * of writing, this is only directly supported in very recent versions of WebKit
-         * (10.0.612.1 dev and later). 如果xhr不直接支持response, 我们尝试模拟它.
+         * setResponseType后直接从响应中得到该类型的数据. 目前, 在较新的chrome中直接支持
+         * WebKit(10.0.612.1 dev and later). 如果xhr不直接支持response, 尝试模拟它.
          *
          * Emulating the response means following the rules laid out at
          * http://www.w3.org/TR/XMLHttpRequest/#the-response-attribute
@@ -1061,9 +1057,8 @@ define('@net.XhrIo',
                     case XhrIo.ResponseType.DEFAULT:
                     case XhrIo.ResponseType.TEXT:
                         return this.xhr_.responseText;
-                    // DOCUMENT and BLOB don't need to be handled here because they are
-                    // introduced in the same spec that adds the .response field, and would
-                    // have been caught above.
+                    // 当xhr对象支持.response属性时就支持了DOCUMENT 和 BLOB 返回类型.
+                    // 所以这里不用处理, 会在上面的代码中返回结果.
                     // ARRAY_BUFFER needs an implementation for Firefox 4, where it was
                     // implemented using a draft spec rather than the final spec.
                     case XhrIo.ResponseType.ARRAY_BUFFER:
@@ -1072,9 +1067,8 @@ define('@net.XhrIo',
                         }
                 }
                 // Fell through to a response type that is not supported on this browser.
-                log.error(this.logger_,
-                    'Response type ' + this.responseType_ + ' is not ' +
-                        'supported on this browser');
+                log.error(this.logger_, 'Response type ' + this.responseType_ +
+                    ' is not supported on this browser');
                 return null;
             } catch (e) {
                 log.fine(this.logger_, 'Can not get response: ' + e.message);
@@ -1084,11 +1078,11 @@ define('@net.XhrIo',
 
 
         /**
-         * Get the value of the response-header with the given name from the Xhr object
+         * 获取指定名称的响应头.
          * Will only return correct result when called from the context of a callback
          * and the request has completed
-         * @param {string} key The name of the response-header to retrieve.
-         * @return {string|undefined} The value of the response-header named key.
+         * @param {string} key 响应头的参数名称.
+         * @return {string|undefined} 返回响应头的参数值.
          */
         XhrIo.prototype.getResponseHeader = function(key) {
             return this.xhr_ && this.isComplete() ?
@@ -1098,7 +1092,6 @@ define('@net.XhrIo',
 
         /**
          * 返回类型是字符串. 调用xhr自身的getAllResponseHeaders方法.
-         * Gets the text of all the headers in the response.
          * Will only return correct result when called from the context of a callback
          * and the request has completed.
          * @return {string} The value of the response headers or empty string.
@@ -1129,10 +1122,9 @@ define('@net.XhrIo',
 
 
         /**
-         * Adds the last method, status and URI to the message.  This is used to add
-         * this information to the logging calls.
+         * 对日志消息进行一些特殊处理Adds the last method, status and URI to the message.
          * @param {string} msg The message text that we want to add the extra text to.
-         * @return {string} The message with the extra text appended.
+         * @return {string} 返回额外信息.
          * @private
          */
         XhrIo.prototype.formatMsg_ = function(msg) {
@@ -1140,17 +1132,18 @@ define('@net.XhrIo',
                 this.getStatus() + ']';
         };
 
+
         // Register the xhr handler as an entry point, so that
         // it can be monitored for exception handling, etc.
-        // debug.entryPointRegistry.register(
+        entryPointRegistry.register(
             /**
              * @param {function(!Function): !Function} transformer The transforming
              *     function.
              */
-        //    function(transformer) {
-        //        XhrIo.prototype.onReadyStateChangeEntryPoint_ =
-        //            transformer(XhrIo.prototype.onReadyStateChangeEntryPoint_);
-        //    });
+            function(transformer) {
+                XhrIo.prototype.onReadyStateChangeEntryPoint_ =
+                    transformer(XhrIo.prototype.onReadyStateChangeEntryPoint_);
+            });
 
 
         return XhrIo;
