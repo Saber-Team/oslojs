@@ -554,8 +554,8 @@ define('@net.XhrIo',
 
 
         /**
-         * Creates a new XHR object.
-         * @return {XMLHttpRequest|GearsHttpRequest} The newly created XHR object.
+         * 创建新的XHR对象.
+         * @return {XMLHttpRequest|GearsHttpRequest} 返回新创建的XHR对象.
          * @protected
          */
         XhrIo.prototype.createXhr = function() {
@@ -586,8 +586,8 @@ define('@net.XhrIo',
         /**
          * error事件触发时默认的回调函数
          * Something errorred, so inactivate, fire error callback and clean up
-         * @param {ErrorCode} errorCode The error code.
-         * @param {Error} err The error object.
+         * @param {ErrorCode} errorCode 错误码.
+         * @param {Error} err 异常对象.
          * @private
          */
         XhrIo.prototype.error_ = function(errorCode, err) {
