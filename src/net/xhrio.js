@@ -1133,8 +1133,8 @@ define('@net.XhrIo',
         };
 
 
-        // Register the xhr handler as an entry point, so that
-        // it can be monitored for exception handling, etc.
+        // 注册xhr的回调处理器为一个entry point, 这样可以进行错误监控
+        // (can be monitored for exception handling, etc.)
         entryPointRegistry.register(
             /**
              * @param {function(!Function): !Function} transformer The transforming
