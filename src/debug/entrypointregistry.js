@@ -1,13 +1,8 @@
 /**
- * @fileoverview 此模块为客户端程序提供全局的注册器, A global registry for entry points into a program,
- * so that they can be instrumented. Each module should register their
- * entry points with this registry. Designed to be compiled out
- * if no instrumentation is requested.
- *
- * Entry points may be registered before or after a call to
- * debug.entryPointRegistry.monitorAll. If an entry point is registered
- * later, the existing monitor will instrument the new entry point.
- *
+ * @fileoverview 此模块为客户端程序提供全局的注册器, 所有的entry point都
+ * 可被instrumented. 需要添加错误监控的模块要通过本模块来注册它们的entry points.
+ * 本模块考虑到entry points可能随时添加但monitorAll的调用时机并不确定. 用私有变量
+ * monitorsMayExist_做开关如果entry point后注册则立即instrument此entry point.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
