@@ -47,9 +47,10 @@ define('@events.util',
         '@events.eventTarget',
         '@events.listener',
         '@array',
-        '@object'
+        '@object',
+        '@debug.entryPointRegistry'
     ],
-    function(util, BrowserEvent, BrowserFeature, EvtTarget, Listener, array, object) {
+    function(util, BrowserEvent, BrowserFeature, EvtTarget, Listener, array, object, entryPointRegistry) {
 
         'use strict';
 
@@ -822,6 +823,24 @@ define('@events.util',
             return count;
         }
 
+        /**
+         * 用给定的error handler为处理浏览器事件的函数添加异常监控机制.
+         * @param {debug.ErrorHandler} errorHandler Error handler保护entry point.
+         */
+        function protectBrowserEventEntryPoint(errorHandler) {
+            handleBrowserEvent_ = errorHandler.protectEntryPoint(handleBrowserEvent_);
+        }
+
+        // 注册浏览器事件处理器为entry point, 可对其进行异常监控.
+        entryPointRegistry.register(
+            /**
+             * @param {function(!Function): !Function} transformer The transforming
+             *     function.
+             */
+            function(transformer) {
+                handleBrowserEvent_ = transformer(handleBrowserEvent_);
+            });
+
         return {
             listen: listen,
             unlisten: unlisten,
@@ -835,7 +854,8 @@ define('@events.util',
             listenWithWrapper: listenWithWrapper,
             unlistenWithWrapper: unlistenWithWrapper,
             removeAll: removeAll,
-            removeAllNativeListeners: removeAllNativeListeners
+            removeAllNativeListeners: removeAllNativeListeners,
+            protectBrowserEventEntryPoint: protectBrowserEventEntryPoint
         };
     }
 );
