@@ -165,8 +165,10 @@ define('@util', [], function() {
     var globalEval = function(script) {
         if (window.execScript) {
             window.execScript(script, 'JavaScript');
+        // 不能直接用window.eval严格模式下会有警告
+        // 因此采用这种方式判断
         } else if ('eval' in window) {
-            // Test to see if eval works
+            // 是否正常工作
             if (evalWorksForGlobals_ === null) {
                 window.eval('var _et_ = 1;');
                 if (typeof window['_et_'] !== 'undefined') {
