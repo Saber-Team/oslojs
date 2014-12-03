@@ -18,15 +18,6 @@ define('@debug.entryPointRegistry', ['@util', '@asserts.util'], function(util, a
 
 
     /**
-     * Instruments a function.
-     *
-     * @param {!Function} fn A function to instrument.
-     * @return {!Function} The instrumented function.
-     */
-    EntryPointMonitor.prototype.wrap;
-
-
-    /**
      * Try to remove an instrumentation wrapper created by this monitor.
      * If the function passed to unwrap is not a wrapper created by this
      * monitor, then we will do nothing.
