@@ -51,6 +51,7 @@
                 expect(util.global).toBe(global);
             });
 
+
             it('测试util.now', function() {
                 var toleranceMilliseconds = 10;
                 var now1 = new Date().getTime();
@@ -58,6 +59,7 @@
 
                 expect(Math.abs(now1 - now2) < toleranceMilliseconds).toBe(true);
             });
+
 
             it('测试util.mixin', function() {
                 var ori = {};
@@ -67,6 +69,7 @@
                 expect(ori.a).toBe(tar.a);
                 expect(ori.b).toBe(tar.b);
             });
+
 
             describe('测试类型判断相关方法', function() {
 
@@ -335,6 +338,7 @@
 
             });
 
+
             describe('测试bind方法', function() {
 
                 function getFoo(arg1, arg2) {
@@ -436,6 +440,7 @@
 
             });
 
+
             describe('测试partial方法', function() {
 
                 function getFoo(arg1, arg2) {
@@ -513,6 +518,7 @@
                 });
 
             });
+
 
             describe('测试UID相关方法', function() {
 
@@ -609,7 +615,35 @@
             });
 
 
-//=== tests for inherits ===
+            describe('测试globalEval', function() {
+
+                it('测试原函数', function testGlobalEval() {
+                    util.globalEval('var foofoofoo = 125;');
+                    expect(util.global.foofoofoo).toBe(125);
+                    var foofoofoo = 128;
+                    // Global should not have changed
+                    expect(util.global.foofoofoo).toBe(125);
+
+                    // NOTE: foofoofoo would normally be available in the function scope,
+                    // via the scope chain, but the JsUnit framework seems to do something weird
+                    // which makes it not work.
+                });
+
+
+                it('测试html字符串', function testGlobalEvalWithHtml() {
+                    // Make sure we don't trip on HTML markup in the code
+                    util.global.evalTestResult = 'failed';
+                    util.global.evalTest = function(arg) {
+                        util.global.evalTestResult = arg;
+                    };
+
+                    util.globalEval('evalTest("<test>")');
+
+                    // Should be able to evaluate strings with HTML in
+                    expect(util.global.evalTestResult).toBe('<test>');
+                });
+            });
+
 
             describe('测试继承', function() {
 

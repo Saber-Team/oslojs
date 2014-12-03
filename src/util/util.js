@@ -152,6 +152,49 @@ define('@util', [], function() {
     })();
 
 
+    // 标识window.eval是否全局作用域执行代码
+    // @type {?boolean}
+    var evalWorksForGlobals_ = null;
+
+    /**
+     * 在全局上下文环境中对js字符串求值, IE下用execScript方法, 其他浏览器用eval方法.
+     * 如果window.eval并非在全局作用域执行代码(for example, in Safari), 创建script标签.
+     * 否则抛出异常.
+     * @param {string} script JavaScript代码.
+     */
+    var globalEval = function(script) {
+        if (window.execScript) {
+            window.execScript(script, 'JavaScript');
+        } else if ('eval' in window) {
+            // Test to see if eval works
+            if (evalWorksForGlobals_ === null) {
+                window.eval('var _et_ = 1;');
+                if (typeof window['_et_'] !== 'undefined') {
+                    delete window['_et_'];
+                    evalWorksForGlobals_ = true;
+                } else {
+                    evalWorksForGlobals_ = false;
+                }
+            }
+
+            if (evalWorksForGlobals_) {
+                window.eval(script);
+            } else {
+                var doc = window.document;
+                var scriptElt = doc.createElement('script');
+                scriptElt.type = 'text/javascript';
+                scriptElt.defer = false;
+                // Note: can't use .innerHTML since "t('<test>')" will fail and
+                // .text doesn't work in Safari 2.  Therefore we append a text node.
+                scriptElt.appendChild(doc.createTextNode(script));
+                doc.body.appendChild(scriptElt);
+                doc.body.removeChild(scriptElt);
+            }
+        } else {
+            throw Error('Oslo.util.globalEval not available');
+        }
+    };
+
     return {
         /**
          * 为要执行的函数提供上下文,同时也可以预提供一些形参. 返回一个spec函数.
@@ -171,10 +214,11 @@ define('@util', [], function() {
             return bindFn.apply(null, arguments);
         },
         // 这个属性在一些模块中有特殊用处, 会利用debug模块的调试信息.
-        // 但我本意在产品形态中用更简单的util模块代替此模块, 那时debug
+        // 本意在产品形态中用更简单的util模块代替此模块, 那时debug
         // 会设置成为false.
         DEBUG: true,
         partial: partial,
+        globalEval: globalEval,
         /**
          * 简单的对象混入, 更多问题参考Object.extend方法.
          * @param {Object} target Target.
