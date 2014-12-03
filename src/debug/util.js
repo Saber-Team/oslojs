@@ -217,6 +217,58 @@ define('@debug.util',
         };
 
 
+        /**
+         * 获取当前调用堆栈信息.
+         * Chrome31.0 new Error('hehe')打印出如下堆栈信息:
+         * "Error: hehe
+         *    at <anonymous>:2:9
+         *    at Object.InjectedScript._evaluateOn (<anonymous>:581:39)
+         *    at Object.InjectedScript._evaluateAndWrap (<anonymous>:540:52)
+         *    at Object.InjectedScript.evaluate (<anonymous>:459:21)"
+         *
+         * FF24.0
+         * "@debugger eval code:1
+         *   evaluate@chrome://firebug/content/console/commandLineExposed.js:271
+         *   executeInWindowContext/listener@chrome://firebug/content/console/commandLineExposed.js:482"
+         *
+         * todo
+         * Simple and iterative - doesn't worry about
+         * catching circular references or getting the args.
+         * @param {number=} opt_depth 最大堆栈长度.
+         * @return {string} 返回包括所有调用函数名字的字符串, 以\n分割.
+         */
+        var getStacktraceSimple = function(opt_depth) {
+            var sb = [];
+            var fn = arguments.callee.caller;
+            var depth = 0;
+
+            while (fn && (!opt_depth || depth < opt_depth)) {
+                sb.push(getFunctionName(fn));
+                sb.push('()\n');
+                /** @preserveTry */
+                try {
+                    fn = fn.caller;
+                } catch (e) {
+                    sb.push('[exception trying to get caller]\n');
+                    break;
+                }
+                depth++;
+                if (depth >= MAX_STACK_DEPTH) {
+                    sb.push('[...long stack...]');
+                    break;
+                }
+            }
+
+            if (opt_depth && depth >= opt_depth) {
+                sb.push('[...reached max depth limit...]');
+            } else {
+                sb.push('[end]');
+            }
+
+            return sb.join('');
+        };
+
+
         // expose
         return {
             LOGGING_ENABLED: util.DEBUG,
@@ -241,8 +293,7 @@ define('@debug.util',
                 // 这个其他大部分dom事件不同. false则是执行正常行为.
                 // 但webkit内核比较主流,仍然false代表阻止,这次要改成和IE一致,
                 // 因为FF也是这么做的.
-                if (ua.isWEBKIT &&
-                    !ua.isVersionOrHigher('535.3')) {
+                if (ua.isWEBKIT && !ua.isVersionOrHigher('535.3')) {
                     retVal = !retVal;
                 }
                 target.onerror = function(message, url, line) {
@@ -289,6 +340,8 @@ define('@debug.util',
             },
 
             getFunctionName: getFunctionName,
+
+            getStacktraceSimple: getStacktraceSimple,
 
             /**
              * 设置一个自定义的函数名字解析器

@@ -1133,12 +1133,12 @@ define('@net.XhrIo',
         };
 
 
-        // 注册xhr的回调处理器为一个entry point, 这样可以进行错误监控
-        // (can be monitored for exception handling, etc.)
+        // 注册xhr的回调处理器为一个entry point, 这样可以进行错误监控.
+        // (transformer是一个ErrorHandler的实例的wrap方法.)
         entryPointRegistry.register(
             /**
-             * @param {function(!Function): !Function} transformer The transforming
-             *     function.
+             * @param {function(!Function): !Function} transformer transformer是一个
+             *     ErrorHandler实例(monitor)的wrap方法.
              */
             function(transformer) {
                 XhrIo.prototype.onReadyStateChangeEntryPoint_ =
