@@ -3,7 +3,7 @@ require([
         '@async.Delay',
         '@async.Throttle',
         '@events.util',
-        '@timer',
+        '@Timer',
         '@dom.util'
     ],
     function(util, Delay, Throttle, EventsUtil, Timer, dom) {
