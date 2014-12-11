@@ -236,7 +236,7 @@ define('@uri.util',
                 needsPhishingProtection_ = false;
 
                 // Use quoted access, just in case the user isn't using location externs.
-                var location = util.globa.location;
+                var location = util.global.location;
                 if (location) {
                     var href = location.href;
                     if (href) {
