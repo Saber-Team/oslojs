@@ -114,10 +114,11 @@ define('@net.IframeIo',
         '@string.util',
         '@ua.util',
         '@log',
-        '@ds.util'
+        '@ds.util',
+        '@uri.Uri'
     ],
     function(util, Timer, uri, dom, EventsUtil, EventBase, EventTarget, EventType,
-             JSON, ErrorCode, NetEventType, string, ua, log, ds) {
+             JSON, ErrorCode, NetEventType, string, ua, log, ds, Uri) {
 
         'use strict';
 
@@ -434,6 +435,83 @@ define('@net.IframeIo',
          * @private
          */
         IframeIo.prototype.iframeDisposalTimer_ = null;
+
+
+        /**
+         * 对同一个错误不要多次处理. 在IE下, 断网且URL不可用的情况下提交表单
+         * 会两次进到handleError_方法.
+         * @type {boolean}
+         * @private
+         */
+        IframeIo.prototype.errorHandled_ = false;
+
+
+        /**
+         * Whether to suppress the listeners that determine when the iframe loads.
+         * @type {boolean}
+         * @private
+         */
+        IframeIo.prototype.ignoreResponse_ = false;
+
+
+        /**
+         * **通过iframe发送请求. 这个方法被IframeIo当作静态方法调用.
+         * 一个HTML表单元素用于提交到iframe. 简化了GET和POST的区别. iframe每次都要被创建并且销毁
+         * 否则request会造成历史实体记录的麻烦.
+         * A HTML form is used and submitted to the iframe, this simplifies the
+         * difference between GET and POST requests. The iframe needs to be created and
+         * destroyed for each request otherwise the request will contribute to the
+         * history stack.
+         *
+         * sendFromForm方法里面做了一些技巧, 在非IE的环境下POST请求不会对历史实体产生添加.
+         * sendFromForm does some clever trickery (thanks jlim) in non-IE browsers to
+         * stop a history entry being added for POST requests.
+         *
+         * @param {Uri|string} uri Uri of the request.
+         * @param {string=} opt_method Default is GET, POST uses a form to submit the
+         *     request.
+         * @param {boolean=} opt_noCache Append a timestamp to the request to avoid
+         *     caching.
+         * @param {Object|Map=} opt_data Map of key-value pairs.
+         */
+        IframeIo.prototype.send = function(uri, opt_method, opt_noCache, opt_data) {
+
+            if (this.active_) {
+                throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
+            }
+
+            var uriObj = new Uri(uri);
+            this.lastUri_ = uriObj;
+            var method = opt_method ? opt_method.toUpperCase() : 'GET';
+
+            if (opt_noCache) {
+                uriObj.makeUnique();
+            }
+
+            log.info(this.logger_,
+                    'Sending iframe request: ' + uriObj + ' [' + method + ']');
+
+            // 创建表单
+            this.form_ = IframeIo.getForm_();
+
+            if (method == 'GET') {
+                // For GET requests, we assume that the caller didn't want the queryparams
+                // already specified in the URI to be clobbered by the form, so we add the
+                // params here.
+                IframeIo.addFormInputs_(this.form_, uriObj.getQueryData());
+            }
+
+            if (opt_data) {
+                // 为每一个数据项创建表单域.
+                IframeIo.addFormInputs_(this.form_, opt_data);
+            }
+
+            // Set the URI that the form will be posted
+            this.form_.action = uriObj.toString();
+            this.form_.method = method;
+
+            this.sendFormInternal_();
+        };
 
 
         return IframeIo;
