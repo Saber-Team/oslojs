@@ -12,9 +12,10 @@ define([
     '../iter/util',
     '../log/log',
     '../ds/map',
-    '../ds/simplepool'
+    '../ds/simplepool',
+    '../debug/logger'
   ],
-  function(util, array, iter, log, Map, SimplePool) {
+  function(util, array, iter, log, Map, SimplePool, Logger) {
 
     'use strict';
 
@@ -406,7 +407,7 @@ define([
         }
       }
 
-      goog.debug.Logger.logToProfilers('Start : ' + comment);
+      Logger.logToProfilers('Start : ' + comment);
 
       var event = /** @type {Trace_.Event_} */ (
         this.eventPool_.getObject());
@@ -434,7 +435,7 @@ define([
      *    identitifer was not recognized.
      */
     Trace_.prototype.stopTracer = function(id, opt_silenceThreshold) {
-      // this used to call goog.isDef(opt_silenceThreshold) but that causes an
+      // this used to call isDef(opt_silenceThreshold) but that causes an
       // object allocation in IE for some reason (doh!). The following code doesn't
       // cause an allocation
       var now = Trace_.now();
@@ -488,7 +489,7 @@ define([
         stat.time += elapsed;
       }
       if (stopEvent) {
-        goog.debug.Logger.logToProfilers('Stop : ' + stopEvent.comment);
+        Logger.logToProfilers('Stop : ' + stopEvent.comment);
 
         stopEvent.totalVarAlloc = this.getTotalVarAlloc();
 
@@ -668,7 +669,7 @@ define([
      */
     Trace_.longToPaddedString_ = function(v) {
       v = Math.round(v);
-      // todo (pupius) - there should be a generic string in goog.string for this
+      // todo (pupius) - there should be a generic string in string for this
       var space = '';
       if (v < 1000) space = ' ';
       if (v < 100) space = '  ';
