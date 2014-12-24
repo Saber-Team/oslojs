@@ -4,8 +4,12 @@
  * @email zmike86@gmail.com
  */
 
-define('@asserts.Error',
-    ['@util', '@string.util', '@debug.Error'], function(util, string, DebugError) {
+define([
+    '../util/util',
+    '../string/util',
+    '../debug/error'
+  ],
+  function(util, string, DebugError) {
 
     'use strict';
 
@@ -18,16 +22,16 @@ define('@asserts.Error',
      */
     var AssertionError = function(messagePattern, messageArgs) {
 
-        messageArgs.unshift(messagePattern);
-        DebugError.call(this, string.subs.apply(null, messageArgs));
-        // 替换后去掉数组第一项的模式防止永久改变了数组.
-        messageArgs.shift();
+      messageArgs.unshift(messagePattern);
+      DebugError.call(this, string.subs.apply(null, messageArgs));
+      // 替换后去掉数组第一项的模式防止永久改变了数组.
+      messageArgs.shift();
 
-        /**
-         * 错误消息模式. 错误捕获函数可以通过对象的这个属性唯一确定the assertion.
-         * @type {string}
-         */
-        this.messagePattern = messagePattern;
+      /**
+       * 错误消息模式. 错误捕获函数可以通过对象的这个属性唯一确定the assertion.
+       * @type {string}
+       */
+      this.messagePattern = messagePattern;
     };
 
     util.inherits(AssertionError, DebugError);
@@ -39,4 +43,4 @@ define('@asserts.Error',
 
     return AssertionError;
 
-});
+  });
