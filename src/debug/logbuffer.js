@@ -7,127 +7,127 @@
  * @email zmike86@gmail.com
  */
 
-define('@debug.logBuffer', ['@debug.logRecord'], function(LogRecord) {
+define(['../debug/logrecord'], function(LogRecord) {
 
-    'use strict';
+  'use strict';
 
-    /**
-     * 单例
-     * @type {LogBuffer}
-     * @private
-     */
-    var instance_ = null;
-
-
-    /**
-     * 创建log buffer.
-     * @constructor
-     */
-    var LogBuffer = function() {
-        this.clear();
-    };
+  /**
+   * 单例
+   * @type {LogBuffer}
+   * @private
+   */
+  var instance_ = null;
 
 
-    /**
-     * 单例模式返回LogBuffer.
-     * @return {!LogBuffer} The LogBuffer singleton instance.
-     */
-    LogBuffer.getInstance = function() {
-        if (!instance_) {
-            instance_ = new LogBuffer();
-        }
-        return instance_;
-    };
+  /**
+   * 创建log buffer.
+   * @constructor
+   */
+  var LogBuffer = function() {
+    this.clear();
+  };
 
 
-    /**
-     * @define {number} 要缓冲的log records数目. 0表示禁止缓冲.
-     */
-    LogBuffer.CAPACITY = 0;
+  /**
+   * 单例模式返回LogBuffer.
+   * @return {!LogBuffer} The LogBuffer singleton instance.
+   */
+  LogBuffer.getInstance = function() {
+    if (!instance_) {
+      instance_ = new LogBuffer();
+    }
+    return instance_;
+  };
 
 
-    /**
-     * 一个数组缓存所有的Record对象.
-     * @type {!Array.<!LogRecord|undefined>}
-     * @private
-     */
-    LogBuffer.prototype.buffer_ = null;
+  /**
+   * @define {number} 要缓冲的log records数目. 0表示禁止缓冲.
+   */
+  LogBuffer.CAPACITY = 0;
 
 
-    /**
-     * 最新加入的record的索引或者-1(代表没有缓存的LogRecord).
-     * @type {number}
-     * @private
-     */
-    LogBuffer.prototype.curIndex_ = -1;
+  /**
+   * 一个数组缓存所有的Record对象.
+   * @type {!Array.<!LogRecord|undefined>}
+   * @private
+   */
+  LogBuffer.prototype.buffer_ = null;
 
 
-    /**
-     * 缓冲区是否已满.
-     * @type {boolean}
-     * @private
-     */
-    LogBuffer.prototype.isFull_ = false;
+  /**
+   * 最新加入的record的索引或者-1(代表没有缓存的LogRecord).
+   * @type {number}
+   * @private
+   */
+  LogBuffer.prototype.curIndex_ = -1;
 
 
-    /**
-     * 增加一条日志记录, 可能会覆盖缓存中老的记录.
-     * @param {LogLevel} level One of the level identifiers.
-     * @param {string} msg 日志消息.
-     * @param {string} loggerName source logger的名称.
-     * @return {!LogRecord} The log record.
-     */
-    LogBuffer.prototype.addRecord = function(level, msg, loggerName) {
-        var curIndex = (this.curIndex_ + 1) % LogBuffer.CAPACITY;
-        this.curIndex_ = curIndex;
-        if (this.isFull_) {
-            var ret = this.buffer_[curIndex];
-            ret.reset(level, msg, loggerName);
-            return ret;
-        }
-        this.isFull_ = (curIndex === LogBuffer.CAPACITY - 1);
-        return this.buffer_[curIndex] = new LogRecord(level, msg, loggerName);
-    };
+  /**
+   * 缓冲区是否已满.
+   * @type {boolean}
+   * @private
+   */
+  LogBuffer.prototype.isFull_ = false;
 
 
-    /**
-     * @return {boolean} 是否开启了log buffer.
-     */
-    LogBuffer.isBufferingEnabled = function() {
-        return LogBuffer.CAPACITY > 0;
-    };
+  /**
+   * 增加一条日志记录, 可能会覆盖缓存中老的记录.
+   * @param {LogLevel} level One of the level identifiers.
+   * @param {string} msg 日志消息.
+   * @param {string} loggerName source logger的名称.
+   * @return {!LogRecord} The log record.
+   */
+  LogBuffer.prototype.addRecord = function(level, msg, loggerName) {
+    var curIndex = (this.curIndex_ + 1) % LogBuffer.CAPACITY;
+    this.curIndex_ = curIndex;
+    if (this.isFull_) {
+      var ret = this.buffer_[curIndex];
+      ret.reset(level, msg, loggerName);
+      return ret;
+    }
+    this.isFull_ = (curIndex === LogBuffer.CAPACITY - 1);
+    return this.buffer_[curIndex] = new LogRecord(level, msg, loggerName);
+  };
 
 
-    /**
-     * 移除所有缓存的log records.
-     */
-    LogBuffer.prototype.clear = function() {
-        this.buffer_ = new Array(LogBuffer.CAPACITY);
-        this.curIndex_ = -1;
-        this.isFull_ = false;
-    };
+  /**
+   * @return {boolean} 是否开启了log buffer.
+   */
+  LogBuffer.isBufferingEnabled = function() {
+    return LogBuffer.CAPACITY > 0;
+  };
 
 
-    /**
-     * 在缓存的每个record上执行func. 从最久的record开始.
-     * @param {function(!LogRecord)} func The function to call.
-     */
-    LogBuffer.prototype.forEachRecord = function(func) {
-        var buffer = this.buffer_;
-        // Corner case: no records.
-        if (!buffer[0]) {
-            return;
-        }
-        var curIndex = this.curIndex_;
-        // 要从最老的开始就要判断isFull_和curIndex
-        var i = this.isFull_ ? curIndex : -1;
-        do {
-            i = (i + 1) % LogBuffer.CAPACITY;
-            func(/** @type {!LogRecord} */ (buffer[i]));
-        } while (i !== curIndex);
-    };
+  /**
+   * 移除所有缓存的log records.
+   */
+  LogBuffer.prototype.clear = function() {
+    this.buffer_ = new Array(LogBuffer.CAPACITY);
+    this.curIndex_ = -1;
+    this.isFull_ = false;
+  };
 
 
-    return LogBuffer;
+  /**
+   * 在缓存的每个record上执行func. 从最久的record开始.
+   * @param {function(!LogRecord)} func The function to call.
+   */
+  LogBuffer.prototype.forEachRecord = function(func) {
+    var buffer = this.buffer_;
+    // Corner case: no records.
+    if (!buffer[0]) {
+      return;
+    }
+    var curIndex = this.curIndex_;
+    // 要从最老的开始就要判断isFull_和curIndex
+    var i = this.isFull_ ? curIndex : -1;
+    do {
+      i = (i + 1) % LogBuffer.CAPACITY;
+      func(/** @type {!LogRecord} */ (buffer[i]));
+    } while (i !== curIndex);
+  };
+
+
+  return LogBuffer;
 
 });

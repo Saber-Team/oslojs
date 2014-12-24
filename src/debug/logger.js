@@ -4,14 +4,13 @@
  * @see ../../demos/debug.html
  */
 
-define('@debug.Logger',
-    [
-        '@util',
-        '@array',
-        '@debug.util',
-        '@debug.logBuffer',
-        '@debug.logRecord',
-        '@debug.logLevel'
+define([
+        '../util/util',
+        '../array/array',
+        '../debug/util',
+        '../debug/logbuffer',
+        '../debug/logrecord',
+        '../debug/loglevel'
     ],
     function(util, array, debug, LogBuffer, LogRecord, LogLevel) {
 
