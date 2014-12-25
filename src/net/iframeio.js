@@ -455,7 +455,7 @@ define('@net.IframeIo',
 
 
         /**
-         * **通过iframe发送请求. 这个方法被IframeIo当作静态方法调用.
+         * 通过iframe发送请求. 这个方法被IframeIo当作静态方法调用.
          * 一个HTML表单元素用于提交到iframe. 简化了GET和POST的区别. iframe每次都要被创建并且销毁
          * 否则request会造成历史实体记录的麻烦.
          * A HTML form is used and submitted to the iframe, this simplifies the
@@ -467,15 +467,12 @@ define('@net.IframeIo',
          * sendFromForm does some clever trickery (thanks jlim) in non-IE browsers to
          * stop a history entry being added for POST requests.
          *
-         * @param {Uri|string} uri Uri of the request.
-         * @param {string=} opt_method Default is GET, POST uses a form to submit the
-         *     request.
-         * @param {boolean=} opt_noCache Append a timestamp to the request to avoid
-         *     caching.
+         * @param {Uri|string} uri 请求地址.
+         * @param {string=} opt_method 默认GET, POST用表单提交请求.
+         * @param {boolean=} opt_noCache 是否在请求后加时间戳避免缓存.
          * @param {Object|Map=} opt_data Map of key-value pairs.
          */
         IframeIo.prototype.send = function(uri, opt_method, opt_noCache, opt_data) {
-
             if (this.active_) {
                 throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
             }
@@ -511,6 +508,101 @@ define('@net.IframeIo',
             this.form_.method = method;
 
             this.sendFormInternal_();
+        };
+
+
+        /**
+         * 这个方法是客户端javascript上传文件的核心方法, 很重要
+         * Sends the data stored in an existing form to the server. The HTTP method
+         * should be specified on the form, the action can also be specified but can
+         * be overridden by the optional URI param.
+         *
+         * This can be used in conjunction will a file-upload input to upload a file in
+         * the background without affecting history.
+         *
+         * Example form:
+         * <pre>
+         *   &lt;form action="/server/" enctype="multipart/form-data" method="POST"&gt;
+         *     &lt;input name="userfile" type="file"&gt;
+         *   &lt;/form&gt;
+         * </pre>
+         *
+         * @param {HTMLFormElement} form Form element used to send the request to the
+         *     server.
+         * @param {string=} opt_uri Uri to set for the destination of the request, by
+         *     default the uri will come from the form.
+         * @param {boolean=} opt_noCache Append a timestamp to the request to avoid
+         *     caching.
+         */
+        IframeIo.prototype.sendFromForm = function(form, opt_uri, opt_noCache) {
+            if (this.active_) {
+                throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
+            }
+
+            var uri = new Uri(opt_uri || form.action);
+            if (opt_noCache) {
+                uri.makeUnique();
+            }
+
+            log.info(this.logger_, 'Sending iframe request from form: ' + uri);
+
+            this.lastUri_ = uri;
+            this.form_ = form;
+            this.form_.action = uri.toString();
+            this.sendFormInternal_();
+        };
+
+
+        /**
+         * Abort the current Iframe request
+         * @param {ErrorCode=} opt_failureCode Optional error code to use -
+         *     defaults to ABORT.
+         */
+        IframeIo.prototype.abort = function(opt_failureCode) {
+            if (this.active_) {
+                log.info(this.logger_, 'Request aborted');
+                EventsUtil.removeAll(this.getRequestIframe());
+                this.complete_ = false;
+                this.active_ = false;
+                this.success_ = false;
+                this.lastErrorCode_ = opt_failureCode || ErrorCode.ABORT;
+
+                this.dispatchEvent(EventType.ABORT);
+
+                this.makeReady_();
+            }
+        };
+
+
+        /** @override */
+        IframeIo.prototype.disposeInternal = function() {
+            log.fine(this.logger_, 'Disposing iframeIo instance');
+
+            // If there is an active request, abort it
+            if (this.active_) {
+                log.fine(this.logger_, 'Aborting active request');
+                this.abort();
+            }
+
+            // Call super-classes implementation (remove listeners)
+            IframeIo.superClass_.disposeInternal.call(this);
+
+            // Add the current iframe to the list of iframes for disposal.
+            if (this.iframe_) {
+                this.scheduleIframeDisposal_();
+            }
+
+            // Disposes of the form
+            this.disposeForm_();
+
+            // Nullify anything that might cause problems and clear state
+            delete this.errorChecker_;
+            this.form_ = null;
+            this.lastCustomError_ = this.lastContent_ = this.lastContentHtml_ = null;
+            this.lastUri_ = null;
+            this.lastErrorCode_ = ErrorCode.NO_ERROR;
+
+            delete instances_[this.name_];
         };
 
 

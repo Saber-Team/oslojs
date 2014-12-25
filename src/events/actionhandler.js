@@ -3,116 +3,114 @@
  * 更容易组织处理器代码只监听一个统一的事件.
  * 如果有如下代码-:
  * <code>
- *     this.handlermanager.listen(el, CLICK, this.onClick_);
+ *   this.handlermanager.listen(el, CLICK, this.onClick_);
  * <code>
- *
  * 可以替换为新的方式:
  * <code>
- *     this.handlermanager.listen(new ActionHandler(el), ACTION, this.onAction_);
+ *   this.handlermanager.listen(new ActionHandler(el), ACTION, this.onAction_);
  * <code>
  *
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define('@events.actionHandler',
-    [
-        '@util',
-        '@events.util',
-        '@events.browserEvent',
-        '@events.eventTarget',
-        '@events.eventType',
-        '@events.keyCodes',
-        '@ua.util',
-        '@events.actionEvent',
-        '@events.beforeActionEvent'
-    ],
-    function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, ua,
-             ActionEvent, BeforeActionEvent) {
+define([
+    '../util/util',
+    './util',
+    './browserevent',
+    './eventtarget',
+    './eventtype',
+    './keycodes',
+    '../ua/util',
+    './actionevent',
+    './beforeactionevent'
+  ],
+  function(util, EventsUtil, BrowserEvent, EventTarget, EventType, KeyCodes, ua,
+           ActionEvent, BeforeActionEvent) {
 
-        'use strict';
+    'use strict';
 
-        /**
-         * 要监听的键盘事件.
-         * @type {string}
-         * @private
-         */
-        var KEY_EVENT_TYPE_ = ua.isGECKO ? EventType.KEYPRESS : EventType.KEYDOWN;
+    /**
+     * 要监听的键盘事件.
+     * @type {string}
+     * @private
+     */
+    var KEY_EVENT_TYPE_ = ua.isGECKO ? EventType.KEYPRESS : EventType.KEYDOWN;
 
-        /**
-         * 一个对元素进行action事件监听的句柄类.
-         * @param {Element|Document} element 要监听的元素.
-         * @constructor
-         * @extends {EventTarget}
-         */
-        var ActionHandler = function(element) {
-            EventTarget.call(this);
-            /**
-             * 内部保存元素引用.
-             * @type {Element|Document}
-             * @private
-             */
-            this.element_ = element;
+    /**
+     * 一个对元素进行action事件监听的句柄类.
+     * @param {Element|Document} element 要监听的元素.
+     * @constructor
+     * @extends {EventTarget}
+     */
+    var ActionHandler = function(element) {
+      EventTarget.call(this);
+      /**
+       * 内部保存元素引用.
+       * @type {Element|Document}
+       * @private
+       */
+      this.element_ = element;
 
-            EventsUtil.listen(element, KEY_EVENT_TYPE_, this.handleKeyDown_, false, this);
-            EventsUtil.listen(element, EventType.CLICK, this.handleClick_, false, this);
-        };
-        util.inherits(ActionHandler, EventTarget);
+      EventsUtil.listen(element, KEY_EVENT_TYPE_, this.handleKeyDown_, false, this);
+      EventsUtil.listen(element, EventType.CLICK, this.handleClick_, false, this);
+    };
+    util.inherits(ActionHandler, EventTarget);
 
-        /**
-         * 键盘事件处理器.
-         * @param {!BrowserEvent} e The key press event.
-         * @private
-         */
-        ActionHandler.prototype.handleKeyDown_ = function(e) {
-            if (e.keyCode === KeyCodes.ENTER ||
-                ua.isWEBKIT && e.keyCode === KeyCodes.MAC_ENTER) {
-                this.dispatchEvents_(e);
-            }
-        };
+    /**
+     * 键盘事件处理器.
+     * @param {!BrowserEvent} e The key press event.
+     * @private
+     */
+    ActionHandler.prototype.handleKeyDown_ = function(e) {
+      if (e.keyCode === KeyCodes.ENTER ||
+        ua.isWEBKIT && e.keyCode === KeyCodes.MAC_ENTER) {
+        this.dispatchEvents_(e);
+      }
+    };
 
-        /**
-         * 鼠标事件处理器.
-         * @param {!BrowserEvent} e The click event.
-         * @private
-         */
-        ActionHandler.prototype.handleClick_ = function(e) {
-            this.dispatchEvents_(e);
-        };
+    /**
+     * 鼠标事件处理器.
+     * @param {!BrowserEvent} e The click event.
+     * @private
+     */
+    ActionHandler.prototype.handleClick_ = function(e) {
+      this.dispatchEvents_(e);
+    };
 
-        /**
-         * 分发BeforeAction和Action事件.
-         * @param {!BrowserEvent} e The event causing dispatches.
-         * @private
-         */
-        ActionHandler.prototype.dispatchEvents_ = function(e) {
-            var beforeActionEvent = new BeforeActionEvent(e);
+    /**
+     * 分发BeforeAction和Action事件.
+     * @param {!BrowserEvent} e The event causing dispatches.
+     * @private
+     */
+    ActionHandler.prototype.dispatchEvents_ = function(e) {
+      var beforeActionEvent = new BeforeActionEvent(e);
 
-            // 应用层程序可以在beforeactionevent处理器里添加逻辑返回false阻止actionevent的发生.
-            // For example, Gmail uses this event to restore keyboard focus
-            if (!this.dispatchEvent(beforeActionEvent)) {
-                return;
-            }
+      // 应用层程序可以在beforeactionevent处理器里添加逻辑返回false阻止actionevent的发生.
+      // For example, Gmail uses this event to restore keyboard focus
+      if (!this.dispatchEvent(beforeActionEvent)) {
+        return;
+      }
 
-            // 对原始事件进行封装
-            var actionEvent = new ActionEvent(e);
-            try {
-                this.dispatchEvent(actionEvent);
-            } finally {
-                // Stop propagating the event
-                e.stopPropagation();
-            }
-        };
+      // 对原始事件进行封装
+      var actionEvent = new ActionEvent(e);
+      try {
+        this.dispatchEvent(actionEvent);
+      } finally {
+        // Stop propagating the event
+        e.stopPropagation();
+      }
+    };
 
-        /** @override */
-        ActionHandler.prototype.disposeInternal = function() {
-            ActionHandler.superClass_.disposeInternal.call(this);
-            EventsUtil.unlisten(this.element_, KEY_EVENT_TYPE_,
-                this.handleKeyDown_, false, this);
-            EventsUtil.unlisten(this.element_, EventType.CLICK, this.handleClick_, false, this);
-            delete this.element_;
-        };
+    /** @override */
+    ActionHandler.prototype.disposeInternal = function() {
+      ActionHandler.superClass_.disposeInternal.call(this);
+      EventsUtil.unlisten(this.element_, KEY_EVENT_TYPE_,
+        this.handleKeyDown_, false, this);
+      EventsUtil.unlisten(this.element_, EventType.CLICK, this.handleClick_, false, this);
+      delete this.element_;
+    };
 
-        return ActionHandler;
-    }
+    return ActionHandler;
+  }
 );

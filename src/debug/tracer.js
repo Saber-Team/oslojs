@@ -711,6 +711,5 @@ define([
      * @type {Trace_}
      */
     return new Trace_();
-
   }
 );
