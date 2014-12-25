@@ -8,12 +8,12 @@
 // 1. dragger未启用;
 // 2. 用鼠标右键进行拖拽;
 // 3. 在达到hysteresis distance前释放了按键.
-define('@fx.draggerEventType', [], {
-    EARLY_CANCEL: 'earlycancel',
-    START: 'start',
-    BEFOREDRAG: 'beforedrag',
-    DRAG: 'drag',
-    END: 'end'
+define({
+  EARLY_CANCEL: 'earlycancel',
+  START: 'start',
+  BEFOREDRAG: 'beforedrag',
+  DRAG: 'drag',
+  END: 'end'
 });
 
 

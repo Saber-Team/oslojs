@@ -5,5 +5,5 @@
  */
 
 define({
-    KEY: 'key'
+  KEY: 'key'
 });

@@ -4,8 +4,11 @@
  * @email zmike86@gmail.com
  */
 
-define('@math.Coordinate', ['@util', '@math.util'],
-    function(util, math) {
+define([
+    '../util/util',
+    './util'
+  ],
+  function(util, math) {
 
     'use strict';
 
@@ -16,16 +19,16 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @constructor
      */
     var Coordinate = function(opt_x, opt_y) {
-        /**
-         * X-value
-         * @type {number}
-         */
-        this.x = util.isNull(opt_x) ? 0 : opt_x;
-        /**
-         * Y-value
-         * @type {number}
-         */
-        this.y = util.isNull(opt_y) ? 0 : opt_y;
+      /**
+       * X-value
+       * @type {number}
+       */
+      this.x = util.isNull(opt_x) ? 0 : opt_x;
+      /**
+       * Y-value
+       * @type {number}
+       */
+      this.y = util.isNull(opt_y) ? 0 : opt_y;
     };
 
     /**
@@ -33,7 +36,7 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} 返回克隆版本.
      */
     Coordinate.prototype.clone = function() {
-        return new Coordinate(this.x, this.y);
+      return new Coordinate(this.x, this.y);
     };
 
     /**
@@ -43,10 +46,10 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {boolean} True iff the coordinates are equal, or if both are null.
      */
     Coordinate.equals = function(a, b) {
-        if (a === b)
-            return true;
-        if (!a || !b) return false;
-        return a.x === b.x && a.y === b.y;
+      if (a === b)
+        return true;
+      if (!a || !b) return false;
+      return a.x === b.x && a.y === b.y;
     };
 
     /**
@@ -56,9 +59,9 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {number}
      */
     Coordinate.distance = function(a, b) {
-        var dx = a.x - b.x;
-        var dy = a.y - b.y;
-        return Math.sqrt(dx * dx + dy * dy);
+      var dx = a.x - b.x;
+      var dy = a.y - b.y;
+      return Math.sqrt(dx * dx + dy * dy);
     };
 
     /**
@@ -68,7 +71,7 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {number}
      */
     Coordinate.magnitude = function(a) {
-        return Math.sqrt(a.x * a.x + a.y * a.y);
+      return Math.sqrt(a.x * a.x + a.y * a.y);
     };
 
     /**
@@ -78,7 +81,7 @@ define('@math.Coordinate', ['@util', '@math.util'],
      *     axis to {@code a}.
      */
     Coordinate.azimuth = function(a) {
-        return math.angle(0, 0, a.x, a.y);
+      return math.angle(0, 0, a.x, a.y);
     };
 
     /**
@@ -94,9 +97,9 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {number} The squared distance between {@code a} and {@code b}.
      */
     Coordinate.squaredDistance = function(a, b) {
-        var dx = a.x - b.x;
-        var dy = a.y - b.y;
-        return dx * dx + dy * dy;
+      var dx = a.x - b.x;
+      var dy = a.y - b.y;
+      return dx * dx + dy * dy;
     };
 
     /**
@@ -107,7 +110,7 @@ define('@math.Coordinate', ['@util', '@math.util'],
      *     between {@code a} and {@code b}.
      */
     Coordinate.difference = function(a, b) {
-        return new Coordinate(a.x - b.x, a.y - b.y);
+      return new Coordinate(a.x - b.x, a.y - b.y);
     };
 
     /**
@@ -118,7 +121,7 @@ define('@math.Coordinate', ['@util', '@math.util'],
      *     coordinates.
      */
     Coordinate.sum = function(a, b) {
-        return new Coordinate(a.x + b.x, a.y + b.y);
+      return new Coordinate(a.x + b.x, a.y + b.y);
     };
 
     /**
@@ -126,9 +129,9 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} This coordinate with ceil'd fields.
      */
     Coordinate.prototype.ceil = function() {
-        this.x = Math.ceil(this.x);
-        this.y = Math.ceil(this.y);
-        return this;
+      this.x = Math.ceil(this.x);
+      this.y = Math.ceil(this.y);
+      return this;
     };
 
     /**
@@ -136,9 +139,9 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} This coordinate with floored fields.
      */
     Coordinate.prototype.floor = function() {
-        this.x = Math.floor(this.x);
-        this.y = Math.floor(this.y);
-        return this;
+      this.x = Math.floor(this.x);
+      this.y = Math.floor(this.y);
+      return this;
     };
 
     /**
@@ -146,9 +149,9 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} This coordinate with rounded fields.
      */
     Coordinate.prototype.round = function() {
-        this.x = Math.round(this.x);
-        this.y = Math.round(this.y);
-        return this;
+      this.x = Math.round(this.x);
+      this.y = Math.round(this.y);
+      return this;
     };
 
     /**
@@ -161,16 +164,16 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} This coordinate after translating.
      */
     Coordinate.prototype.translate = function(tx, opt_ty) {
-        if (tx instanceof Coordinate) {
-            this.x += tx.x;
-            this.y += tx.y;
-        } else {
-            this.x += tx;
-            if (util.isNumber(opt_ty)) {
-                this.y += opt_ty;
-            }
+      if (tx instanceof Coordinate) {
+        this.x += tx.x;
+        this.y += tx.y;
+      } else {
+        this.x += tx;
+        if (util.isNumber(opt_ty)) {
+          this.y += opt_ty;
         }
-        return this;
+      }
+      return this;
     };
 
     /**
@@ -182,11 +185,12 @@ define('@math.Coordinate', ['@util', '@math.util'],
      * @return {!Coordinate} This coordinate after scaling.
      */
     Coordinate.prototype.scale = function(sx, opt_sy) {
-        var sy = util.isNumber(opt_sy) ? opt_sy : sx;
-        this.x *= sx;
-        this.y *= sy;
-        return this;
+      var sy = util.isNumber(opt_sy) ? opt_sy : sx;
+      this.x *= sx;
+      this.y *= sy;
+      return this;
     };
 
     return Coordinate;
-});
+  }
+);

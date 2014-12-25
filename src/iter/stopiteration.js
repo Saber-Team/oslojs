@@ -5,27 +5,27 @@
  * @email zmike86@gmail.com
  */
 
-define('@iter.stopIteration', ['@util'], function(util) {
+define(['../util/util'], function(util) {
 
-    'use strict';
+  'use strict';
 
-    var StopIteration;
+  var StopIteration;
 
-    // 有的脚本引擎已经支持全局StopIteration对象.
-    if ('StopIteration' in util.global) {
-        /**
-         * 单例的异常对象, 表示终止迭代发生.
-         * @type {Error}
-         */
-        StopIteration = util.global.StopIteration;
-    } else {
-        /**
-         * 单例的异常对象, 表示终止迭代发生.
-         * @type {Error}
-         * @suppress {duplicate}
-         */
-        StopIteration = Error('StopIteration');
-    }
+  // 有的脚本引擎已经支持全局StopIteration对象.
+  if ('StopIteration' in util.global) {
+    /**
+     * 单例的异常对象, 表示终止迭代发生.
+     * @type {Error}
+     */
+    StopIteration = util.global.StopIteration;
+  } else {
+    /**
+     * 单例的异常对象, 表示终止迭代发生.
+     * @type {Error}
+     * @suppress {duplicate}
+     */
+    StopIteration = Error('StopIteration');
+  }
 
-    return StopIteration;
+  return StopIteration;
 });
