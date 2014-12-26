@@ -1,5 +1,5 @@
 /**
- * @fileoverview  Topic-based publish/subscribe channel implementation.
+ * @fileoverview 主题订阅类.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -33,7 +33,6 @@ define([
     };
 
     util.inherits(PubSub, Disposable);
-
 
     /**
      * Sparse array of subscriptions.  Each subscription is represented by a tuple
