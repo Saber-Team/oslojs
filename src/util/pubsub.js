@@ -14,15 +14,11 @@ define([
     'use strict';
 
     /**
-     * Topic-based publish/subscribe channel.  Maintains a map of topics to
-     * subscriptions.  When a message is published to a topic, all functions
-     * subscribed to that topic are invoked in the order they were added.
-     * Uncaught errors abort publishing.
-     *
-     * Topics may be identified by any nonempty string, <strong>except</strong>
-     * strings corresponding to native Object properties, e.g. "constructor",
+     * 基于主题的订阅者模式. 维护了主题和订阅者映射关系.
+     * 当某个主题发出消息,订阅该主题的所有函数都会被按顺序触发.
+     * 未被捕获的异常会终止发布.
+     * 主题可以是任何字符串值,除了对象的一些原生属性, e.g. "constructor",
      * "toString", "hasOwnProperty", etc.
-     *
      * @constructor
      * @extends {Disposable}
      */
@@ -35,72 +31,51 @@ define([
     util.inherits(PubSub, Disposable);
 
     /**
-     * Sparse array of subscriptions.  Each subscription is represented by a tuple
-     * comprising a topic identifier, a function, and an optional context object.
-     * Each tuple occupies three consecutive positions in the array, with the topic
-     * identifier at index n, the function at index (n + 1), the context object at
-     * index (n + 2), the next topic at index (n + 3), etc.  (This representation
-     * minimizes the number of object allocations and has been shown to be faster
-     * than an array of objects with three key-value pairs or three parallel arrays,
-     * especially on IE.)  Once a subscription is removed via {@link #unsubscribe}
-     * or {@link #unsubscribeByKey}, the three corresponding array elements are
-     * deleted, and never reused.  This means the total number of subscriptions
-     * during the lifetime of the pubsub channel is limited by the maximum length
-     * of a JavaScript array to (2^32 - 1) / 3 = 1,431,655,765 subscriptions, which
-     * should suffice for most applications.
-     *
-     * @type {!Array}
+     * 订阅者数组. 每个订阅者有三元组: 主题id, 函数, 可选的函数上下文.
+     * 每个元祖占据数组中的一个位置, 如果主题id在n的位置, 函数就在 (n + 1),
+     * 上下文对象在 (n + 2), 下一个主题在 (n + 3).
+     * (这种表示方式减少对象创建, 并且比数组存储对象和三个并行数组的方式要快,特别是IE.)
+     * 如果通过unsubscribe或者unsubscribeByKey取消订阅, 对应的三个数组项都会被删除.
+     * 这意味着订阅者的最大数目限制在数组最大长度除以3 (2^32 - 1) / 3 = 1,431,655,765.
+     * @type {?Array}
      * @private
      */
-    PubSub.prototype.subscriptions_;
+    PubSub.prototype.subscriptions_ = null;
 
     /**
-     * The next available subscription key.  Internally, this is an index into the
-     * sparse array of subscriptions.
-     *
+     * 订阅者的key. 就是在订阅者数组中该对象的索引.
      * @type {number}
      * @private
      */
     PubSub.prototype.key_ = 1;
 
     /**
-     * Map of topics to arrays of subscription keys.
-     *
-     * @type {!Object.<!Array.<number>>}
+     * 主题和订阅者key的映射对象.
+     * @type {?Object.<!Array.<number>>}
      * @private
      */
-    PubSub.prototype.topics_;
+    PubSub.prototype.topics_ = null;
 
     /**
-     * Array of subscription keys pending removal once publishing is done.
-     *
-     * @type {Array.<number>}
+     * 一个数组保存发布阶段取消订阅的订阅者key, 一旦发布完成则全部取消.
+     * @type {?Array.<number>}
      * @private
      */
-    PubSub.prototype.pendingKeys_;
+    PubSub.prototype.pendingKeys_ = null;
 
     /**
-     * Lock to prevent the removal of subscriptions during publishing.  Incremented
-     * at the beginning of {@link #publish}, and decremented at the end.
-     *
+     * 一个锁保证取消订阅时不处于主题发布阶段. publish开始和结束时会重置该值.
      * @type {number}
      * @private
      */
     PubSub.prototype.publishDepth_ = 0;
 
     /**
-     * Subscribes a function to a topic.  The function is invoked as a method on
-     * the given {@code opt_context} object, or in the global scope if no context
-     * is specified.  Subscribing the same function to the same topic multiple
-     * times will result in multiple function invocations while publishing.
-     * Returns a subscription key that can be used to unsubscribe the function from
-     * the topic via {@link #unsubscribeByKey}.
-     *
-     * @param {string} topic Topic to subscribe to.
-     * @param {Function} fn Function to be invoked when a message is published to
-     *     the given topic.
-     * @param {Object=} opt_context Object in whose context the function is to be
-     *     called (the global scope if none).
+     * 订阅主题. 多次订阅一个主题若传入相同的函数也不会去重.
+     * 返回订阅key, 可以调用unsubscribeByKey取消订阅.
+     * @param {string} topic 主题.
+     * @param {Function} fn 函数.
+     * @param {Object=} opt_context 函数上下文.
      * @return {number} Subscription key.
      */
     PubSub.prototype.subscribe = function(topic, fn, opt_context) {
@@ -120,22 +95,15 @@ define([
       // Push the subscription key onto the list of subscriptions for the topic.
       keys.push(key);
 
-      // Return the subscription key.
+      // 返回订阅者key.
       return key;
     };
 
     /**
-     * Subscribes a single-use function to a topic.  The function is invoked as a
-     * method on the given {@code opt_context} object, or in the global scope if
-     * no context is specified, and is then unsubscribed.  Returns a subscription
-     * key that can be used to unsubscribe the function from the topic via
-     * {@link #unsubscribeByKey}.
-     *
-     * @param {string} topic Topic to subscribe to.
-     * @param {Function} fn Function to be invoked once and then unsubscribed when
-     *     a message is published to the given topic.
-     * @param {Object=} opt_context Object in whose context the function is to be
-     *     called (the global scope if none).
+     * 只订阅主题一次,函数调用后自动注销.
+     * @param {string} topic 主题.
+     * @param {Function} fn 订阅函数.
+     * @param {Object=} opt_context 函数上下文.
      * @return {number} Subscription key.
      */
     PubSub.prototype.subscribeOnce = function(topic, fn, opt_context) {
@@ -148,13 +116,11 @@ define([
     };
 
     /**
-     * Unsubscribes a function from a topic.  Only deletes the first match found.
-     * Returns a Boolean indicating whether a subscription was removed.
-     *
-     * @param {string} topic Topic to unsubscribe from.
-     * @param {Function} fn Function to unsubscribe.
-     * @param {Object=} opt_context Object in whose context the function was to be
-     *     called (the global scope if none).
+     * 取消订阅主题. 只取消第一个找到的订阅函数.
+     * 返回是否移除成功.
+     * @param {string} topic 主题.
+     * @param {Function} fn 取消订阅的函数.
+     * @param {Object=} opt_context 函数上下文.
      * @return {boolean} Whether a matching subscription was removed.
      */
     PubSub.prototype.unsubscribe = function(topic, fn, opt_context) {
@@ -164,7 +130,7 @@ define([
         // and context object.
         var subscriptions = this.subscriptions_;
         var key = array.find(keys, function(k) {
-          return subscriptions[k + 1] == fn && subscriptions[k + 2] == opt_context;
+          return subscriptions[k + 1] === fn && subscriptions[k + 2] === opt_context;
         });
         // Zero is not a valid key.
         if (key) {
@@ -176,15 +142,12 @@ define([
     };
 
     /**
-     * Removes a subscription based on the key returned by {@link #subscribe}.
-     * No-op if no matching subscription is found.  Returns a Boolean indicating
-     * whether a subscription was removed.
-     *
-     * @param {number} key Subscription key.
-     * @return {boolean} Whether a matching subscription was removed.
+     * 根据key取消订阅. 没有存储此key则什么也不做.
+     * @param {number} key 订阅key.
+     * @return {boolean} 返回是否移除成功.
      */
     PubSub.prototype.unsubscribeByKey = function(key) {
-      if (this.publishDepth_ != 0) {
+      if (this.publishDepth_ !== 0) {
         // Defer removal until after publishing is complete.
         if (!this.pendingKeys_) {
           this.pendingKeys_ = [];
@@ -209,14 +172,10 @@ define([
     };
 
     /**
-     * Publishes a message to a topic.  Calls functions subscribed to the topic in
-     * the order in which they were added, passing all arguments along.  If any of
-     * the functions throws an uncaught error, publishing is aborted.
-     *
-     * @param {string} topic Topic to publish to.
-     * @param {...*} var_args Arguments that are applied to each subscription
-     *     function.
-     * @return {boolean} Whether any subscriptions were called.
+     * 发布消息. 若其中一个订阅者抛出异常则终止操作.
+     * @param {string} topic 发布主题.
+     * @param {...*} var_args 提供给订阅者的参数.
+     * @return {boolean} 是否调用了订阅者.
      */
     PubSub.prototype.publish = function(topic, var_args) {
       var keys = this.topics_[topic];
@@ -226,20 +185,19 @@ define([
         // array.
         this.publishDepth_++;
 
-        // For each key in the list of subscription keys for the topic, apply the
-        // function to the arguments in the appropriate context.  The length of the
-        // array mush be fixed during the iteration, since subscribers may add new
-        // subscribers during publishing.
+        // 调用订阅者函数. keys数组的长度在迭代过程中一定要确定, 因为订阅者会
+        // 在发布的时候添加进来.
         var args = array.slice(arguments, 1);
         for (var i = 0, len = keys.length; i < len; i++) {
           var key = keys[i];
-          this.subscriptions_[key + 1].apply(this.subscriptions_[key + 2], args);
+          this.subscriptions_[key + 1].apply(
+            this.subscriptions_[key + 2], args);
         }
 
         // Unlock subscriptions.
         this.publishDepth_--;
 
-        if (this.pendingKeys_ && this.publishDepth_ == 0) {
+        if (this.pendingKeys_ && this.publishDepth_ === 0) {
           var pendingKey;
           while ((pendingKey = this.pendingKeys_.pop())) {
             this.unsubscribeByKey(pendingKey);
@@ -247,16 +205,16 @@ define([
         }
 
         // At least one subscriber was called.
-        return i != 0;
+        return i !== 0;
       }
 
-      // No subscribers were found.
+      // 没有订阅者
       return false;
     };
 
     /**
-     * Clears the subscription list for a topic, or all topics if unspecified.
-     * @param {string=} opt_topic Topic to clear (all topics if unspecified).
+     * 清除指定主题的订阅者.
+     * @param {string=} opt_topic 主题.
      */
     PubSub.prototype.clear = function(opt_topic) {
       if (opt_topic) {
@@ -268,16 +226,15 @@ define([
       } else {
         this.subscriptions_.length = 0;
         this.topics_ = {};
-        // We don't reset key_ on purpose, because we want subscription keys to be
-        // unique throughout the lifetime of the application.  Reusing subscription
-        // keys could lead to subtle errors in client code.
+        // 没有重置this.key_的意图, 是想在整个页面周期内订阅者key一直唯一.
+        // Reusing subscription keys could lead to subtle errors in client code.
       }
     };
 
     /**
      * 返回给定主题的订阅者数目.
-     * @param {string=} opt_topic The topic (all topics if unspecified).
-     * @return {number} Number of subscriptions to the topic.
+     * @param {string=} opt_topic 主题.
+     * @return {number} 订阅者数目.
      */
     PubSub.prototype.getCount = function(opt_topic) {
       if (opt_topic) {
