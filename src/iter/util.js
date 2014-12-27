@@ -90,13 +90,10 @@ define([
     /**
      * 遍历迭代对象, 返回只通过验证函数的项加入到新的迭代器中.
      * @param {Iterator} iterable 迭代对象.
-     * @param {function(this:T,?,undefined,?):boolean} f 要执行的函数. If the return value is true the element will be
-     *     included  in the returned iteror.  If it is false the element is not
-     *     included.
-     * @param {T=} opt_obj The object to be used as the value of 'this' within
-     *     {@code f}.
-     * @return {!Iterator} A new iterator in which only elements that
-     *     passed the test are present.
+     * @param {function(this:T,?,undefined,?):boolean} f 要执行的函数. 如果函数执行返回true则在新的
+     *   迭代器中可以遍历到该项否则跳过该项.
+     * @param {T=} opt_obj 函数上下文.
+     * @return {!Iterator} 返回一个新的迭代器只遍历通过测试的项.
      * @template T
      */
     function filter(iterable, f, opt_obj) {
@@ -113,24 +110,16 @@ define([
       return newIter;
     }
 
-
     /**
-     * Creates a new iterator that returns the values in a range.  This function
-     * can take 1, 2 or 3 arguments:
+     * 返回只在特定范围遍历的迭代器,函数的参数个数是不固定的:
      * <pre>
-     * range(5) same as range(0, 5, 1)
-     * range(2, 5) same as range(2, 5, 1)
+     * range(5) = range(0, 5, 1)
+     * range(2, 5) = range(2, 5, 1)
      * </pre>
-     *
-     * @param {number} startOrStop  The stop value if only one argument is provided.
-     *     The start value if 2 or more arguments are provided.  If only one
-     *     argument is used the start value is 0.
-     * @param {number=} opt_stop  The stop value.  If left out then the first
-     *     argument is used as the stop value.
-     * @param {number=} opt_step  The number to increment with between each call to
-     *     next.  This can be negative.
-     * @return {!Iterator} A new iterator that returns the values in the
-     *     range.
+     * @param {number} startOrStop 只有一个参数时代表终止值,起始值默认是0. 否则代表起始值.
+     * @param {number=} opt_stop 提供的终止值.
+     * @param {number=} opt_step 步进长度,也可以是负值.
+     * @return {!Iterator} 返回新的迭代器.
      */
     function range(startOrStop, opt_stop, opt_step) {
       var start = 0;
@@ -140,7 +129,7 @@ define([
         start = startOrStop;
         stop = opt_stop;
       }
-      if (step == 0) {
+      if (step === 0) {
         throw Error('Range step argument must not be zero');
       }
 
@@ -156,17 +145,15 @@ define([
       return newIter;
     }
 
-
     /**
-     * Joins the values in a iterator with a delimiter.
-     * @param {Iterator} iterable  The iterator to get the values from.
-     * @param {string} deliminator  The text to put between the values.
-     * @return {string} The joined value string.
+     * 将迭代器中各项连接起来.
+     * @param {Iterator} iterable
+     * @param {string} deliminator
+     * @return {string}
      */
     function join(iterable, deliminator) {
       return toArray(iterable).join(deliminator);
     }
-
 
     /**
      * For every element in the iterator call a function and return a new iterator
@@ -394,11 +381,10 @@ define([
       return newIter;
     }
 
-
     /**
-     * Converts the iterator to an array
-     * @param {Iterable} iterable  The iterator to convert to an array.
-     * @return {!Array} An array of the elements the iterator iterates over.
+     * 将迭代器转化成熟组
+     * @param {Iterable} iterable
+     * @return {!Array}
      */
     function toArray(iterable) {
       // Fast path for array-like.
@@ -412,7 +398,6 @@ define([
       });
       return array;
     }
-
 
     /**
      * Iterates over 2 iterators and returns true if they contain the same sequence
