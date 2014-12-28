@@ -156,18 +156,11 @@ define([
     }
 
     /**
-     * For every element in the iterator call a function and return a new iterator
-     * with that value.
-     *
-     * @param {Iterable} iterable The iterator to iterate over.
-     * @param {function(this:T,?,undefined,?):?} f The function to call for every
-     *     element.  This function
-     *     takes 3 arguments (the element, undefined, and the iterator) and should
-     *     return a new value.
-     * @param {T=} opt_obj The object to be used as the value of 'this' within
-     *     {@code f}.
-     * @return {!Iterator} A new iterator that returns the results of
-     *     applying the function to each element in the original iterator.
+     * 多值映射返回新的迭代器.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {function(this:T,?,undefined,?):?} f 一个处理函数要返回新的值.
+     * @param {T=} opt_obj 函数上下文.
+     * @return {!Iterator}
      * @template T
      */
     function map(iterable, f, opt_obj) {
@@ -182,19 +175,13 @@ define([
       return newIter;
     }
 
-
     /**
-     * Passes every element of an iterator into a function and accumulates the
-     * result.
-     *
-     * @param {Iterable} iterable The iterator to iterate over.
-     * @param {function(this:T,V,?):V} f The function to call for every
-     *     element. This function takes 2 arguments (the function's previous result
-     *     or the initial value, and the value of the current element).
+     * 逐步递增式处理可迭代对象各项.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {function(this:T,V,?):V} f 执行函数接受两个行参(上次计算后的值或初始值, 和当前项).
      *     function(previousValue, currentElement) : newValue.
-     * @param {V} val The initial value to pass into the function on the first call.
-     * @param {T=} opt_obj  The object to be used as the value of 'this'
-     *     within f.
+     * @param {V} val 处理函数的初始值.
+     * @param {T=} opt_obj 函数上下文.
      * @return {V} Result of evaluating f repeatedly across the values of
      *     the iterator.
      * @template T,V
@@ -207,20 +194,12 @@ define([
       return rval;
     }
 
-
     /**
-     * Goes through the values in the iterator. Calls f for each these and if any of
-     * them returns true, this returns true (without checking the rest). If all
-     * return false this will return false.
-     *
-     * @param {Iterable} iterable  The iterator object.
-     * @param {function(this:T,?,undefined,?):boolean} f  The function to call for
-     *     every value. This function
-     *     takes 3 arguments (the value, undefined, and the iterator) and should
-     *     return a boolean.
-     * @param {T=} opt_obj The object to be used as the value of 'this' within
-     *     {@code f}.
-     * @return {boolean} true if any value passes the test.
+     * 只要有一项返回true则返回true.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {function(this:T,?,undefined,?):boolean} f 执行函数返回布尔值.
+     * @param {T=} opt_obj 函数上下文.
+     * @return {boolean} 返回是否有值通过测试.
      * @template T
      */
     function some(iterable, f, opt_obj) {
@@ -240,20 +219,12 @@ define([
       return false;
     }
 
-
     /**
-     * Goes through the values in the iterator. Calls f for each these and if any of
-     * them returns false this returns false (without checking the rest). If all
-     * return true this will return true.
-     *
-     * @param {Iterable} iterable  The iterator object.
-     * @param {function(this:T,?,undefined,?):boolean} f  The function to call for
-     *     every value. This function
-     *     takes 3 arguments (the value, undefined, and the iterator) and should
-     *     return a boolean.
-     * @param {T=} opt_obj The object to be used as the value of 'this' within
-     *     {@code f}.
-     * @return {boolean} true if every value passes the test.
+     * 全部通过测试则返回true否则返回false.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {function(this:T,?,undefined,?):boolean} f 检测函数返回布尔值.
+     * @param {T=} opt_obj 函数上下文.
+     * @return {boolean} true 是否全部通过测试.
      * @template T
      */
     function every(iterable, f, opt_obj) {
@@ -273,13 +244,10 @@ define([
       return true;
     }
 
-
     /**
-     * Takes zero or more iterators and returns one iterator that will iterate over
-     * them in the order chained.
-     * @param {...Iterator} var_args  Any number of iterator objects.
-     * @return {!Iterator} Returns a new iterator that will iterate over
-     *     all the given iterators' contents.
+     * 接收多个迭代器并且在迭代的时候遍历其中的项.
+     * @param {...Iterator} var_args 任意数量的迭代对象.
+     * @return {!Iterator} 返回新的迭代器.
      */
     function chain(var_args) {
       var args = arguments;
@@ -313,17 +281,12 @@ define([
       return newIter;
     }
 
-
     /**
      * Builds a new iterator that iterates over the original, but skips elements as
      * long as a supplied function returns true.
-     * @param {Iterable} iterable  The iterator object.
-     * @param {function(this:T,?,undefined,?):boolean} f  The function to call for
-     *     every value. This function
-     *     takes 3 arguments (the value, undefined, and the iterator) and should
-     *     return a boolean.
-     * @param {T=} opt_obj The object to be used as the value of 'this' within
-     *     {@code f}.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {function(this:T,?,undefined,?):boolean} f 遍历用到的函数,返回布尔值.
+     * @param {T=} opt_obj 函数上下文.
      * @return {!Iterator} A new iterator that drops elements from the
      *     original iterator as long as {@code f} is true.
      * @template T
@@ -345,7 +308,6 @@ define([
       };
       return newIter;
     }
-
 
     /**
      * Builds a new iterator that iterates over the original, but only as long as a
@@ -400,12 +362,10 @@ define([
     }
 
     /**
-     * Iterates over 2 iterators and returns true if they contain the same sequence
-     * of elements and have the same length.
-     * @param {Iterable} iterable1  The first iterable object.
-     * @param {Iterable} iterable2  The second iterable object.
-     * @return {boolean} true if the iterators contain the same sequence of
-     *     elements and have the same length.
+     * 遍历两个对象返回他们是否长度相等且数据项各个都相等.
+     * @param {Iterable} iterable1 对象1.
+     * @param {Iterable} iterable2 对象2.
+     * @return {boolean} 返回是否相等.
      */
     function equals(iterable1, iterable2) {
       iterable1 = toIterator(iterable1);
@@ -419,7 +379,7 @@ define([
           b1 = true;
           var val2 = iterable2.next();
           b2 = true;
-          if (val1 != val2) {
+          if (val1 !== val2) {
             return false;
           }
         }
@@ -451,26 +411,22 @@ define([
       return false;
     }
 
-
     /**
-     * Advances the iterator to the next position, returning the given default value
-     * instead of throwing an exception if the iterator has no more entries.
-     * @param {Iterable} iterable The iterable object.
-     * @param {*} defaultValue The value to return if the iterator is empty.
-     * @return {*} The next item in the iteration, or defaultValue if the iterator
-     *     was empty.
+     * 加强版的next方法, 在不能遍历的情况下不是抛出异常而是返回默认值.
+     * @param {Iterable} iterable 迭代对象.
+     * @param {*} 默认项.
+     * @return {*} 返回下一项或者默认项.
      */
     function nextOrValue(iterable, defaultValue) {
       try {
         return toIterator(iterable).next();
       } catch (e) {
-        if (e != StopIteration) {
+        if (e !== StopIteration) {
           throw e;
         }
         return defaultValue;
       }
     }
-
 
     /**
      * Cartesian product of zero or more sets.  Gives an iterator that gives every
@@ -509,7 +465,7 @@ define([
           // rightmost (like carry-over addition).
           for (var i = indicies.length - 1; i >= 0; i--) {
             // Assertion prevents compiler warning below.
-            // goog.asserts.assert(indicies);
+            // asserts.assert(indicies);
             if (indicies[i] < arrays[i].length - 1) {
               indicies[i]++;
               break;
@@ -571,7 +527,7 @@ define([
             // If an exception other than StopIteration is thrown
             // or if there are no elements to iterate over (the iterable was empty)
             // throw an exception
-            if (e != StopIteration || array.isEmpty(cache)) {
+            if (e !== StopIteration || array.isEmpty(cache)) {
               throw e;
             }
             // set useCache to true after we know that a 'StopIteration' exception
