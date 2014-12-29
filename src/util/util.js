@@ -338,8 +338,10 @@ define(function() {
     },
     /**
      * 全局上下文, 通常是 'window'.
+     * 重构: 之前是this, 在严格模式下不会提示警告,但在代码执行时由于在闭包内
+     * 此时会是undefined, 因此这里写死window
      */
-    global: this,
+    global: window,
     /**
      * @return {number} 返回1970年1月1日0时至今的毫秒数.
      */
