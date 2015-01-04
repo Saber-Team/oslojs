@@ -48,7 +48,6 @@ define([
       'width': 'width'
     };
 
-
     /**
      * 以下这些元素计算文本长度时忽略他们的内容
      * @type {Object}
@@ -62,7 +61,6 @@ define([
       'OBJECT': 1
     };
 
-
     /**
      * 这个映射规定了这两个元素在获取文本内容时的具体值替换方案
      * @type {Object}
@@ -73,7 +71,6 @@ define([
       'BR': '\n'
     };
 
-
     /**
      * 侦测是否可用原生的选择符查询API(W3C HTML5支持)(http://www.w3.org/TR/selectors-api/)
      * @param {!(Element|Document)} parent 文档对象或者一个元素.
@@ -83,7 +80,6 @@ define([
     var canUseQuerySelector_ = function(parent) {
       return !!(parent.querySelectorAll && parent.querySelector);
     };
-
 
     /**
      * Helper for getWindow. IE下有document.parentWindow
@@ -96,7 +92,6 @@ define([
       return doc.parentWindow || doc.defaultView;
     }
 
-
     /**
      * 返回浏览器是否文档标准模式 "CSS1-compatible"
      * @param {Document} doc 要检查的文档对象.
@@ -106,7 +101,6 @@ define([
     function isCss1CompatMode_(doc) {
       return doc.compatMode === 'CSS1Compat';
     }
-
 
     /**
      * 由于是取得视口大小, 所以长宽都是clientWidth clientHeight
@@ -121,7 +115,6 @@ define([
       return new Size(el.clientWidth, el.clientHeight);
     }
 
-
     /**
      * 文档滚动的话需要确定取body还是documentElement的scrollLeft属性
      * Helper for getDocumentScrollElement.
@@ -133,7 +126,6 @@ define([
       // Safari (2 and 3) 要用body.scrollLeft不论是quirks mode 还是 strict mode.
       return !ua.isWEBKIT && isCss1CompatMode_(doc) ? doc.documentElement : doc.body;
     }
-
 
     /**
      * 获取文档滚动距离（横纵向）
@@ -158,7 +150,6 @@ define([
       }
       return new Coordinate(win.pageXOffset || el.scrollLeft, win.pageYOffset || el.scrollTop);
     }
-
 
     /**
      * 递归计算节点文本值
@@ -189,6 +180,18 @@ define([
       }
     }
 
+    /**
+     * 返回节点的文本内容, 没有html标签.
+     * 与getTextContent方法不同, 这个方法不会合并空白和标准化换行.
+     * @param {Node} node 节点元素.
+     * @return {string} 原始的text content.
+     */
+    function getRawTextContent(node) {
+      var buf = [];
+      getTextContent_(node, buf, false);
+
+      return buf.join('');
+    }
 
     /**
      * 给定元素获取文档对象
@@ -200,7 +203,6 @@ define([
       return node.nodeType === NodeType.DOCUMENT ? node : node.ownerDocument;
     }
 
-
     /**
      * 获取document对象
      * @return {!Document} Document object.
@@ -208,7 +210,6 @@ define([
     function getDocument() {
       return document;
     }
-
 
     /**
      * 获得window对象.
@@ -219,7 +220,6 @@ define([
       return opt_doc ? getWindow_(opt_doc) : window;
     }
 
-
     /**
      * 删除节点.
      * @param {Node} node 删除的节点.
@@ -228,7 +228,6 @@ define([
     function removeNode(node) {
       return node && node.parentNode ? node.parentNode.removeChild(node) : null;
     }
-
 
     /**
      * 移除所有子元素.
@@ -240,7 +239,6 @@ define([
       while ((child = node.firstChild))
         node.removeChild(child);
     }
-
 
     /**
      * Helper for getElementsByTagNameAndClass.
@@ -309,7 +307,6 @@ define([
       }
     }
 
-
     /**
      * 根据类名选元素，getElementsByClass是一个新接口,FF和IE一些老版本不支持但能用尽量用.
      * Note：这个原生方法返回的是HTMLCollection,和getElementsByTagName是一样的返回类型。
@@ -335,7 +332,6 @@ define([
       return getElementsByTagNameAndClass_(document, '*', className, opt_el);
     }
 
-
     /**
      * 是否一个元素
      * @param {*} obj 测试的对象.
@@ -345,7 +341,6 @@ define([
       return util.isObject(obj) && obj.nodeType === NodeType.ELEMENT;
     }
 
-
     /**
      * 返回浏览器是否文档标准模式 "CSS1-compatible" (standards-compliant).
      * @return {boolean}
@@ -353,7 +348,6 @@ define([
     function isCss1CompatMode() {
       return isCss1CompatMode_(document);
     }
-
 
     /**
      * 一次性在元素上设置多个属性.
@@ -382,7 +376,6 @@ define([
         }
       });
     }
-
 
     /**
      * 获取视口的大小. Mochikit奉献吐血级别的跨浏览器方案
@@ -453,7 +446,6 @@ define([
       return getViewportSize_(opt_window || window);
     }
 
-
     /**
      * 查询节点的函数.
      * @param {?string=} opt_tag 标签名
@@ -465,7 +457,6 @@ define([
       return getElementsByTagNameAndClass_(document, opt_tag, opt_class, opt_el);
     }
 
-
     /**
      * 跨浏览器获取 document of a frame or iframe.
      * @param {Element} frame Frame元素.
@@ -474,7 +465,6 @@ define([
     function getFrameContentDocument(frame) {
       return frame.contentDocument || frame.contentWindow.document;
     }
-
 
     /**
      * 替换元素.如果老元素没有父节点则什么也不做.
@@ -487,7 +477,6 @@ define([
         parent.replaceChild(newNode, oldNode);
       }
     }
-
 
     /**
      * 是否一个节点包含另一个节点.
@@ -518,7 +507,6 @@ define([
       return descendant === parent;
     }
 
-
     /**
      * 这个方法会冲刷掉元素的内容,类似设置innerHTML.
      * @param {Element} element 元素.
@@ -540,7 +528,6 @@ define([
         element.appendChild(doc.createTextNode(String(text)));
       }
     }
-
 
     /**
      * 返回当前节点的文本内容, 不包含html标签和不可见的符号. 去掉换行并且把
@@ -567,7 +554,7 @@ define([
 
       // 去除 &shy; 实体. Oslo.format.insertWordBreaks 会在Opera下不慎插入.
       textContent = textContent.replace(/ \xAD /g, ' ').replace(/\xAD/g, '');
-      // 去除 &#8203; 实体. Oslo.format.insertWordBreaks 会在IE8下不慎插入.
+      // 去除 &#8203; 实体. format.insertWordBreaks 会在IE8下不慎插入.
       // 具体可以看看这个：
       //  http://stackoverflow.com/questions/7055600/
       //    u200b-zero-width-space-characters-in-my-js-code-where-did-they-came-from
@@ -586,7 +573,6 @@ define([
       return textContent;
     }
 
-
     /**
      * 获取document的滚动距离
      * @return {!Coordinate} Object with values 'x' and 'y'.
@@ -595,7 +581,6 @@ define([
       return getDocumentScroll_(document);
     }
 
-
     /**
      * 获取document滚动的元素(标准).
      * @return {Element} Scrolling element.
@@ -603,7 +588,6 @@ define([
     function getDocumentScrollElement() {
       return getDocumentScrollElement_(document);
     }
-
 
     /**
      * 获取当父 document 拥有焦点时获得焦点的对象。
@@ -621,7 +605,6 @@ define([
 
       return null;
     }
-
 
     /**
      * 获取给定元素符合条件的组父级元素
@@ -648,7 +631,6 @@ define([
       return null;
     }
 
-
     /**
      * 向上查找符合类名的祖先元素,如果元素自身也符合条件则返回自身.
      * @param {Node} element 元素.
@@ -658,7 +640,6 @@ define([
     function getAncestorByClass(element, className) {
       return getAncestorByTagNameAndClass(element, null, className);
     }
-
 
     /**
      * 随DOM结构上溯到符合标准条件的祖先元素. 自身符合标准就返回自身.
@@ -678,7 +659,6 @@ define([
         }, true));
     }
 
-
     /**
      * 返回第一个子元素.
      * @param {Node} node 父节点.
@@ -690,7 +670,6 @@ define([
       }
       return getNextElementNode_(node.firstChild, true);
     }
-
 
     /**
      * 返回最后一个元素.
@@ -704,7 +683,6 @@ define([
       return getNextElementNode_(node.lastChild, false);
     }
 
-
     /**
      * 返回下一个元素.
      * @param {Node} node
@@ -717,7 +695,6 @@ define([
       return getNextElementNode_(node.nextSibling, true);
     }
 
-
     /**
      * 返回上一个元素节点.
      * @param {Node} node
@@ -729,7 +706,6 @@ define([
       }
       return getNextElementNode_(node.previousSibling, false);
     }
-
 
     /**
      * 返回下一个元素节点.
@@ -746,7 +722,6 @@ define([
       return /** @type {Element} */ (node);
     }
 
-
     /**
      * 在已存在节点前插入新节点 (i.e. as the previous sibling).
      * @param {Node} newNode 要插入的元素.
@@ -757,7 +732,6 @@ define([
         refNode.parentNode.insertBefore(newNode, refNode);
     }
 
-
     /**
      * 在参照节点后插入一个节点 (i.e. as the next sibling).
      * @param {Node} newNode 要插入的元素.
@@ -767,7 +741,6 @@ define([
       if (refNode.parentNode)
         refNode.parentNode.insertBefore(newNode, refNode.nextSibling);
     }
-
 
     /**
      * 用指定的属性创建Dom元素.
@@ -785,7 +758,6 @@ define([
       return createDom_(document, arguments);
     }
 
-
     /**
      * 是否一个 DOM node.
      * @param {*} obj 测试对象.
@@ -794,7 +766,6 @@ define([
     function isNodeLike(obj) {
       return util.isObject(obj) && obj.nodeType > 0;
     }
-
 
     /**
      * 判断是否一个NodeList. 要有length属性和item方法.
@@ -817,7 +788,6 @@ define([
 
       return false;
     }
-
 
     /**
      * Helper for createDom.
@@ -885,7 +855,6 @@ define([
       return element;
     }
 
-
     /**
      * 将文本或其他节点附加到指定的父节点上.
      * @param {!Document} doc 创建元素的doc对象.
@@ -914,7 +883,6 @@ define([
       }
     }
 
-
     /**
      * 返回包含子节点的数组.
      * @param {Element} element
@@ -932,14 +900,12 @@ define([
       });
     }
 
-
     /**
      * 做一个默认domhelper的缓存.
      * @type {DomHelper}
      * @private
      */
     var defaultDomHelper_ = null;
-
 
     /**
      * 获取一个DOMHelper对象，相对于给定的元素所在的文档。
@@ -951,7 +917,6 @@ define([
         new DomHelper(getOwnerDocument(opt_element)) :
         (defaultDomHelper_ || (defaultDomHelper_ = new DomHelper()));
     }
-
 
     /**
      * DOM helper Class with a new document object.
@@ -966,7 +931,6 @@ define([
        */
       this.document_ = opt_document || util.global.document || document;
     };
-
 
     // 原型对象
     var proto = {
@@ -1100,10 +1064,8 @@ define([
       isNodeLike: isNodeLike
     };
 
-
     // 混入原型对象
     util.mixin(DomHelper.prototype, proto);
-
 
     return {
       contains: contains,
@@ -1136,6 +1098,7 @@ define([
       replaceNode: replaceNode,
       setTextContent: setTextContent,
       getTextContent: getTextContent,
+      getRawTextContent: getRawTextContent,
       getAncestor: getAncestor,
       getAncestorByClass: getAncestorByClass,
       getAncestorByTagNameAndClass: getAncestorByTagNameAndClass,
