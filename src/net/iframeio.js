@@ -786,7 +786,12 @@ define([
             this.onIframeLoaded_, false, this);
         }
 
-        // Fix text areas, since importNode won't clone changes to the value
+        // 下面的做法需要将form元素跨文档复制, 用到了importNode方法, 见：
+        // https://developer.mozilla.org/en-US/docs/Web/API/document.importNode
+        // 至于此方法和cloneNode的不同, 见：
+        // https://developer.mozilla.org/en-US/docs/Web/API/Node.cloneNode
+
+        // text areas元素的问题, importNode won't clone changes to the value
         var textareas = this.form_.getElementsByTagName('textarea');
         var i, n;
         for (i = 0, n = textareas.length; i < n; i++) {
@@ -879,7 +884,7 @@ define([
      * IE环境下此函数用于监听iframe的readystatechange事件
      * Handles the load event of the iframe for IE, determines if the request was
      * successful or not, handles clean up and dispatching of appropriate events.
-     * @param {goog.events.BrowserEvent} e The browser event.
+     * @param {BrowserEvent} e The browser event.
      * @private
      */
     IframeIo.prototype.onIeReadyStateChange_ = function(e) {
