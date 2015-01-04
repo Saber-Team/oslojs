@@ -133,7 +133,8 @@ define([
            log,
            ds,
            Uri,
-           debug
+           debug,
+           reflect
     ) {
 
     'use strict';
@@ -531,7 +532,7 @@ define([
         this.success_ = false;
         this.lastErrorCode_ = opt_failureCode || ErrorCode.ABORT;
 
-        this.dispatchEvent(EventType.ABORT);
+        this.dispatchEvent(NetEventType.ABORT);
 
         this.makeReady_();
       }
@@ -790,14 +791,16 @@ define([
         // https://developer.mozilla.org/en-US/docs/Web/API/document.importNode
         // 至于此方法和cloneNode的不同, 见：
         // https://developer.mozilla.org/en-US/docs/Web/API/Node.cloneNode
+        // 两个方法的共同点是: 复制之后其中一个改变不影响另一个
 
-        // text areas元素的问题, importNode won't clone changes to the value
+        // text areas元素的问题, importNode不会复制改变的值域
         var textareas = this.form_.getElementsByTagName('textarea');
         var i, n;
         for (i = 0, n = textareas.length; i < n; i++) {
-          // The childnodes represent the initial child nodes for the text area
-          // appending a text node essentially resets the initial value ready for
-          // it to be clones - while maintaining HTML escaping.
+          // textArea元素仍然保留着最初始的value值, 而实际上可能已经改变.
+          // 比如js动态创建了textNode并附加到textArea元素内, 此时dom.getRawTextContent
+          // 方法会返回全部文字, 但取value属性仍然是最初的内容, 且childNodes.length = 0
+          // (chrome 39.0下测试). - while maintaining HTML escaping.
           var value = textareas[i].value;
           if (dom.getRawTextContent(textareas[i]) !== value) {
             dom.setTextContent(textareas[i], value);
@@ -812,7 +815,7 @@ define([
         clone.action = this.form_.action;
         doc.body.appendChild(clone);
 
-        // Fix select boxes, importNode won't override the default value
+        // select元素的默认选中值也不会被复制.
         var selects = this.form_.getElementsByTagName('select');
         var clones = clone.getElementsByTagName('select');
         for (i = 0, n = selects.length; i < n; i++) {
@@ -823,17 +826,16 @@ define([
           }
         }
 
-        // Some versions of Firefox (1.5 - 1.5.07?) fail to clone the value
-        // attribute for <input type="file"> nodes, which results in an empty
-        // upload if the clone is submitted.  Check, and if the clone failed, submit
-        // using the original form instead.
+        // 一些版本的Firefox (1.5 - 1.5.07?) 对 <input type="file"> 元素的value域会
+        // 复制失败, 会导致clone表单提交后得到空文件. 在这里检查是否复制失败, 如果失败了
+        // 则直接提交原始的form instead.
         var inputs = this.form_.getElementsByTagName('input');
         var inputClones = clone.getElementsByTagName('input');
         for (i = 0, n = inputs.length; i < n; i++) {
           if (inputs[i].type === 'file') {
             if (inputs[i].value !== inputClones[i].value) {
               log.fine(this.logger_,
-                  'File input value not cloned properly.  Will ' +
+                  'File input value not cloned properly. Will ' +
                   'submit using original form.');
               this.form_.target = innerFrameName;
               clone = this.form_;
@@ -851,21 +853,21 @@ define([
           doc.close();
 
           if (ua.isGECKO) {
-            // This tests if firefox silently fails, this can happen, for example,
-            // when the server resets the connection because of a large file upload
+            // 测试是否firefox静默失败, 发生这种情况可能是:
+            // 服务器上传文件过大导致重置了连接
             this.firefoxSilentErrorTimeout_ =
               Timer.callOnce(this.testForFirefoxSilentError_, 250, this);
           }
 
         } catch (e) {
-          // If submit threw an exception then it probably means the page that the
-          // code is running on the local file system and the form's action was
-          // pointing to a file that doesn't exist, causing the browser to fire an
-          // exception.
+          // 如果提交时抛出异常则说明页面代码运行在本地文件系统上并且form的action属性指向了
+          // 不存在的地址.
 
           log.error(this.logger_,
               'Error when submitting form: ' + debug.exposeException(e));
 
+          // 这里同IE不一样,绑定的load事件,因为非IE浏览器不支持iframe的readystatechange
+          // 事件. 并且在顶层document中,也只有IE支持.
           if (!this.ignoreResponse_) {
             EventsUtil.unlisten(
               doc.getElementById(innerFrameName),
@@ -881,9 +883,8 @@ define([
     };
 
     /**
-     * IE环境下此函数用于监听iframe的readystatechange事件
-     * Handles the load event of the iframe for IE, determines if the request was
-     * successful or not, handles clean up and dispatching of appropriate events.
+     * IE环境下此函数用于监听iframe的readystatechange事件, 确定请求是否成功,
+     * 移除所有事件监听并触发合适的事件.
      * @param {BrowserEvent} e The browser event.
      * @private
      */
@@ -913,7 +914,6 @@ define([
 
     /**
      * 非IE下监听iframe的load事件.
-     * Handles the load event of the iframe for non-IE browsers.
      * @param {BrowserEvent} e The browser event.
      * @private
      */
@@ -946,9 +946,10 @@ define([
 
       var errorCode;
 
-      // 试图得到innerHTML.  If this fails then it can be an access denied
-      // error or the document may just not have a body, typical case is if there
-      // is an IE's default 404.
+      // 试图得到innerHTML. 如果失败了可能是因为拒绝访问error或者
+      // document没有body属性, 最典型的是IE下的404.
+      // 提一点: 如果浏览没有body的页面, document.body确实为Null,
+      // 并不会像有的文章所说浏览器会自动生成body元素(IE9 & Chrome39.0).
       /** @preserveTry */
       try {
         var body = contentDocument.body;
@@ -962,10 +963,10 @@ define([
       // contentDocument and determine if it is an error page.  Applications
       // may send down markers in the document, define JS vars, or some other test.
       var customError;
-      if (!errorCode && typeof this.errorChecker_ == 'function') {
+      if (!errorCode && typeof this.errorChecker_ === 'function') {
         customError = this.errorChecker_(contentDocument);
         if (customError) {
-          errorCode = goog.net.ErrorCode.CUSTOM_ERROR;
+          errorCode = ErrorCode.CUSTOM_ERROR;
         }
       }
 
@@ -983,8 +984,8 @@ define([
         this.success_ = true;
         this.lastErrorCode_ = ErrorCode.NO_ERROR;
         // 先complete后success
-        this.dispatchEvent(goog.net.EventType.COMPLETE);
-        this.dispatchEvent(goog.net.EventType.SUCCESS);
+        this.dispatchEvent(NetEventType.COMPLETE);
+        this.dispatchEvent(NetEventType.SUCCESS);
         // 方法如其名, make iframe ready...
         this.makeReady_();
       }
@@ -1170,8 +1171,8 @@ define([
      */
     IframeIo.prototype.getContentDocument_ = function() {
       if (this.iframe_) {
-        return /** @type {HTMLDocument} */(dom.getFrameContentDocument(
-          this.getRequestIframe()));
+        return /** @type {HTMLDocument} */(
+          dom.getFrameContentDocument(this.getRequestIframe()));
       }
       return null;
     };
@@ -1203,10 +1204,12 @@ define([
         // This is a hack to test of the document has loaded with a page that
         // we can't access, such as a network error, that won't report onload
         // or onerror events.
-        if (doc && !goog.reflect.canAccessProperty(doc, 'documentUri')) {
+        if (doc && !reflect.canAccessProperty(doc, 'documentUri')) {
           if (!this.ignoreResponse_) {
-            goog.events.unlisten(this.getRequestIframe(),
-              EventType.LOAD, this.onIframeLoaded_, false, this);
+            EventsUtil.unlisten(
+              this.getRequestIframe(),
+              EventType.LOAD,
+              this.onIframeLoaded_, false, this);
           }
 
           if (navigator.onLine) {
