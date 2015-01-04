@@ -7,7 +7,7 @@
 define([
     '../util/util',
     '../events/util',
-    '../events/eventtarget',
+    '../events/target',
     '../events/eventtype',
     './event'
   ],

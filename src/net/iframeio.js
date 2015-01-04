@@ -98,514 +98,542 @@
  * @email zmike86@gmail.com
  */
 
-define('@net.IframeIo',
-    [
-        '@util',
-        '@Timer',
-        '@uri.util',
-        '@dom.util',
-        '@events.util',
-        '@events.eventBase',
-        '@events.eventTarget',
-        '@events.eventType',
-        '@json.util',
-        '@net.errorCode',
-        '@net.eventType',
-        '@string.util',
-        '@ua.util',
-        '@log',
-        '@ds.util',
-        '@uri.Uri'
-    ],
-    function(util, Timer, uri, dom, EventsUtil, EventBase, EventTarget, EventType,
-             JSON, ErrorCode, NetEventType, string, ua, log, ds, Uri) {
-
-        'use strict';
-
-
-        /**
-         * 创建了多少个iframes
-         * @type {number}
-         * @private
-         */
-        var counter_ = 0;
-
-
-        /**
-         * 通过名字查找IframeIo实例.
-         * @type {Object}
-         * @private
-         */
-        var instances_ = {};
-
-
-        /**
-         * 返回一个iframe新的名字
-         * @return {string} 下一个iframe名字.
-         * @private
-         */
-        function getNextName_() {
-            return IframeIo.FRAME_NAME_PREFIX + counter_++;
-        }
-
-
-        /**
-         * 通过iFrames管理请求的类.
-         * @constructor
-         * @extends {EventTarget}
-         */
-        var IframeIo = function() {
-
-            EventTarget.call(this);
-
-            /**
-             * 当前IframeIo实例和frame的名字
-             * @type {string}
-             * @private
-             */
-            this.name_ = getNextName_();
-
-            /**
-             * 保存一些已经完成请求的iframe元素. 惰性异步析构这个元素,
-             * so we don't confuse the browser (see below).
-             * @type {Array.<Element>}
-             * @private
-             */
-            this.iframesForDisposal_ = [];
-
-            // 创建一个哈希便于查找IframeIo实例. 用于getInstanceByName找到特定iframe
-            // 相关的IframeIo实例.  递增的脚本里用到.
-            instances_[this.name_] = this;
-
-        };
-
-        util.inherits(IframeIo, EventTarget);
-
-
-        /**
-         * 每个frame的名称前缀
-         * @type {string}
-         */
-        IframeIo.FRAME_NAME_PREFIX = 'oslo_frame';
-
-
-        /**
-         * 非IE环境要在用于发请求的inner frames加后缀
-         * @type {string}
-         */
-        IframeIo.INNER_FRAME_SUFFIX = '_inner';
-
-
-        /**
-         * 请求完毕后距离析构iframe还需要一段时间. 析构可以惰性异步完成, 我们等待
-         * 足够的时间防止response被处理返回的时间不够.
-         * @type {number}
-         */
-        IframeIo.IFRAME_DISPOSE_DELAY_MS = 2000;
-
-
-        /**
-         * 一个表单元素的引用, 记住要发送哪个表单数据.
-         * @type {HTMLFormElement}
-         * @private
-         */
-        IframeIo.form_;
-
-
-        /**
-         * 一个静态方法创建一个短期活跃的IframeIo发送请求.
-         * @param {Uri|string} uri 发送请求的地址, 调用者应该把查询字符串拼接好.
-         * @param {Function=} opt_callback complete事件处理器.
-         * @param {string=} opt_method 默认GET, POST会用表单提交请求.
-         * @param {boolean=} opt_noCache 是否加时间戳避免缓存.
-         * @param {Object|Map=} opt_data 键值对儿会通过iframe的表单post到服务端.
-         */
-        IframeIo.send = function(uri, opt_callback, opt_method, opt_noCache, opt_data) {
-            var io = new IframeIo();
-            // 第四个参数不需要捕获阶段, 第五个参数指定上下文
-            EventsUtil.listen(io, NetEventType.READY, io.dispose, false, io);
-            if (opt_callback) {
-                EventsUtil.listen(io, NetEventType.COMPLETE, opt_callback);
-            }
-            io.send(uri, opt_method, opt_noCache, opt_data);
-        };
-
-
-        /**
-         * 通过iframe的名字找到此表单元素(全局对象是util.global因为这个window对象含有
-         * IframeIo的iframes元素.
-         * @param {string} fname 名称.
-         * @return {HTMLIFrameElement} iframe元素.
-         */
-        IframeIo.getIframeByName = function(fname) {
-            return window.frames[fname];
-        };
-
-
-        /**
-         * 根据名字获取IframeIo实例对象.
-         * @param {string} fname The name to find.
-         * @return {IframeIo} 返回IframeIo实例.
-         */
-        IframeIo.getInstanceByName = function(fname) {
-            return instances_[fname];
-        };
-
-
-        /**
-         * todo 这个方法需要定义为全局方法暴露在window上,
-         * 接受服务端连续的数据灌入(需要服务端配合), 负责接收数据并且把数据导流到正确的IframeIo实例上.
-         * 而IframeIo实例中包含的html页面中的script要调用被导出到全局的此方法.
-         * @param {Window} win window对象.
-         * @param {Object} data 数据.
-         */
-        IframeIo.handleIncrementalData = function(win, data) {
-            // 如果是inner-frame, 需要用父窗口.
-            var iframeName = string.endsWith(win.name,
-                IframeIo.INNER_FRAME_SUFFIX) ? win.parent.name : win.name;
-
-            var iframeIoName = iframeName.substring(0, iframeName.lastIndexOf('_'));
-            var iframeIo = IframeIo.getInstanceByName(iframeIoName);
-            if (iframeIo && iframeName === iframeIo.iframeName_) {
-                // todo
-                iframeIo.handleIncrementalData_(data);
-            } else {
-                log.getLogger('Oslo.net.IframeIo').info(
-                    'Incremental iframe data routed for unknown iframe');
-            }
-        };
-
-
-        /**
-         * 保存了一个静态引用(想提供给所有IframeIo实例), 因为IE6在创建删除form后会造成内存泄露.
-         * @return {HTMLFormElement} The static form.
-         * @private
-         */
-        IframeIo.getForm_ = function() {
-            if (!IframeIo.form_) {
-                IframeIo.form_ = /** @type {HTMLFormElement} */(dom.createDom('form'));
-                IframeIo.form_.acceptCharset = 'utf-8';
-
-                // 隐藏form并将它移出屏幕
-                var s = IframeIo.form_.style;
-                s.position = 'absolute';
-                s.visibility = 'hidden';
-                s.top = s.left = '-10px';
-                s.width = s.height = '10px';
-                s.overflow = 'hidden';
-
-                dom.getDocument().body.appendChild(IframeIo.form_);
-            }
-            return IframeIo.form_;
-        };
-
-
-        /**
-         * 把需要传输的数据(不论GET还是POST)写入到表单的隐藏input中一并带到服务器端.
-         * @param {HTMLFormElement} form 要附加数据的表单.
-         * @param {Object|Map|Uri.QueryData} data 要传的数据.
-         * @private
-         */
-        IframeIo.addFormInputs_ = function(form, data) {
-            var helper = dom.getDomHelper(form);
-            ds.forEach(data, function(value, key) {
-                var inp = helper.createDom('input',
-                    {'type': 'hidden', 'name': key, 'value': value});
-                form.appendChild(inp);
-            });
-        };
-
-
-        /**
-         * 为IframeIo实例服务的logger
-         * @type {Logger}
-         * @private
-         */
-        IframeIo.prototype.logger_ = log.getLogger('Oslo.net.IframeIo');
-
-
-        /**
-         * 保留一个表单元素的引用可以在每次请求到iframe的时候复用.
-         * @type {HTMLFormElement}
-         * @private
-         */
-        IframeIo.prototype.form_ = null;
-
-
-        /**
-         * 当前请求用到的iframe对象, 如果当前没有active的请求则为null.
-         * @type {HTMLIFrameElement}
-         * @private
-         */
-        IframeIo.prototype.iframe_ = null;
-
-
-        /**
-         * 当前请求用到的iframe的名字, 若没活动请求则为null.
-         * @type {?string}
-         * @private
-         */
-        IframeIo.prototype.iframeName_ = null;
-
-
-        /**
-         * 保存每次iframe的名字以保证唯一.
-         * @type {number}
-         * @private
-         */
-        IframeIo.prototype.nextIframeId_ = 0;
-
-
-        /**
-         * 是否当前请求处于激活状态.
-         * @type {boolean}
-         * @private
-         */
-        IframeIo.prototype.active_ = false;
-
-
-        /**
-         * 上次请求是否完成.
-         * @type {boolean}
-         * @private
-         */
-        IframeIo.prototype.complete_ = false;
-
-
-        /**
-         * 请求是否成功.
-         * @type {boolean}
-         * @private
-         */
-        IframeIo.prototype.success_ = false;
-
-
-        /**
-         * 上次请求的url.
-         * @type {Uri}
-         * @private
-         */
-        IframeIo.prototype.lastUri_ = null;
-
-
-        /**
-         * 上次请求的文本内容.
-         * @type {?string}
-         * @private
-         */
-        IframeIo.prototype.lastContent_ = null;
-
-
-        /**
-         * 上次错误码.
-         * @type {ErrorCode}
-         * @private
-         */
-        IframeIo.prototype.lastErrorCode_ = ErrorCode.NO_ERROR;
-
-
-        /**
-         * 定义超时的时间, 若请求还未完成会被中断且会分发一个EventType.TIMEOUT事件;
-         * 0意味着不需要超时处理.
-         * @type {number}
-         * @private
-         */
-        IframeIo.prototype.timeoutInterval_ = 0;
-
-
-        /**
-         * Window timeout ID用于取消超时的处理器.
-         * @type {?number}
-         * @private
-         */
-        IframeIo.prototype.timeoutId_ = null;
-
-
-        /**
-         * Window timeout ID用于检查firefox的静默失败.
-         * @type {?number}
-         * @private
-         */
-        IframeIo.prototype.firefoxSilentErrorTimeout_ = null;
-
-
-        /**
-         * Window timeout ID用于析构iframes对象.
-         * @type {?number}
-         * @private
-         */
-        IframeIo.prototype.iframeDisposalTimer_ = null;
-
-
-        /**
-         * 对同一个错误不要多次处理. 在IE下, 断网且URL不可用的情况下提交表单
-         * 会两次进到handleError_方法.
-         * @type {boolean}
-         * @private
-         */
-        IframeIo.prototype.errorHandled_ = false;
-
-
-        /**
-         * Whether to suppress the listeners that determine when the iframe loads.
-         * @type {boolean}
-         * @private
-         */
-        IframeIo.prototype.ignoreResponse_ = false;
-
-
-        /**
-         * 通过iframe发送请求. 这个方法被IframeIo当作静态方法调用.
-         * 一个HTML表单元素用于提交到iframe. 简化了GET和POST的区别. iframe每次都要被创建并且销毁
-         * 否则request会造成历史实体记录的麻烦.
-         * A HTML form is used and submitted to the iframe, this simplifies the
-         * difference between GET and POST requests. The iframe needs to be created and
-         * destroyed for each request otherwise the request will contribute to the
-         * history stack.
-         *
-         * sendFromForm方法里面做了一些技巧, 在非IE的环境下POST请求不会对历史实体产生添加.
-         * sendFromForm does some clever trickery (thanks jlim) in non-IE browsers to
-         * stop a history entry being added for POST requests.
-         *
-         * @param {Uri|string} uri 请求地址.
-         * @param {string=} opt_method 默认GET, POST用表单提交请求.
-         * @param {boolean=} opt_noCache 是否在请求后加时间戳避免缓存.
-         * @param {Object|Map=} opt_data Map of key-value pairs.
-         */
-        IframeIo.prototype.send = function(uri, opt_method, opt_noCache, opt_data) {
-            if (this.active_) {
-                throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
-            }
-
-            var uriObj = new Uri(uri);
-            this.lastUri_ = uriObj;
-            var method = opt_method ? opt_method.toUpperCase() : 'GET';
-
-            if (opt_noCache) {
-                uriObj.makeUnique();
-            }
-
-            log.info(this.logger_,
-                    'Sending iframe request: ' + uriObj + ' [' + method + ']');
-
-            // 创建表单
-            this.form_ = IframeIo.getForm_();
-
-            if (method == 'GET') {
-                // For GET requests, we assume that the caller didn't want the queryparams
-                // already specified in the URI to be clobbered by the form, so we add the
-                // params here.
-                IframeIo.addFormInputs_(this.form_, uriObj.getQueryData());
-            }
-
-            if (opt_data) {
-                // 为每一个数据项创建表单域.
-                IframeIo.addFormInputs_(this.form_, opt_data);
-            }
-
-            // Set the URI that the form will be posted
-            this.form_.action = uriObj.toString();
-            this.form_.method = method;
-
-            this.sendFormInternal_();
-        };
-
-
-        /**
-         * 这个方法是客户端javascript上传文件的核心方法, 很重要
-         * Sends the data stored in an existing form to the server. The HTTP method
-         * should be specified on the form, the action can also be specified but can
-         * be overridden by the optional URI param.
-         *
-         * This can be used in conjunction will a file-upload input to upload a file in
-         * the background without affecting history.
-         *
-         * Example form:
-         * <pre>
-         *   &lt;form action="/server/" enctype="multipart/form-data" method="POST"&gt;
-         *     &lt;input name="userfile" type="file"&gt;
-         *   &lt;/form&gt;
-         * </pre>
-         *
-         * @param {HTMLFormElement} form Form element used to send the request to the
-         *     server.
-         * @param {string=} opt_uri Uri to set for the destination of the request, by
-         *     default the uri will come from the form.
-         * @param {boolean=} opt_noCache Append a timestamp to the request to avoid
-         *     caching.
-         */
-        IframeIo.prototype.sendFromForm = function(form, opt_uri, opt_noCache) {
-            if (this.active_) {
-                throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
-            }
-
-            var uri = new Uri(opt_uri || form.action);
-            if (opt_noCache) {
-                uri.makeUnique();
-            }
-
-            log.info(this.logger_, 'Sending iframe request from form: ' + uri);
-
-            this.lastUri_ = uri;
-            this.form_ = form;
-            this.form_.action = uri.toString();
-            this.sendFormInternal_();
-        };
-
-
-        /**
-         * Abort the current Iframe request
-         * @param {ErrorCode=} opt_failureCode Optional error code to use -
-         *     defaults to ABORT.
-         */
-        IframeIo.prototype.abort = function(opt_failureCode) {
-            if (this.active_) {
-                log.info(this.logger_, 'Request aborted');
-                EventsUtil.removeAll(this.getRequestIframe());
-                this.complete_ = false;
-                this.active_ = false;
-                this.success_ = false;
-                this.lastErrorCode_ = opt_failureCode || ErrorCode.ABORT;
-
-                this.dispatchEvent(EventType.ABORT);
-
-                this.makeReady_();
-            }
-        };
-
-
-        /** @override */
-        IframeIo.prototype.disposeInternal = function() {
-            log.fine(this.logger_, 'Disposing iframeIo instance');
-
-            // If there is an active request, abort it
-            if (this.active_) {
-                log.fine(this.logger_, 'Aborting active request');
-                this.abort();
-            }
-
-            // Call super-classes implementation (remove listeners)
-            IframeIo.superClass_.disposeInternal.call(this);
-
-            // Add the current iframe to the list of iframes for disposal.
-            if (this.iframe_) {
-                this.scheduleIframeDisposal_();
-            }
-
-            // Disposes of the form
-            this.disposeForm_();
-
-            // Nullify anything that might cause problems and clear state
-            delete this.errorChecker_;
-            this.form_ = null;
-            this.lastCustomError_ = this.lastContent_ = this.lastContentHtml_ = null;
-            this.lastUri_ = null;
-            this.lastErrorCode_ = ErrorCode.NO_ERROR;
-
-            delete instances_[this.name_];
-        };
-
-
-        return IframeIo;
+define([
+    '../util/util',
+    '../timer/timer',
+    '../uri/util',
+    '../dom/util',
+    '../events/util',
+    '../events/event',
+    '../events/target',
+    '../events/eventtype',
+    '../json/json',
+    './errorcode',
+    './eventtype',
+    '../string/util',
+    '../ua/util',
+    '../log/log',
+    '../ds/util',
+    '../uri/uri'
+  ],
+  function(util,
+           Timer,
+           uri,
+           dom,
+           EventsUtil,
+           EventBase,
+           EventTarget,
+           EventType,
+           JSON,
+           ErrorCode,
+           NetEventType,
+           string,
+           ua,
+           log,
+           ds,
+           Uri) {
+
+    'use strict';
+
+    /**
+     * 创建了多少个iframes
+     * @type {number}
+     * @private
+     */
+    var counter_ = 0;
+
+    /**
+     * 通过名字查找IframeIo实例.
+     * @type {Object}
+     * @private
+     */
+    var instances_ = {};
+
+    /**
+     * 返回一个iframe新的名字
+     * @return {string} 下一个iframe名字.
+     * @private
+     */
+    function getNextName_() {
+      return IframeIo.FRAME_NAME_PREFIX + counter_++;
     }
+
+    /**
+     * 通过iFrames管理请求的类.
+     * @constructor
+     * @extends {EventTarget}
+     */
+    var IframeIo = function() {
+
+      EventTarget.call(this);
+
+      /**
+       * 当前IframeIo实例和frame的名字
+       * @type {string}
+       * @private
+       */
+      this.name_ = getNextName_();
+
+      /**
+       * 保存一些已经完成请求的iframe元素. 惰性异步析构这个元素,
+       * so we don't confuse the browser (see below).
+       * @type {Array.<Element>}
+       * @private
+       */
+      this.iframesForDisposal_ = [];
+
+      // 创建一个哈希便于查找IframeIo实例. 用于getInstanceByName找到特定iframe
+      // 相关的IframeIo实例.  递增的脚本里用到.
+      instances_[this.name_] = this;
+
+    };
+
+    util.inherits(IframeIo, EventTarget);
+
+    /**
+     * 每个frame的名称前缀
+     * @type {string}
+     */
+    IframeIo.FRAME_NAME_PREFIX = 'oslo_frame';
+
+    /**
+     * 非IE环境要在用于发请求的inner frames加后缀
+     * @type {string}
+     */
+    IframeIo.INNER_FRAME_SUFFIX = '_inner';
+
+    /**
+     * 请求完毕后距离析构iframe还需要一段时间. 析构可以惰性异步完成, 我们等待
+     * 足够的时间防止response被处理返回的时间不够.
+     * @type {number}
+     */
+    IframeIo.IFRAME_DISPOSE_DELAY_MS = 2000;
+
+    /**
+     * 一个表单元素的引用, 记住要发送哪个表单数据.
+     * @type {HTMLFormElement}
+     * @private
+     */
+    IframeIo.form_;
+
+    /**
+     * 一个静态方法创建一个短期活跃的IframeIo发送请求.
+     * @param {Uri|string} uri 发送请求的地址, 调用者应该把查询字符串拼接好.
+     * @param {Function=} opt_callback complete事件处理器.
+     * @param {string=} opt_method 默认GET, POST会用表单提交请求.
+     * @param {boolean=} opt_noCache 是否加时间戳避免缓存.
+     * @param {Object|Map=} opt_data 键值对儿会通过iframe的表单post到服务端.
+     */
+    IframeIo.send = function(uri, opt_callback, opt_method, opt_noCache, opt_data) {
+      var io = new IframeIo();
+      // 第四个参数不需要捕获阶段, 第五个参数指定上下文
+      EventsUtil.listen(io, NetEventType.READY, io.dispose, false, io);
+      if (opt_callback) {
+        EventsUtil.listen(io, NetEventType.COMPLETE, opt_callback);
+      }
+      io.send(uri, opt_method, opt_noCache, opt_data);
+    };
+
+    /**
+     * 通过iframe的名字找到此表单元素(全局对象是util.global因为这个window对象含有
+     * IframeIo的iframes元素.
+     * @param {string} fname 名称.
+     * @return {HTMLIFrameElement} iframe元素.
+     */
+    IframeIo.getIframeByName = function(fname) {
+      return window.frames[fname];
+    };
+
+    /**
+     * 根据名字获取IframeIo实例对象.
+     * @param {string} fname The name to find.
+     * @return {IframeIo} 返回IframeIo实例.
+     */
+    IframeIo.getInstanceByName = function(fname) {
+      return instances_[fname];
+    };
+
+    /**
+     * todo 这个方法需要定义为全局方法暴露在window上,
+     * 接受服务端连续的数据灌入(需要服务端配合), 负责接收数据并且把数据导流到正确的IframeIo实例上.
+     * 而IframeIo实例中包含的html页面中的script要调用被导出到全局的此方法.
+     * @param {Window} win window对象.
+     * @param {Object} data 数据.
+     */
+    IframeIo.handleIncrementalData = function(win, data) {
+      // 如果是inner-frame, 需要用父窗口.
+      var iframeName = string.endsWith(win.name,
+        IframeIo.INNER_FRAME_SUFFIX) ? win.parent.name : win.name;
+
+      var iframeIoName = iframeName.substring(0, iframeName.lastIndexOf('_'));
+      var iframeIo = IframeIo.getInstanceByName(iframeIoName);
+      if (iframeIo && iframeName === iframeIo.iframeName_) {
+        // todo
+        iframeIo.handleIncrementalData_(data);
+      } else {
+        log.getLogger('Oslo.net.IframeIo').info(
+          'Incremental iframe data routed for unknown iframe');
+      }
+    };
+
+    /**
+     * 保存了一个静态引用(想提供给所有IframeIo实例), 因为IE6在创建删除form后会造成内存泄露.
+     * @return {HTMLFormElement} The static form.
+     * @private
+     */
+    IframeIo.getForm_ = function() {
+      if (!IframeIo.form_) {
+        IframeIo.form_ = /** @type {HTMLFormElement} */(dom.createDom('form'));
+        IframeIo.form_.acceptCharset = 'utf-8';
+
+        // 隐藏form并将它移出屏幕
+        var s = IframeIo.form_.style;
+        s.position = 'absolute';
+        s.visibility = 'hidden';
+        s.top = s.left = '-10px';
+        s.width = s.height = '10px';
+        s.overflow = 'hidden';
+
+        dom.getDocument().body.appendChild(IframeIo.form_);
+      }
+      return IframeIo.form_;
+    };
+
+    /**
+     * 把需要传输的数据(不论GET还是POST)写入到表单的隐藏input中一并带到服务器端.
+     * @param {HTMLFormElement} form 要附加数据的表单.
+     * @param {Object|Map|Uri.QueryData} data 要传的数据.
+     * @private
+     */
+    IframeIo.addFormInputs_ = function(form, data) {
+      var helper = dom.getDomHelper(form);
+      ds.forEach(data, function(value, key) {
+        var inp = helper.createDom('input',
+          {'type': 'hidden', 'name': key, 'value': value});
+        form.appendChild(inp);
+      });
+    };
+
+    /**
+     * 为IframeIo实例服务的logger
+     * @type {Logger}
+     * @private
+     */
+    IframeIo.prototype.logger_ = log.getLogger('Oslo.net.IframeIo');
+
+    /**
+     * 保留一个表单元素的引用可以在每次请求到iframe的时候复用.
+     * @type {HTMLFormElement}
+     * @private
+     */
+    IframeIo.prototype.form_ = null;
+
+    /**
+     * 当前请求用到的iframe对象, 如果当前没有active的请求则为null.
+     * @type {HTMLIFrameElement}
+     * @private
+     */
+    IframeIo.prototype.iframe_ = null;
+
+    /**
+     * 当前请求用到的iframe的名字, 若没活动请求则为null.
+     * @type {?string}
+     * @private
+     */
+    IframeIo.prototype.iframeName_ = null;
+
+    /**
+     * 保存每次iframe的名字以保证唯一.
+     * @type {number}
+     * @private
+     */
+    IframeIo.prototype.nextIframeId_ = 0;
+
+    /**
+     * 是否当前请求处于激活状态.
+     * @type {boolean}
+     * @private
+     */
+    IframeIo.prototype.active_ = false;
+
+    /**
+     * 上次请求是否完成.
+     * @type {boolean}
+     * @private
+     */
+    IframeIo.prototype.complete_ = false;
+
+    /**
+     * 请求是否成功.
+     * @type {boolean}
+     * @private
+     */
+    IframeIo.prototype.success_ = false;
+
+    /**
+     * 上次请求的url.
+     * @type {Uri}
+     * @private
+     */
+    IframeIo.prototype.lastUri_ = null;
+
+    /**
+     * 上次请求的文本内容.
+     * @type {?string}
+     * @private
+     */
+    IframeIo.prototype.lastContent_ = null;
+
+    /**
+     * 上次错误码.
+     * @type {ErrorCode}
+     * @private
+     */
+    IframeIo.prototype.lastErrorCode_ = ErrorCode.NO_ERROR;
+
+    /**
+     * 定义超时的时间, 若请求还未完成会被中断且会分发一个EventType.TIMEOUT事件;
+     * 0意味着不需要超时处理.
+     * @type {number}
+     * @private
+     */
+    IframeIo.prototype.timeoutInterval_ = 0;
+
+    /**
+     * Window timeout ID用于取消超时的处理器.
+     * @type {?number}
+     * @private
+     */
+    IframeIo.prototype.timeoutId_ = null;
+
+    /**
+     * Window timeout ID用于检查firefox的静默失败.
+     * @type {?number}
+     * @private
+     */
+    IframeIo.prototype.firefoxSilentErrorTimeout_ = null;
+
+    /**
+     * Window timeout ID用于析构iframes对象.
+     * @type {?number}
+     * @private
+     */
+    IframeIo.prototype.iframeDisposalTimer_ = null;
+
+    /**
+     * 对同一个错误不要多次处理. 在IE下, 断网且URL不可用的情况下提交表单
+     * 会两次进到handleError_方法.
+     * @type {boolean}
+     * @private
+     */
+    IframeIo.prototype.errorHandled_ = false;
+
+    /**
+     * Whether to suppress the listeners that determine when the iframe loads.
+     * @type {boolean}
+     * @private
+     */
+    IframeIo.prototype.ignoreResponse_ = false;
+
+    /**
+     * 通过iframe发送请求. 这个方法被IframeIo当作静态方法调用.
+     * 一个HTML表单元素用于提交到iframe. 简化了GET和POST的区别. iframe每次都要被创建并且销毁
+     * 否则request会造成历史实体记录的麻烦.
+     * A HTML form is used and submitted to the iframe, this simplifies the
+     * difference between GET and POST requests. The iframe needs to be created and
+     * destroyed for each request otherwise the request will contribute to the
+     * history stack.
+     *
+     * sendFromForm方法里面做了一些技巧, 在非IE的环境下POST请求不会对历史实体产生添加.
+     * sendFromForm does some clever trickery (thanks jlim) in non-IE browsers to
+     * stop a history entry being added for POST requests.
+     *
+     * @param {Uri|string} uri 请求地址.
+     * @param {string=} opt_method 默认GET, POST用表单提交请求.
+     * @param {boolean=} opt_noCache 是否在请求后加时间戳避免缓存.
+     * @param {Object|Map=} opt_data Map of key-value pairs.
+     */
+    IframeIo.prototype.send = function(uri, opt_method, opt_noCache, opt_data) {
+      if (this.active_) {
+        throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
+      }
+
+      var uriObj = new Uri(uri);
+      this.lastUri_ = uriObj;
+      var method = opt_method ? opt_method.toUpperCase() : 'GET';
+
+      if (opt_noCache) {
+        uriObj.makeUnique();
+      }
+
+      log.info(this.logger_,
+          'Sending iframe request: ' + uriObj + ' [' + method + ']');
+
+      // 创建表单
+      this.form_ = IframeIo.getForm_();
+
+      if (method == 'GET') {
+        // For GET requests, we assume that the caller didn't want the queryparams
+        // already specified in the URI to be clobbered by the form, so we add the
+        // params here.
+        IframeIo.addFormInputs_(this.form_, uriObj.getQueryData());
+      }
+
+      if (opt_data) {
+        // 为每一个数据项创建表单域.
+        IframeIo.addFormInputs_(this.form_, opt_data);
+      }
+
+      // Set the URI that the form will be posted
+      this.form_.action = uriObj.toString();
+      this.form_.method = method;
+
+      this.sendFormInternal_();
+    };
+
+    /**
+     * 这个方法是客户端javascript上传文件的核心方法, 很重要
+     * Sends the data stored in an existing form to the server. The HTTP method
+     * should be specified on the form, the action can also be specified but can
+     * be overridden by the optional URI param.
+     *
+     * This can be used in conjunction will a file-upload input to upload a file in
+     * the background without affecting history.
+     *
+     * Example form:
+     * <pre>
+     *   &lt;form action="/server/" enctype="multipart/form-data" method="POST"&gt;
+     *     &lt;input name="userfile" type="file"&gt;
+     *   &lt;/form&gt;
+     * </pre>
+     *
+     * @param {HTMLFormElement} form Form element used to send the request to the
+     *     server.
+     * @param {string=} opt_uri Uri to set for the destination of the request, by
+     *     default the uri will come from the form.
+     * @param {boolean=} opt_noCache Append a timestamp to the request to avoid
+     *     caching.
+     */
+    IframeIo.prototype.sendFromForm = function(form, opt_uri, opt_noCache) {
+      if (this.active_) {
+        throw Error('[Oslo.net.IframeIo] Unable to send, already active.');
+      }
+
+      var uri = new Uri(opt_uri || form.action);
+      if (opt_noCache) {
+        uri.makeUnique();
+      }
+
+      log.info(this.logger_, 'Sending iframe request from form: ' + uri);
+
+      this.lastUri_ = uri;
+      this.form_ = form;
+      this.form_.action = uri.toString();
+      this.sendFormInternal_();
+    };
+
+    /**
+     * Abort the current Iframe request
+     * @param {ErrorCode=} opt_failureCode Optional error code to use -
+     *     defaults to ABORT.
+     */
+    IframeIo.prototype.abort = function(opt_failureCode) {
+      if (this.active_) {
+        log.info(this.logger_, 'Request aborted');
+        EventsUtil.removeAll(this.getRequestIframe());
+        this.complete_ = false;
+        this.active_ = false;
+        this.success_ = false;
+        this.lastErrorCode_ = opt_failureCode || ErrorCode.ABORT;
+
+        this.dispatchEvent(EventType.ABORT);
+
+        this.makeReady_();
+      }
+    };
+
+    /** @override */
+    IframeIo.prototype.disposeInternal = function() {
+      log.fine(this.logger_, 'Disposing iframeIo instance');
+
+      // If there is an active request, abort it
+      if (this.active_) {
+        log.fine(this.logger_, 'Aborting active request');
+        this.abort();
+      }
+
+      // Call super-classes implementation (remove listeners)
+      IframeIo.superClass_.disposeInternal.call(this);
+
+      // Add the current iframe to the list of iframes for disposal.
+      if (this.iframe_) {
+        this.scheduleIframeDisposal_();
+      }
+
+      // Disposes of the form
+      this.disposeForm_();
+
+      // Nullify anything that might cause problems and clear state
+      delete this.errorChecker_;
+      this.form_ = null;
+      this.lastCustomError_ = this.lastContent_ = this.lastContentHtml_ = null;
+      this.lastUri_ = null;
+      this.lastErrorCode_ = ErrorCode.NO_ERROR;
+
+      delete instances_[this.name_];
+    };
+
+    /**
+     * @return {boolean} 传输是否完成.
+     */
+    IframeIo.prototype.isComplete = function() {
+      return this.complete_;
+    };
+
+    /**
+     * @return {boolean} 是否传输成功.
+     */
+    IframeIo.prototype.isSuccess = function() {
+      return this.success_;
+    };
+
+    /**
+     * @return {boolean} True if a transfer is in progress.
+     */
+    IframeIo.prototype.isActive = function() {
+      return this.active_;
+    };
+
+    /**
+     * Returns the last response text (i.e. the text content of the iframe).
+     * Assumes plain text!
+     * @return {?string} Result from the server.
+     */
+    IframeIo.prototype.getResponseText = function() {
+      return this.lastContent_;
+    };
+
+
+    /**
+     * Returns the last response html (i.e. the innerHtml of the iframe).
+     * @return {?string} Result from the server.
+     */
+    goog.net.IframeIo.prototype.getResponseHtml = function() {
+      return this.lastContentHtml_;
+    };
+
+
+    /**
+     * Parses the content as JSON. This is a safe parse and may throw an error
+     * if the response is malformed.
+     * Use goog.json.unsafeparse(this.getResponseText()) if you are sure of the
+     * state of the returned content.
+     * @return {Object} The parsed content.
+     */
+    goog.net.IframeIo.prototype.getResponseJson = function() {
+      return goog.json.parse(this.lastContent_);
+    };
+
+    return IframeIo;
+  }
 );

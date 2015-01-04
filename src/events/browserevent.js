@@ -33,7 +33,7 @@
 define([
     '../util/util',
     './browserfeature',
-    './eventbase',
+    './event',
     './eventtype',
     '../ua/util'
   ],

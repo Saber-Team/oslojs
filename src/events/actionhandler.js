@@ -18,7 +18,7 @@ define([
     '../util/util',
     './util',
     './browserevent',
-    './eventtarget',
+    './target',
     './eventtype',
     './keycodes',
     '../ua/util',

@@ -21,7 +21,7 @@ define([
     '../util/util',
     '../timer/timer',
     '../array/array',
-    '../events/eventtarget',
+    '../events/target',
     '../json/json',
     '../log/log',
     './errorcode',

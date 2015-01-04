@@ -26,7 +26,7 @@ define([
     '../dom/util',
     './browserevent',
     './handlermanager',
-    './eventtarget',
+    './target',
     './keycodes',
     '../ua/util'
   ],

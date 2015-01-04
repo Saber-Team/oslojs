@@ -11,7 +11,7 @@ define([
     '../util/util',
     './util',
     './browserevent',
-    './eventtarget',
+    './target',
     '../ua/util'
   ],
   function(util, EventsUtil, BrowserEvent, EventTarget, ua) {

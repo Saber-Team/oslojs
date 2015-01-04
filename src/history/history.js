@@ -127,7 +127,7 @@ define([
     '../timer/timer',
     '../dom/util',
     '../events/handlermanager',
-    '../events/eventtarget',
+    '../events/target',
     '../events/eventtype',
     './eventtype',
     './event',

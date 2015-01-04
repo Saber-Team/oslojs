@@ -10,7 +10,7 @@
 
 define([
     '../util/util',
-    '../events/eventtarget'
+    '../events/target'
   ],
   function(util, EventTarget) {
 

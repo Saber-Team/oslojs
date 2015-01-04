@@ -6,7 +6,7 @@
 
 define([
     '../util/util',
-    '../events/eventtarget',
+    '../events/target',
     './eventtype'
   ],
   function(util, EventTarget, EventType) {

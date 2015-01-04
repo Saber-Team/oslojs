@@ -43,7 +43,7 @@ define([
     '../util/util',
     './browserevent',
     './browserfeature',
-    './eventtarget',
+    './target',
     './listener',
     '../array/array',
     '../object/object',

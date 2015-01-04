@@ -8,7 +8,7 @@ define([
     '../util/util',
     '../disposable/disposable',
     '../array/array',
-    './eventbase',
+    './event',
     './listenermap',
     '../object/object'
   ],

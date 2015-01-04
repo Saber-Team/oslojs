@@ -7,7 +7,7 @@
 define([
     '../util/util',
     '../array/array',
-    '../events/eventbase'
+    '../events/event'
   ],
   function(util, array, EventBase) {
 

@@ -6,7 +6,7 @@
 
 define([
     '../util/util',
-    '../events/eventbase',
+    '../events/event',
     './eventtype'
   ],
   function(util, EventBase, HistoryEventType) {

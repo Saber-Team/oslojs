@@ -16,7 +16,7 @@ define([
     '../dom/util',
     './util',
     './browserevent',
-    './eventtarget',
+    './target',
     '../math/util',
     '../style/util',
     '../ua/util',
