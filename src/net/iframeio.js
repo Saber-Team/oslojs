@@ -115,7 +115,9 @@ define([
     '../log/log',
     '../ds/util',
     '../uri/uri',
-    '../debug/util'
+    '../debug/util',
+    '../reflect/reflect',
+    './incredataevent'
   ],
   function(util,
            Timer,
@@ -134,7 +136,8 @@ define([
            ds,
            Uri,
            debug,
-           reflect
+           reflect,
+           IncrementalDataEvent
     ) {
 
     'use strict';
@@ -175,6 +178,13 @@ define([
     var INNER_FRAME_SUFFIX = '_inner';
 
     /**
+     * 请求完毕后距离析构iframe还需要一段时间. 析构可以惰性异步完成, 我们等待
+     * 足够的时间防止response被处理返回的时间不够.
+     * @type {number}
+     */
+    var IFRAME_DISPOSE_DELAY_MS = 2000;
+
+    /**
      * 通过iFrames管理请求的类.
      * @constructor
      * @extends {EventTarget}
@@ -205,13 +215,6 @@ define([
     };
 
     util.inherits(IframeIo, EventTarget);
-
-    /**
-     * 请求完毕后距离析构iframe还需要一段时间. 析构可以惰性异步完成, 我们等待
-     * 足够的时间防止response被处理返回的时间不够.
-     * @type {number}
-     */
-    IframeIo.IFRAME_DISPOSE_DELAY_MS = 2000;
 
     /**
      * 一个form的引用, 记住要发送哪个表单数据.
@@ -649,20 +652,16 @@ define([
     };
 
     /**
-     * Sets the callback function used to check if a loaded IFrame is in an error
-     * state.
-     * @param {Function} fn Callback that expects a document object as it's single
-     *     argument.
+     * error checker是一个回调函数, 用于检查iframe中的页面状态, 看是否错误.
+     * @param {Function} fn 一个回调函数接受一个iframe中的document对象.
      */
     IframeIo.prototype.setErrorChecker = function(fn) {
       this.errorChecker_ = fn;
     };
 
     /**
-     * Gets the callback function used to check if a loaded IFrame is in an error
-     * state.
-     * @return {Function} A callback that expects a document object as it's single
-     *     argument.
+     * 返回error checker.
+     * @return {Function}
      */
     IframeIo.prototype.getErrorChecker = function() {
       return this.errorChecker_;
@@ -993,7 +992,7 @@ define([
 
     /**
      * Handles errors.
-     * @param {ErrorCode} errorCode Error code.
+     * @param {ErrorCode} errorCode 错误码.
      * @param {Object=} opt_customError If error is CUSTOM_ERROR, this is the
      *     client-provided custom error.
      * @private
@@ -1018,18 +1017,16 @@ define([
     };
 
     /**
-     * Dispatches an event indicating that the IframeIo instance has received a data
-     * packet via incremental loading.  The event object has a 'data' member.
+     * 分发事件, IframeIo的实例通过chunked接受到的数据包. 事件对象有个data属性.
      * @param {Object} data Data.
      * @private
      */
     IframeIo.prototype.handleIncrementalData_ = function(data) {
-      this.dispatchEvent(new IframeIo.IncrementalDataEvent(data));
+      this.dispatchEvent(new IncrementalDataEvent(data));
     };
 
     /**
-     * Finalizes the request, schedules the iframe for disposal, and maybe disposes
-     * the form.
+     * 完成请求后需要析构iframe元素, 和form.
      * @private
      */
     IframeIo.prototype.makeReady_ = function() {
@@ -1087,18 +1084,16 @@ define([
     };
 
     /**
-     * 延时执行iframe的析构. 针对FF的状态栏异常做一个特殊处理
-     * Schedules an iframe for disposal, async.  We can't remove the iframes in the
-     * same execution context as the response, otherwise some versions of Firefox
-     * will not detect that the response has correctly finished and the loading bar
-     * will stay active forever.
+     * 延时执行iframe的析构. 针对FF的状态栏异常做一个特殊处理.
+     * 这个方法在dispose的时候调用, 而此时服务端可能还未应答, 如果此时我们移除iframe
+     * 某些版本的Firefox不能检测到应答的完成,导致状态栏一直处于忙碌状态.
      * @private
      */
     IframeIo.prototype.scheduleIframeDisposal_ = function() {
       var iframe = this.iframe_;
 
-      // There shouldn't be a case where the iframe is null and we get to this
-      // stage, but the error reports in http://b/909448 indicate it is possible.
+      // 如果iframe是null应该没有问题,
+      // but the error reports in http://b/909448 indicate it is possible.
       if (iframe) {
         // NOTE(user): Stops Internet Explorer leaking the iframe object. This
         // shouldn't be needed, since the events have all been removed, which
@@ -1115,13 +1110,11 @@ define([
         this.iframeDisposalTimer_ = null;
       }
 
-      if (goog.userAgent.GECKO || goog.userAgent.OPERA) {
-        // For FF and Opera, we must dispose the iframe async,
-        // but it doesn't need to be done as soon as possible.
-        // We therefore schedule it for 2s out, so as not to
-        // affect any other actions that may have been triggered by the request.
+      if (ua.isGECKO || ua.isOPERA) {
+        // 对于FF和Opera, 需要异步析构iframe对象, 但不用很快完成.
+        // 于是设定了2秒, 这个时间对于我服务端返回后的一些操作也基本够用.
         this.iframeDisposalTimer_ = Timer.callOnce(
-          this.disposeIframes_, IframeIo.IFRAME_DISPOSE_DELAY_MS, this);
+          this.disposeIframes_, IFRAME_DISPOSE_DELAY_MS, this);
 
       } else {
         // For non-Gecko browsers we dispose straight away.
@@ -1134,12 +1127,11 @@ define([
     };
 
     /**
-     * Disposes any iframes.
+     * 在文档中移除之前用到过的iframe节点.
      * @private
      */
     IframeIo.prototype.disposeIframes_ = function() {
       if (this.iframeDisposalTimer_) {
-        // Clear the timer
         Timer.clear(this.iframeDisposalTimer_);
         this.iframeDisposalTimer_ = null;
       }
@@ -1152,12 +1144,12 @@ define([
     };
 
     /**
-     * Disposes of the Form.  Since IE6 leaks form nodes, this just cleans up the
-     * DOM and nullifies the instances reference so the form can be used for another
-     * request.
+     * 析构表单元素. IE6对form元素会有内存泄漏, 这里清除掉实例的引用然后form
+     * 可以被用作另一次请求sendFromForm.
      * @private
      */
     IframeIo.prototype.disposeForm_ = function() {
+      // why
       if (this.form_ && this.form_ === IframeIo.form_) {
         dom.removeChildren(this.form_);
       }
@@ -1178,10 +1170,8 @@ define([
     };
 
     /**
-     * 因为IE与非IE的iframe生成方式不同, IE下直接在当前页面包含了一个iframe而非IE下会在iframe
-     * 中再生成一个iframe....(这方法竟然是公有的...)
-     * @return {HTMLIFrameElement} The appropriate iframe to use for requests
-     *     (created in sendForm_).
+     * 因为IE与非IE的iframe生成方式不同
+     * @return {HTMLIFrameElement} 发送请求的iframe(created in sendForm_).
      */
     IframeIo.prototype.getRequestIframe = function() {
       if (this.iframe_) {
@@ -1193,17 +1183,15 @@ define([
     };
 
     /**
-     * Tests for a silent failure by firefox that can occur when the connection is
-     * reset by the server or is made to an illegal URL.
+     * 测试FF下是否由于连接重置或非法URL导致静默失败.
+     * 这个方法在sendFormInternal_中异步执行.
      * @private
      */
     IframeIo.prototype.testForFirefoxSilentError_ = function() {
       if (this.active_) {
         var doc = this.getContentDocument_();
 
-        // This is a hack to test of the document has loaded with a page that
-        // we can't access, such as a network error, that won't report onload
-        // or onerror events.
+        // 测试页面加载完毕后是否可以访问, 网络错误不会报onload和onerror错.
         if (doc && !reflect.canAccessProperty(doc, 'documentUri')) {
           if (!this.ignoreResponse_) {
             EventsUtil.unlisten(
