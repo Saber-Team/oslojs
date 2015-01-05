@@ -10,13 +10,12 @@ define([
     '../events/target',
     '../events/eventtype',
     './event'
-  ],
-  function(util, EventUtil, EventTarget, EventType, HistoryEvent) {
+  ], function(util, EventUtil, EventTarget, EventType, HistoryEvent) {
 
     'use strict';
 
     /**
-     * 用HTML5的APIs实现兼容Sogou.History.History的历史管理器.
+     * 用HTML5的APIs实现兼容History的历史管理器.
      * @param {Window=} opt_win 监听和分发历史事件的window对象.
      * @param {Html5History.TokenTransformer=} opt_transformer
      *     可选的. 由token生成url的转换器, 可以不借助hash片段存储token.
@@ -47,6 +46,7 @@ define([
         this.window_,
         EventType.POPSTATE,
         this.onHistoryEvent_, false, this);
+
       EventUtil.listen(
         this.window_,
         EventType.HASHCHANGE,
@@ -58,7 +58,7 @@ define([
     /**
      * 标识是否Html5History是被支持的. 其实就是看window.history.pushState
      * @param {Window=} opt_win Optional window to check.
-     * @return {boolean} Whether html5 history is supported.
+     * @return {boolean} 是否支持html5 history.
      */
     Html5History.isSupported = function(opt_win) {
       var win = opt_win || window;
@@ -73,7 +73,7 @@ define([
     Html5History.prototype.enabled_ = false;
 
     /**
-     * 是否使用hash片段存储token, defaults to true.
+     * 是否使用hash片段存储token, 默认是true.
      * @type {boolean}
      * @private
      */
@@ -87,7 +87,7 @@ define([
     Html5History.prototype.pathPrefix_ = '/';
 
     /**
-     * 开始或停止History. When enabled, History会立刻分发事件for the current location.
+     * 开始或停止History. 启用以后History会为当前的location立刻分发事件.
      * 调用程序可以在构造函数执行和setEnabled执行之间建立事件监听器.
      * @param {boolean} enable 是否开启history.
      */
@@ -142,7 +142,7 @@ define([
     Html5History.prototype.replaceToken = function(token, opt_title) {
       // Per externs/gecko_dom.js document.title can be null.
       this.window_.history.replaceState(null,
-        opt_title || this.window_.document.title || '',
+          opt_title || this.window_.document.title || '',
         this.getUrl_(token));
       this.dispatchEvent(new HistoryEvent(token, false));
     };
@@ -183,13 +183,14 @@ define([
 
     /**
      * 设置路径前缀在存储tokens时有用. 路径前缀应该以'/'开始和结束.
-     * @param {string} pathPrefix Sets the path prefix.
+     * @param {string} pathPrefix 路径前缀.
      */
     Html5History.prototype.setPathPrefix = function(pathPrefix) {
       this.pathPrefix_ = pathPrefix;
     };
 
     /**
+     * 获取路径前缀
      * @return {string} The path prefix.
      */
     Html5History.prototype.getPathPrefix = function() {
@@ -217,7 +218,7 @@ define([
     };
 
     /**
-     * hashchange或者popstate时手动分发Sogou.History.Event事件.
+     * hashchange或者popstate时手动分发History.Event事件.
      * @param {BrowserEvent} e The browser event object.
      * @private
      */
@@ -237,8 +238,8 @@ define([
 
     /**
      * 根据路径前缀设定和window.location得到历史记录的token.
-     * @param {string} pathPrefix 路径前缀; always begin with a slash.
-     * @param {Location} location window.location object.
+     * @param {string} pathPrefix 路径前缀, 以/开始.
+     * @param {Location} location window.location.
      * @return {string} token The history token.
      */
     Html5History.TokenTransformer.prototype.retrieveToken = function(
