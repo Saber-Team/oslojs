@@ -2071,6 +2071,21 @@ var requirejs, require, define;
     return eval(text);
   };
 
+
+  /**
+   * 异步请求接口
+   * @param {String} id 所需模块的路径或id
+   * @param {Function} callback 回调函数
+   */
+  req.async = function(id, callback) {
+    req([id], callback);
+  };
+
+
+  global._req = require;
+  global._def = define;
+
+
   //Set up with config info.
   req(cfg);
 }(this));
