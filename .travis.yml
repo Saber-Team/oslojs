@@ -1,4 +1,4 @@
-#语言配置
+# 语言配置
 language: node_js
 node_js:
   - "0.10"

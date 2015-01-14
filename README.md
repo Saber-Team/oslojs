@@ -1,7 +1,6 @@
-OsloJS
-=======
+[![Build Status][travis-image]][travis-url]
 
-[![Build Status](https://travis-ci.org/Saber-Team/SogouJS.svg?branch=master)](https://travis-ci.org/Saber-Team/SogouJS)
+##OsloJS
 
 <p>Oslo JavaScript Framework (OJF) 是一款底层的JavaScript框架. 是大教堂风格的框架而非一个轻量级的库.
 框架基于若干个国外非常棒且成熟的团队杰作而成, 在应用复杂度、代码优化、面向对象、浏览器兼容性做了非常复杂的处理,
@@ -20,8 +19,7 @@ OsloJS
 </p>
 
 <p>
-Oslojs曾名SogouJS, 犯了和YUI一样的错. 名字决定了归属. 如果更开放我希望在多次重构和改版后仍有其他人使用. 成也YUI
-败也YUI, 拥有众多顶尖jser的团队尚不能做出完美的架构更何况初期的我们. Oslojs的更名意味着今后依赖于此的UI库、测试框架(如果有)、
+Oslojs曾名SogouJS. Oslojs的更名意味着今后依赖于此的UI库、测试框架(如果有)、
 打包构建工具都会做相应调整.
 </p>
 
@@ -36,3 +34,6 @@ Oslojs曾名SogouJS, 犯了和YUI一样的错. 名字决定了归属. 如果更�
 </p>
 
 To be continued...
+
+[travis-image]: https://travis-ci.org/Saber-Team/SogouJS.svg?branch=master
+[travis-url]: https://travis-ci.org/Saber-Team/SogouJS
