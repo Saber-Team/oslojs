@@ -96,8 +96,12 @@ define([
           type = typeArray_;
         }
         for (var i = 0; i < type.length; i++) {
-          var listenerObj = EventUtil.listen(src, type[i], opt_fn || this,
-              opt_capture || false, opt_context || this.context_ || this);
+          var listenerObj = EventUtil.listen(
+              src,
+              type[i],
+              opt_fn || this,
+              opt_capture || false,
+              opt_context || this.context_ || this);
 
           if (util.DEBUG && !listenerObj) {
             // Some tests mock events.listen, thus ensuring that

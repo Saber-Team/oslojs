@@ -51,7 +51,7 @@ define([
   ],
   function(util, BrowserEvent, BrowserFeature, EvtTarget, Listener, array, object, entryPointRegistry) {
 
-    'use strict';
+    //'use strict';
 
     /**
      * 如果一个对象包含handleEvent方法，则也可以被传递作为handler存在。
@@ -59,7 +59,7 @@ define([
      * @type {string}
      * @private
      */
-    var LISTENER_WRAPPER_PROP_ = '__sogou_events_fn_' + ((Math.random() * 1e9) >>> 0);
+    var LISTENER_WRAPPER_PROP_ = '__oslojs_events_fn_' + ((Math.random() * 1e9) >>> 0);
 
     /**
      * 句柄树
@@ -737,7 +737,7 @@ define([
      */
     function fireListener(listener, eventObject) {
       var listenerFn = listener.listener;
-      var context = listener.handler || listener.src;
+      var context = listener.context || listener.src;
 
       if (listener.callOnce) {
         unlistenByKey(listener);
