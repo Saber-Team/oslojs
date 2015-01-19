@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Oslo.history.html5history模块</title>
+  <style>
+  .section {
+    display: none;
+  }
+  .active {
+    display: block;
+  }
+  </style>
+  <link rel="stylesheet" href="../css/demo.css">
+</head>
+<body>
+  <h1>html5history模块示例</h1>
+
+  <p>这个示例页面需要本地服务器环境</p><br/>
+
+  <p id="links">
+    <a href="kittens/" token="kittens" title="Kittens">Kittens</a> |
+    <a href="puppies/" token="puppies" title="Puppies">Puppies</a> |
+    <a href="pandas/" token="pandas" title="Pandas">Pandas</a> |
+    <a href="bucket/" token="bucket" title="Bucket">Bucket</a>
+  </p>
+
+  <div id="kittens" class="section active">
+    <img src="http://farm4.static.flickr.com/3045/2481490798_bba0c585b4.jpg">
+  </div>
+  <div id="puppies" class="section">
+    <img src="http://farm4.static.flickr.com/3178/2976942142_7f5be73d21.jpg">
+  </div>
+  <div id="pandas" class="section">
+    <img src="http://farm1.static.flickr.com/106/303160549_49917ba1b7.jpg">
+  </div>
+  <div id="bucket" class="section">
+    <img src="http://farm1.static.flickr.com/146/421093356_6bbefa304e.jpg">
+  </div>
+
+  <script src="../../src/kernel.js"></script>
+  <script src="h5.js"></script>
+</body>
+</html>

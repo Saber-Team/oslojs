@@ -1,5 +1,5 @@
 /**
- * @fileoverview 基于HTML5的历史状态管理器, 和History兼容
+ * @fileoverview 基于HTML5的历史状态管理器, 和History接口兼容
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -81,7 +81,7 @@ define([
     Html5History.prototype.useFragment_ = true;
 
     /**
-     * 若不用hash片段则用path, path前缀会在所有tokens之前默认是'/'.
+     * 若不用hash片段则用path, path前缀会在所有tokens之前, 默认是'/'.
      * @type {string}
      * @private
      */
@@ -93,8 +93,9 @@ define([
      * @param {boolean} enable 是否开启history.
      */
     Html5History.prototype.setEnabled = function(enable) {
-      if (enable === this.enabled_)
+      if (enable === this.enabled_) {
         return;
+      }
 
       this.enabled_ = enable;
       if (enable) {
@@ -104,7 +105,7 @@ define([
 
     /**
      * 返回token.(不包括#)
-     * @return {string} The current token.
+     * @return {string} 返回当前token.
      */
     Html5History.prototype.getToken = function() {
       if (this.useFragment_) {
@@ -126,12 +127,14 @@ define([
      * @param {string=} opt_title 可选的对应此历史实体的title.
      */
     Html5History.prototype.setToken = function(token, opt_title) {
-      if (token === this.getToken())
+      if (token === this.getToken()) {
         return;
+      }
 
       // Per externs/gecko_dom.js document.title can be null.
       this.window_.history.pushState(null,
-          opt_title || this.window_.document.title || '', this.getUrl_(token));
+        opt_title || this.window_.document.title || '',
+        this.getUrl_(token));
       this.dispatchEvent(new HistoryEvent(token, false));
     };
 
@@ -192,7 +195,7 @@ define([
 
     /**
      * 获取路径前缀
-     * @return {string} The path prefix.
+     * @return {string} 返回路径前缀.
      */
     Html5History.prototype.getPathPrefix = function() {
       return this.pathPrefix_;
