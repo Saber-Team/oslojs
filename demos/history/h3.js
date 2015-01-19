@@ -18,7 +18,8 @@ require([
   log.info(logger, 'Listening for: ' + events.join(', ') + '.');
 
   var Hist = new History(
-    false, 'history_blank.html',
+    false,
+    'history_blank.html',
     top.document.getElementById('hist_state'));
 
   EventsUtil.listen(Hist, events, function(e) {
@@ -36,5 +37,7 @@ require([
       dom.setTextContent(output, token);
     }
   }
+
+  window.Hist = Hist;
 
 });
