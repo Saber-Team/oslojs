@@ -213,7 +213,7 @@ define([
 
     /**
      * XhrIo实例的logger
-     * @private {Oslo.debug.Logger}
+     * @private {debug.Logger}
      * @const
      */
     XhrIo.prototype.logger_ = log.getLogger('Oslo.net.XhrIo');
@@ -562,9 +562,9 @@ define([
      * @private
      */
     XhrIo.prototype.timeout_ = function() {
-      if (typeof Oslo === 'undefined') {
-        // Oslo对象为undefined则有可能是回调发生在页面卸载时并引发异常.
-        // Thus we let it silently fail.
+      if (typeof define === 'undefined') {
+        // define对象为undefined则有可能是回调发生在页面卸载时并引发异常.
+        // 静默失败.
       } else if (this.xhr_) {
         this.lastError_ = 'Timed out after ' + this.timeoutInterval_ +
           'ms, aborting';
@@ -700,15 +700,15 @@ define([
         return;
       }
 
-      if (typeof Oslo === 'undefined') {
+      if (typeof define === 'undefined') {
         // NOTE: 如果全局没有Oslo对象则说明回调发生在页面卸载时.
-        // Thus we let it silently fail.
+        // 静默失败.
 
       } else if (
         this.xhrOptions_[xmlHttp.OptionType.LOCAL_REQUEST_ERROR] &&
         this.getReadyState() === xmlHttp.ReadyState.COMPLETE &&
         this.getStatus() === 2) {
-        // Oslo.net.defaultXmlHttpFactory的getOptions方法会把IE下
+        // net.defaultXmlHttpFactory的getOptions方法会把IE下
         // this.xhrOptions_[xmlHttp.OptionType.LOCAL_REQUEST_ERROR]设为true,
         // 所以当前条件只会在IE下出现.
         // NOTE: 在IE下如果send()方法在*local* request时发生错误readystate会

@@ -9,8 +9,9 @@ define([
     '../events/util',
     '../events/target',
     '../events/eventtype',
-    './event'
-  ], function(util, EventUtil, EventTarget, EventType, HistoryEvent) {
+    './event',
+    '../asserts/asserts'
+  ], function(util, EventUtil, EventTarget, EventType, HistoryEvent, asserts) {
 
     'use strict';
 
@@ -24,8 +25,8 @@ define([
      */
     function Html5History(opt_win, opt_transformer) {
       EventTarget.call(this);
-      if (Html5History.isSupported(opt_win))
-        throw 'HTML5 history is not supported.';
+      asserts.assert(Html5History.isSupported(opt_win),
+        'HTML5 history is not supported.');
 
       /**
        * 一般都是当前窗口.
