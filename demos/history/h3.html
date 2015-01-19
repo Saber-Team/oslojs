@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>history #示例3</title>
+    <link rel="stylesheet" href="../css/demo.css">
+    <style>
+        body {
+          font-family: sans-serif;
+          font-size: 83%
+        }
+
+        table {
+          border: 1px solid #666;
+          background: lightblue;
+          margin: 1em auto;
+        }
+
+        td {
+          text-align: center;
+          padding: 0 0.5em 0.5em 0.5em;
+        }
+
+        .hidden-frame {
+          height: 0;
+          left: 0;
+          position: absolute;
+          top: 0;
+          width: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<p>本示例需要搭建本地服务器</p>
+
+<p>本示例描述了History对象在iframe中如何使用. 用iframe加载js对于大型web apps比较有用,
+    因为js代码可以以更小的数据代码块进行传递, 浏览器可以递增式的执行通过网络传递过来的js代码块.</p>
+
+<p>对于History对象的使用介绍, 点这里 <a href="h1.html">h1.html</a> 和 <a href="h2.html">h2.html</a>.
+    本示例用可见模式, 和#示例1一致.</p>
+
+<p>试试下面的hash链接, 或者用自定义的token. 替换token会替换当前页面url而不会新添加历史记录实体.</p>
+
+<p>
+  Set #fragment<br>
+  <a href="#first">first</a><br>
+  <a href="#second">second</a><br>
+  <a href="#third">third</a>
+</p>
+
+<p>
+  Set Token<br>
+    <button onclick="setToken('//\\\\/\\/\\');">//\\/\/\</button>
+    <button onclick="setToken('{\'a\': \'123\', \'b\': \'456\'}');">
+      {'a': '123', 'b': '456'}
+    </button>
+    <button onclick="setToken('!@#$%^&*()_+-={}[]\\|;\':&quot;,./<>?');">
+      !@#$%^&*()_+-={}[]\|;':&quot;,./&lt;&gt;
+    </button>
+    <button onclick="setToken('%2F/foo');">%2F/foo</button>
+    <button onclick="setToken('%20   02%');">%20&nbsp;&nbsp;&nbsp;02%</button>
+</p>
+
+<p>
+    <input type="text" id="token_input">
+    <button onclick="setToken()">Set Token</button>
+    <button onclick="replaceToken()">Replace Current Token</button>
+</p>
+
+<table>
+    <tr>
+        <td>
+            <h3>当前历史状态:</h3>
+            <div id="token_output"></div>
+        </td>
+    </tr>
+</table>
+
+<p>当你 <a href="http://www.baidu.com/">离开</a> 当前页面后状态会被正确存储下来, 可以点后退试试效果.</p>
+
+<fieldset class="goog-debug-panel">
+  <legend>事件日志</legend>
+  <div id="log"></div>
+</fieldset>
+
+<input type="text" id="hist_state" style="display:none">
+<iframe name="js" class="hidden-frame" src="h3js.html"></iframe>
+
+<script>
+    function setToken(opt_val) {
+      if (js && js.Hist) {
+        var input = document.getElementById('token_input');
+        js.Hist.setToken(opt_val || input.value);
+      }
+      return false;
+    }
+
+    function replaceToken() {
+      if (js && js.Hist) {
+        var input = document.getElementById('token_input');
+        js.Hist.replaceToken(input.value);
+      }
+      return false;
+    }
+</script>
+
+</body>
+</html>
