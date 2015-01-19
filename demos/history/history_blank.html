@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<title>Intentionally left blank</title>
+<script type="text/javascript">
+// Display the current iframe location for debugging purposes.
+function displayLocation() {
+  document.body.innerHTML = '';
+  document.body.appendChild(document.createTextNode(location.hash || 'null'));
+}
+
+if (window != window.top) {
+  setInterval(displayLocation, 10);
+}
+</script>
+<body>
+这个空白页是一个帮助页面. 见
+<a href="h1.html">demo 1</a> 和
+<a href="h2.html">demo 2</a>.
+</body>
+</html>

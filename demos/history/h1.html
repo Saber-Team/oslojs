@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>history模块</title>
+  <link rel="stylesheet" href="../css/demo.css">
+  <style>
+    table {
+      border: 1px solid #666;
+      background: lightblue;
+      margin: 1em auto;
+    }
+    td {
+      text-align: center;
+      padding: 0 0.5em 0.5em 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>history 示例#1</h1>
+  <p>示例页面描述如何使用History对象创建历史记录实体而不必离开当前页面. 当前示例都是用hash部分使得
+      历史记录可用, 用户可以操作. 这些带有hash片段的url可以加入书签, 手动编辑, 粘贴到电子邮件等等,
+      就像其他正常的url. 浏览器的前进后退按钮会在不同的历史记录间导航.</p>
+
+  <p>试试下面的hash链接, 或者用自定义的token. 替换token会替换当前页面url而不会新添加历史记录实体.</p>
+
+  <p>
+    Set #fragment<br>
+    <a href="#first">first</a><br>
+    <a href="#second">second</a><br>
+    <a href="#third">third</a>
+  </p>
+
+  <p>
+    Set Token<br>
+  <button onclick="setToken('//\\\\/\\/\\');">//\\/\/\</button>
+  <button onclick="setToken('{\'a\': \'123\', \'b\': \'456\'}');">
+    {'a': '123', 'b': '456'}
+  </button>
+  <button onclick="setToken('!@#$%^&*()_+-={}[]\\|;\':&quot;,./<>?');">
+    !@#$%^&*()_+-={}[]\|;':",./&lt;&gt;
+  </button>
+  <button onclick="setToken('%2F/foo');">%2F/foo</button>
+  <button onclick="setToken('%20   02%');">%20&nbsp;&nbsp;&nbsp;02%</button>
+  </p>
+
+  <p>
+  <input type="text" id="token_input" />
+  <button onclick="setToken()">Set Token</button>
+  <button onclick="replaceToken()">Replace Current Token</button>
+  </p>
+
+  <table>
+      <tr>
+          <td><h3>当前历史状态:</h3><div id="token_output"></div>
+          </td>
+      </tr>
+  </table>
+
+  <p>历史状态在你<a href="http://www.baidu.com/">离开当前页面</a>后仍然会被正确存储, 可通过后退按钮返回.</p>
+
+  <p>历史实体也可通过不可见模式创建.
+  详见示例页面 <a href="h2.html#came from history 1">h2.html</a>.
+  要看可见模式下代码被加载到隐藏的iframe中后是如何工作的，可见下面示例 <a href="h3.html#came from history 1">h3.html</a>.
+  </p>
+
+  <fieldset class="goog-debug-panel">
+    <legend>事件日志</legend>
+    <div id="log"></div>
+  </fieldset>
+
+  <script src="../../src/kernel.js"></script>
+  <script src="h1.js"></script>
+
+</body>
+</html>

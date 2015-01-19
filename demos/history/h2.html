@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>history 示例#2</title>
+  <link rel="stylesheet" href="../css/demo.css">
+  <style>
+    table {
+      border: 1px solid #666;
+      background: lightblue;
+      margin: 1em auto;
+    }
+    td {
+      text-align: center;
+      padding: 0 0.5em 0.5em 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <h1>history 示例#2</h1>
+  <p>示例页面描述如何使用History对象创建历史记录实体而不必离开当前页面. 示例#2是在内部维护了
+      历史状态, 所以对于用户而言这种状态是不可见的, 也不可编辑, 但前进后退按钮可以进行历史导航.
+  </p>
+
+  <p>用下面的按钮和输入框设置一些历史token, 然后用浏览器提供的前进后退按钮看token状态是否被正确存储下来了.</p>
+
+  <button onclick="setToken('one')">State 1</button>
+  <button onclick="setToken('two')">State 2</button>
+  <button onclick="setToken('three')">State 3</button>
+  <button onclick="setToken('four')">State 4</button><br>
+
+  <button onclick="setToken('//\\\\/\\/\\');">//\\/\/\</button>
+  <button onclick="setToken('{\'a\': \'123\', \'b\': \'456\'}');">
+    {'a': '123', 'b': '456'}
+  </button>
+  <button onclick="setToken('!@#$%^&*()_+-={}[]\\|;\':&quot;,./<>?');">
+    !@#$%^&*()_+-={}[]\|;':",./&lt;&gt;
+  </button>
+  <button onclick="setToken('%2F/foo');">%2F/foo</button>
+  <button onclick="setToken('%20   02%');">%20&nbsp;&nbsp;&nbsp;02%</button>
+
+  <p>
+      <input type="text" id="token_input" />
+      <button onclick="javascript:setToken()">Set Token</button>
+      <button onclick="replaceToken()">Replace Current Token</button>
+  </p>
+
+  <table>
+      <tr>
+          <td>
+            <h3>当前历史状态:</h3>
+            <div id="token_output"></div>
+          </td>
+      </tr>
+  </table>
+
+  <p>状态在你<a href="http://www.baidu.com/">离开</a>之后也会被正确记下来, 用后退试试.</p>
+
+  <p>与本例对应的是可见模式, 历史状态对用户可见并且可以编辑. 见 <a href="h1.html">h1.html</a>.</p>
+
+  <fieldset class="goog-debug-panel">
+    <legend>事件日志</legend>
+    <div id="log"></div>
+  </fieldset>
+
+  <script src="../../src/kernel.js"></script>
+  <script src="h2.js"></script>
+
+</body>
+</html>
