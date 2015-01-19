@@ -51,7 +51,7 @@ define([
   ],
   function(util, BrowserEvent, BrowserFeature, EvtTarget, Listener, array, object, entryPointRegistry) {
 
-    //'use strict';
+    'use strict';
 
     /**
      * 如果一个对象包含handleEvent方法，则也可以被传递作为handler存在。

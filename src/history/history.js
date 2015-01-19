@@ -170,20 +170,6 @@ define([
     var IFRAME_SOURCE_TEMPLATE_ = '<title>%s</title><body>%s</body>';
 
     /**
-     * 隐藏iframe的HTML模板
-     * @type {string}
-     * @private
-     */
-    var IFRAME_TEMPLATE_ = '<iframe id="%s" style="display:none" %s></iframe>';
-
-    /**
-     * 隐藏input的HTML模板
-     * @type {string}
-     * @private
-     */
-    var INPUT_TEMPLATE_ = '<input type="text" name="%s" id="%s" style="display:none">';
-
-    /**
      * History实例的计数器，方便生成UIDs
      * @type {number}
      * @private
@@ -273,8 +259,13 @@ define([
         input = opt_input;
       } else {
         var inputId = 'history_state' + historyCount_;
-        document.write(string.subs(INPUT_TEMPLATE_, inputId, inputId));
-        input = dom.getElement(inputId);
+        input = dom.createDom('input', {
+          type: 'text',
+          name: inputId,
+          id  : inputId,
+          style: 'display: none'
+        });
+        (document.body || document.documentElement).appendChild(input);
       }
 
       /**
@@ -286,12 +277,13 @@ define([
       this.hiddenInput_ = /** @type {HTMLInputElement} */ (input);
 
       /**
-       * 地址栏中加载文档的的window对象,这个window中含有隐藏的input元素,肯定是top window,
-       * 但不必是当前js执行的window.
+       * 地址栏中加载文档的的window对象,这个window中含有隐藏的input元素,
+       * 肯定是top window, 但不必是当前js执行的window.
        * @type {Window}
        * @private
        */
-      this.window_ = opt_input ? dom.getWindow(dom.getOwnerDocument(opt_input)) : window;
+      this.window_ = opt_input ?
+        dom.getWindow(dom.getOwnerDocument(opt_input)) : window;
 
       /**
        * 隐藏的iframe的URL. 必须和父层页面属于同一域.
@@ -301,7 +293,8 @@ define([
       this.iframeSrc_ = opt_blankPageUrl;
 
       if (UA.isIE && !opt_blankPageUrl) {
-        this.iframeSrc_ = (window.location.protocol === 'https' ? 'https:///' : 'javascript:""');
+        this.iframeSrc_ =
+          (window.location.protocol === 'https' ? 'https:///' : 'javascript:""');
       }
 
       /**
@@ -335,10 +328,14 @@ define([
           iframe = opt_iframe;
         } else {
           var iframeId = 'history_iframe' + historyCount_;
-          var srcAttribute = this.iframeSrc_ ?
-            'src="' + string.htmlEscape(this.iframeSrc_) + '"' : '';
-          document.write(string.subs(IFRAME_TEMPLATE_, iframeId, srcAttribute));
-          iframe = dom.getElement(iframeId);
+          iframe = dom.createDom('iframe', {
+            id: iframeId,
+            style: 'display: none'
+          });
+          if (this.iframeSrc_) {
+            iframe.src = string.htmlEscape(this.iframeSrc_);
+          }
+          (document.body || document.documentElement).appendChild(iframe);
         }
 
         /**
@@ -360,7 +357,10 @@ define([
       if (LEGACY_IE) {
         // IE依靠隐藏的input存储上个回话历史状态, 但input的值只在window.onload后才会被存储.
         // onload event触发回调获取状态值.
-        this.handlerManager_.listen(this.window_, EventType.LOAD, this.onDocumentLoaded);
+        this.handlerManager_.listen(
+          this.window_,
+          EventType.LOAD,
+          this.onDocumentLoaded);
 
         /**
          * IE下用于标识是否document loaded.
@@ -474,7 +474,11 @@ define([
           // iframe # changes instead of the window.
           // 如果浏览器支持hashchange并且是用户可见模式
           if (isOnHashChangeSupported() && this.userVisible_) {
-            this.handlerManager_.listen(this.window_, EventType.HASHCHANGE, this.onHashChange_);
+            this.handlerManager_.listen(
+              this.window_,
+              EventType.HASHCHANGE,
+              this.onHashChange_);
+
             this.enabled_ = true;
             // setEnabled同时就分发事件
             this.dispatchEvent(new HistoryEvent(this.getToken(), false));
