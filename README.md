@@ -26,5 +26,5 @@ Oslojs曾名SogouJS. Oslojs的更名意味着今后依赖于此的UI库、测试
 
 To be continued...
 
-[travis-image]: https://travis-ci.org/Saber-Team/SogouJS.svg?branch=master
-[travis-url]: https://travis-ci.org/Saber-Team/SogouJS
+[travis-image]: https://travis-ci.org/Saber-Team/oslojs.svg?branch=master
+[travis-url]: https://travis-ci.org/Saber-Team/oslojs
