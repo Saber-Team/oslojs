@@ -138,9 +138,7 @@ define([
 
     /**
      * 如果在一个Deferred对象执行的过程中发生了错误而没有errback捕获它, 这个错误对象会在
-     * 一段timeout后重新抛出. 这样在一段时间内执行仍然会继续??
-     * Reporting the error after a timeout allows execution to continue
-     * in the calling context.
+     * 一段timeout后重新抛出. 这样在一段时间内回调仍然会继续执行.
      * @type {number}
      * @private
      */
@@ -154,10 +152,8 @@ define([
     Deferred.prototype.parent_ = null;
 
     /**
-     * 一个数字记录当前Deferred参与的分支. 当分支上的Deferred被触发或者取消这个数字会递减.
+     * 一个数字记录当前Deferred衍生的分支. 当分支上的Deferred被触发或者取消这个数字会递减.
      * 俗点说可以认为当前Deferred生了多少孩子.
-     * The number of Deferred objects that have been branched off this one. This
-     * will be decremented whenever a branch is fired or canceled.
      * @type {number}
      * @private
      */
@@ -235,12 +231,8 @@ define([
       }
     };
 
-
     /**
      * 处理取消单个分支(只是减少标记分支的数目). 一旦所有分支都被取消了, 当前Deferred也会被取消了.
-     * Handle a single branch being canceled. Once all branches are canceled, this
-     * Deferred will be canceled as well.
-     *
      * @private
      */
     Deferred.prototype.branchCancel_ = function() {
@@ -249,7 +241,6 @@ define([
         this.cancel();
       }
     };
-
 
     /**
      * 在一个blocking的Deferred对象触发后, 解锁当前的Deferred对象, 恢复执行队列.
@@ -278,7 +269,6 @@ define([
       this.fire_();
     };
 
-
     /**
      * 私有方法: 检验Deferred对象是否未被触发过.
      * @private
@@ -295,7 +285,6 @@ define([
       }
     };
 
-
     /**
      * 触发Deferred的执行队列并且传入默认的第一个执行结果.
      * @param {*=} opt_result The starting result.
@@ -307,7 +296,6 @@ define([
       }
       this.updateResult_(true /* isSuccess */, opt_result);
     };
-
 
     /**
      * 触发Deferred的执行队列并且传入默认的第一个错误结果.
@@ -321,7 +309,6 @@ define([
       this.makeStackTraceLong_(opt_result);
       this.updateResult_(false /* isSuccess */, opt_result);
     };
-
 
     /**
      * 为Deferred对象建立错误堆栈. 堆栈信息包括从对象创建开始到当前错误发生的信息.
