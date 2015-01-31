@@ -86,7 +86,6 @@ define([
       }
     };
 
-
     /**
      * 标示是否被触发过.
      * @type {boolean}
@@ -94,14 +93,12 @@ define([
      */
     Deferred.prototype.fired_ = false;
 
-
     /**
      * 是否最近的返回结果是一个错误. 布尔值.
      * @type {boolean}
      * @private
      */
     Deferred.prototype.hadError_ = false;
-
 
     /**
      * 当前的执行结果, 方便另外再加的回调使用.
@@ -111,7 +108,6 @@ define([
      */
     Deferred.prototype.result_ = undefined;
 
-
     /**
      * 是否Deferred对象正在等待另一个Deferred的返回结果. 比如一个callback或者errback
      * 返回一个Deferred对象时, 执行队列就会被阻塞直到那个返回的Deferred可用. (这种情况很常发生)
@@ -119,7 +115,6 @@ define([
      * @private
      */
     Deferred.prototype.blocked_ = false;
-
 
     /**
      * 是否当前的Deferred对象正在阻塞别的Deferred对象.
@@ -132,7 +127,6 @@ define([
      */
     Deferred.prototype.blocking_ = false;
 
-
     /**
      * 是否Deferred对象在没有自定义取消回调的情况被取消. 记录这个做什么？
      * Whether the Deferred has been canceled without having a custom cancel
@@ -141,7 +135,6 @@ define([
      * @private
      */
     Deferred.prototype.silentlyCanceled_ = false;
-
 
     /**
      * 如果在一个Deferred对象执行的过程中发生了错误而没有errback捕获它, 这个错误对象会在
@@ -153,14 +146,12 @@ define([
      */
     Deferred.prototype.unhandledExceptionTimeoutId_;
 
-
     /**
      * 如果当前Deferred是通过branch()方法被创建的, 他就是parent Deferred.
      * @type {Deferred}
      * @private
      */
     Deferred.prototype.parent_ = null;
-
 
     /**
      * 一个数字记录当前Deferred参与的分支. 当分支上的Deferred被触发或者取消这个数字会递减.
@@ -172,18 +163,15 @@ define([
      */
     Deferred.prototype.branches_ = 0;
 
-
     /**
      * @define {boolean} 未处理的异常是否会多次尝试抛出到全局环境. 默认等于util.DEBUG.
      */
     Deferred.STRICT_ERRORS = util.DEBUG;
 
-
     /**
      * @define {boolean} 是否对Deferred对象进行long stack traces. 默认等于util.DEBUG.
      */
     Deferred.LONG_STACK_TRACES = util.DEBUG;
-
 
     /**
      * Cancel这块有点乱, 因为结合了branch的方法....
