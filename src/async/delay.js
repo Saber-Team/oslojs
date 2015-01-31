@@ -53,7 +53,6 @@ define([
 
     util.inherits(Delay, Disposable);
 
-
     /**
      * timeout返回的id, or 0 when inactive.
      * @type {number}
@@ -61,10 +60,8 @@ define([
      */
     Delay.prototype.id_ = 0;
 
-
     /**
-     * Disposes of the object, cancelling the timeout if it is still outstanding and
-     * removing all object references.
+     * 析构.
      * @override
      * @protected
      */
@@ -74,7 +71,6 @@ define([
       delete this.listener_;
       delete this.context_;
     };
-
 
     /**
      * 启动延时对象。函数的初次触发会在指定的时间间隔后。
@@ -88,16 +84,15 @@ define([
         util.isNull(opt_interval) ? this.interval_ : opt_interval);
     };
 
-
     /**
      * 停止计时器
      */
     Delay.prototype.stop = function() {
-      if (this.isActive())
+      if (this.isActive()) {
         Timer.clear(this.id_);
+      }
       this.id_ = 0;
     };
-
 
     /**
      * 手动触发要延时的action即便timer已经注销或者还未发生. 为了保护fire方法, 首先调用stop.
@@ -107,15 +102,13 @@ define([
       this.doAction_();
     };
 
-
     /**
-     * 只有当delay对象的timer还未被触发时才执行.Stops the delay timer.
+     * 只有当delay对象的timer还未被触发时才执行.
      */
     Delay.prototype.fireIfActive = function() {
       if (this.isActive())
         this.fire();
     };
-
 
     /**
      * @return {boolean} 返回当前delay对象是否未被触发.
@@ -123,7 +116,6 @@ define([
     Delay.prototype.isActive = function() {
       return this.id_ !== 0;
     };
-
 
     /**
      * 执行函数

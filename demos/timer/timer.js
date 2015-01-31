@@ -104,7 +104,7 @@ require([
     /**
      * Do the throttle action, this can be called as often as desired.
      */
-    window.doThrottle = function(){
+    window.doThrottle = function() {
       if (throttle) {
         // Fire the throttle, this will only actually 'fire' no more than
         // once per interval.
@@ -114,7 +114,7 @@ require([
     };
 
     /**
-     * Throttle Action Callback.
+     * 记录实际被fire了多少次.
      */
     var throttleAction = function() {
       dom.setTextContent(throttleStatus, ++throttleCount);

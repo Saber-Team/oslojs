@@ -151,8 +151,9 @@ define([
      * @private
      */
     Throttle.prototype.doAction_ = function() {
+      // callback_是执行onTimer_
       this.timer_ = Timer.callOnce(this.callback_, this.interval_);
-      // 实际执行了用户想要的函数
+      // 执行用户想要的函数
       this.listener_.call(this.context_);
     };
 
