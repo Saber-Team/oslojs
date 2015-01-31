@@ -57,7 +57,6 @@ define([
 
     util.inherits(Throttle, Disposable);
 
-
     /**
      * 指示挂起(pending)的action是否要被触发调用.
      * 因为只有一个shouldFire_所以不可能等待的行为都会触发,
@@ -67,15 +66,13 @@ define([
      */
     Throttle.prototype.shouldFire_ = false;
 
-
     /**
-     * 表示throttle当前留下的调用数目.
+     * 表示throttle当前暂停的调用.
      * 当这个数不是0, fire的调用会被推迟到有足够的时间使得挂起的调用都执行完毕.
      * @type {number}
      * @private
      */
     Throttle.prototype.pauseCount_ = 0;
-
 
     /**
      * timerid
@@ -83,7 +80,6 @@ define([
      * @private
      */
     Throttle.prototype.timer_ = null;
-
 
     /**
      * 通知throttle有情况发生了,这个动作可能是无限快的发生. throttle会节流这些调用以致callback不会过于频繁调用.
@@ -100,7 +96,6 @@ define([
       }
     };
 
-
     /**
      * 取消等待执行的定时器. throttle可以调用fire方法重启.
      */
@@ -112,14 +107,12 @@ define([
       }
     };
 
-
     /**
      * 暂停throttle. 所有等待的回调都会被推迟到throttle恢复. 可多次调用pause.
      */
     Throttle.prototype.pause = function() {
       this.pauseCount_++;
     };
-
 
     /**
      * 恢复throttle. 如果暂停回调数目降到了0, 等待的回调会立马触发,但仍然是距离上次调用至少间隔指定时间.
@@ -134,13 +127,11 @@ define([
       }
     };
 
-
     /** @override */
     Throttle.prototype.disposeInternal = function() {
       Throttle.superClass_.disposeInternal.call(this);
       this.stop();
     };
-
 
     /**
      * 定时器触发throttle
@@ -155,7 +146,6 @@ define([
       }
     };
 
-
     /**
      * 执行动作函数, 并在interval时间后执行onTimer_
      * @private
@@ -166,8 +156,6 @@ define([
       this.listener_.call(this.context_);
     };
 
-
     return Throttle;
-
   }
 );
