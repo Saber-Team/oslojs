@@ -481,9 +481,8 @@ define([
     };
 
     /**
-     * 执行队列中剩余的函数都要触发. 这个内部方法很重要!
-     * The result may be modified by callbacks or errbacks, and execution will block
-     * if the returned result is an incomplete Deferred.
+     * 执行队列中剩余的函数都要触发. 这个内部方法很重要! 执行结果会随着回调的返回值而改变, 如故返回挂起的deferred对象
+     * 则会触发当前对象成为blocked.
      * @private
      */
     Deferred.prototype.fire_ = function() {
