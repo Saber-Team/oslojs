@@ -173,27 +173,19 @@ define([
      * Cancel这块有点乱, 因为结合了branch的方法....
      * 总觉得opt_deepCancel和opt_propagateCancel有所重复
      * (todo by zmike86)
-     * 取消一个未被触发的Deferred对象, 或者这个Deferred对象正在等着另一个Deferred对象,
+     * 取消一个未被触发的Deferred对象, 或者这个Deferred对象正在等着另一个Deferred对象的返回结果,
      * 则被等待Deferred对象也会被cancel.
-     * Cancels a Deferred that has not yet been fired, or is blocked on another
-     * deferred operation. If this Deferred is waiting for a blocking Deferred to
-     * fire, the blocking Deferred will also be canceled.
      *
-     * #1 如果当前Deferred在父亲用branch()创建时设置opt_propagateCancel为true, 父亲Deferred
+     * #1 如果当前Deferred在父亲用branch()创建时设置opt_propagateCancel为true, 父Deferred
      * 也会被取消.
-     * #2 如果opt_deepCancel也设置了, cancel会在父亲(包括所有用父亲的父亲也会发生).
-     * If this Deferred was created by calling branch() on a parent Deferred with
-     * opt_propagateCancel set to true, the parent may also be canceled.
-     * If opt_deepCancel is set, cancel() will be called on the parent (as well as any
-     * other ancestors if the parent is also a branch).
      *
-     * #3 如果一个或多个分支创建的时候设置了opt_propagateCancel为true, 父亲也会被取消
-     * If one or more branches were created with opt_propagateCancel set to true,
-     * the parent will be canceled if cancel() is called on all of those branches.
+     * #2 如果opt_deepCancel也设置了, cancel会在祖先链上执行(包括所有用父亲的父亲也会发生).
      *
-     * @param {boolean=} opt_deepCancel If true, cancels this Deferred's parent even
-     *     if cancel() hasn't been called on some of the parent's branches. Has no
-     *     effect on a branch without opt_propagateCancel set to true.
+     * #3 如果一个或多个branch创建的时候设置了opt_propagateCancel为true, 父亲会在其
+     * 全部这些branch deferred对象都调用了cancel方法后被取消.
+     *
+     * @param {boolean=} opt_deepCancel 如果设置为true, cancels当前父节点parent而不必管是否其他branch
+     *     也调用了cancel. 对于生成branch时没有设置opt_propagateCancel的deferred对象则不会有副作用.
      */
     Deferred.prototype.cancel = function(opt_deepCancel) {
       // 如果没有触发
@@ -206,11 +198,12 @@ define([
           // double-counted.
           var parent = this.parent_;
           delete this.parent_;
-          // 设置深度取消, 则父亲也受牵连
+          // 深度取消, 则父亲也受牵连
           if (opt_deepCancel) {
             parent.cancel(opt_deepCancel);
-            // 否则只有父亲branch_为0才会取消
-          } else {
+          }
+          // 否则只有父亲branch_为0才会取消
+          else {
             parent.branchCancel_();
           }
         }
@@ -252,7 +245,6 @@ define([
       this.blocked_ = false;
       this.updateResult_(isSuccess, res);
     };
-
 
     /**
      * 根据传入的第一个参数决定如何更新最后的状态.这个方法只能作为私有了看来.
@@ -328,7 +320,6 @@ define([
       }
     };
 
-
     /**
      * 注册一个回调函数返回成功时执行. 这个函数是重要API之一.
      * 如果这个函数没有返回值, Deferred的结果不会改变.
@@ -346,7 +337,6 @@ define([
     Deferred.prototype.addCallback = function(cb, opt_scope) {
       return this.addCallbacks(cb, null, opt_scope);
     };
-
 
     /**
      * 注册一个回调函数发生错误时执行.
@@ -367,7 +357,6 @@ define([
       return this.addCallbacks(null, eb, opt_scope);
     };
 
-
     /**
      * 把一个函数当做成功和失败的回调.
      * @param {!function(this:T,?):?} f 任何结果都会进行的回调函数.
@@ -378,7 +367,6 @@ define([
     Deferred.prototype.addBoth = function(f, opt_scope) {
       return this.addCallbacks(f, f, opt_scope);
     };
-
 
     /**
      * 在执行队列中顺序加入成功(或失败)的回调, 只有一种可能发生,这依赖于前一个函数的返回结果.
@@ -473,16 +461,14 @@ define([
       return d;
     };
 
-
     /**
-     * 返回this.fired_, 很明显了, callback和errback会置this.fired_为true.
+     * 返回this.fired_, callback和errback会置this.fired_为true.
      * @return {boolean} Whether the execution sequence has been started on this
      *     Deferred by invoking callback or errback.
      */
     Deferred.prototype.hasFired = function() {
       return this.fired_;
     };
-
 
     /**
      * 判断一个返回结果是否一个Error.
