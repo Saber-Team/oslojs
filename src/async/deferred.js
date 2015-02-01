@@ -246,7 +246,7 @@ define([
     };
 
     /**
-     * 根据传入的第一个参数决定如何更新最后的状态.这个方法只能作为私有了看来.
+     * 根据传入的第一个参数决定如何更新最后的状态.这个方法只能作为私有.
      * @param {boolean} isSuccess 是否成功执行.
      * @param {*} res The result.
      * @private
@@ -271,7 +271,7 @@ define([
         if (!this.silentlyCanceled_) {
           throw new AlreadyCalledError(this);
         }
-        // 这个代表没有传入errback， 但这里为什么置为false??
+        // 这个代表没有传入cancel回调， 但这里为什么置为false??
         this.silentlyCanceled_ = false;
       }
     };
@@ -386,24 +386,18 @@ define([
       }
       // asserts.assert(!this.blocking_, 'Blocking Deferreds can not be re-used');
       this.sequence_.push([cb, eb, opt_scope]);
-      // 如果resolve过则直接fire
+      // 如果fire过则直接执行回调
       if (this.hasFired()) {
         this.fire_();
       }
       return this;
     };
 
-
     /**
      * 传入的Deferred对象的成功(失败)触发方法注册成当前Deferred对象的成功(失败)回调, 即可实现了
      * 传入的Deferred作为当前Deferred的执行队列的后继. 但这个方法返回当前的Deferred对象.
-     *
-     * Links another Deferred to the end of this Deferred's execution sequence. The
-     * result of this execution sequence will be passed as the starting result for
-     * the chained Deferred, invoking either its first callback or errback.
-     *
-     * @param {!Deferred} otherDeferred The Deferred to chain.
-     * @return {!Deferred} This Deferred.
+     * @param {!Deferred} otherDeferred 另一个Deferred对象.
+     * @return {!Deferred} 返回当前Deferred对象.
      */
     Deferred.prototype.chainDeferred = function(otherDeferred) {
       this.addCallbacks(
@@ -411,6 +405,31 @@ define([
       return this;
     };
 
+    /**
+     * 在当前Deferred对象的执行队列上创建一个分支, 并返回新的Deferred对象. 分支deferred对象的
+     * 初始值就是当下回调序列的执行结果.
+     *
+     * All branches at the same stage in the execution sequence will receive the
+     * same starting value.
+     *
+     * @param {boolean=} opt_propagateCancel 决定是否cancel冒泡行为. 若为true, 当创建的分支
+     *     全都调用cancel()的时候, parent也会被cancel.
+     * @return {!Deferred} 返回一个分支deferred对象. 初始值时当前执行队列的返回结果.
+     */
+    Deferred.prototype.branch = function(opt_propagateCancel) {
+      // 创建新的Deferred对象
+      var d = new Deferred();
+      // 做分支, 这步非常关键！
+      this.chainDeferred(d);
+      // 创建关联
+      if (opt_propagateCancel) {
+        // 又成了一次爸爸
+        // 又多了一条后代~~
+        d.parent_ = this;
+        this.branches_++;
+      }
+      return d;
+    };
 
     /**
      * todo by zmike86
@@ -431,38 +450,8 @@ define([
     };
 
     /**
-     * 在当前Deferred对象的执行队列上创建一个分支, 并返回新的Deferred对象.
-     * Creates a branch off this Deferred's execution sequence, and returns it as a
-     * new Deferred. The branched Deferred's starting result will be shared with the
-     * parent at the point of the branch, even if further callbacks are added to the
-     * parent.
-     *
-     * All branches at the same stage in the execution sequence will receive the
-     * same starting value.
-     *
-     * @param {boolean=} opt_propagateCancel 决定是否冒泡'取消'行为. 若为true, 当创建的分支
-     *     (every child branch)调用cancel()的时候, parent也会被'取消'.
-     * @return {!Deferred} A Deferred that will be started with the
-     *     computed result from this stage in the execution sequence.
-     */
-    Deferred.prototype.branch = function(opt_propagateCancel) {
-      // 创建新的Deferred对象
-      var d = new Deferred();
-      // 做分支, 这步非常关键！
-      this.chainDeferred(d);
-      if (opt_propagateCancel) {
-        // 又成了一次爸爸
-        // 又多了一条后代~~
-        d.parent_ = this;
-        this.branches_++;
-      }
-      return d;
-    };
-
-    /**
      * 返回this.fired_, callback和errback会置this.fired_为true.
-     * @return {boolean} Whether the execution sequence has been started on this
-     *     Deferred by invoking callback or errback.
+     * @return {boolean} 当前对象是否调用过callback或errback方法.
      */
     Deferred.prototype.hasFired = function() {
       return this.fired_;
@@ -480,9 +469,8 @@ define([
       return res instanceof Error;
     };
 
-
     /**
-     * @return {boolean} Whether an errback exists in the remaining sequence.
+     * @return {boolean} 当前回调队列中是否有error回调.
      * @private
      */
     Deferred.prototype.hasErrback_ = function() {
@@ -491,7 +479,6 @@ define([
         return util.isFunction(sequenceRow[1]);
       });
     };
-
 
     /**
      * 执行队列中剩余的函数都要触发. 这个内部方法很重要!
@@ -624,7 +611,6 @@ define([
       d.cancel();
       return d;
     };
-
 
     /**
      * 不管给的value是否是Deferred对象, 都会对他进行标准化. 并且返回这个标准化Deferred.
