@@ -11,9 +11,11 @@ define([
     '../util/util',
     '../array/array',
     '../debug/error',
-    '../functions/functions'
+    '../functions/functions',
+    './cancelederror',
+    './alreadycallederror'
   ],
-  function(util, array, DebugError, functions) {
+  function(util, array, DebugError, functions, CanceledError, AlreadyCalledError) {
 
     'use strict';
 
@@ -128,9 +130,7 @@ define([
     Deferred.prototype.blocking_ = false;
 
     /**
-     * 是否Deferred对象在没有自定义取消回调的情况被取消. 记录这个做什么？
-     * Whether the Deferred has been canceled without having a custom cancel
-     * function.
+     * 是否Deferred对象在没有自定义cancel回调的情况被取消. 记录这个做什么？
      * @type {boolean}
      * @private
      */
@@ -170,11 +170,10 @@ define([
     Deferred.LONG_STACK_TRACES = util.DEBUG;
 
     /**
-     * Cancel这块有点乱, 因为结合了branch的方法....
      * 总觉得opt_deepCancel和opt_propagateCancel有所重复
      * (todo by zmike86)
      * 取消一个未被触发的Deferred对象, 或者这个Deferred对象正在等着另一个Deferred对象的返回结果,
-     * 则被等待Deferred对象也会被cancel.
+     * 则该Deferred对象也会被cancel.
      *
      * #1 如果当前Deferred在父亲用branch()创建时设置opt_propagateCancel为true, 父Deferred
      * 也会被取消.
@@ -184,7 +183,7 @@ define([
      * #3 如果一个或多个branch创建的时候设置了opt_propagateCancel为true, 父亲会在其
      * 全部这些branch deferred对象都调用了cancel方法后被取消.
      *
-     * @param {boolean=} opt_deepCancel 如果设置为true, cancels当前父节点parent而不必管是否其他branch
+     * @param {boolean=} opt_deepCancel 如果设置为true, cancels当前父节点而不必管是否其他branch
      *     也调用了cancel. 对于生成branch时没有设置opt_propagateCancel的deferred对象则不会有副作用.
      */
     Deferred.prototype.cancel = function(opt_deepCancel) {
@@ -193,9 +192,8 @@ define([
         // 没触发却有parent_, 难道单独调了branch?
         // 不过我想大部分时间没有parent存在吧^
         if (this.parent_) {
-          // Get rid of the parent reference before potentially running the parent's
-          // canceler function to ensure that this cancellation isn't
-          // double-counted.
+          // 先切断this.parent_的引用, 防止自定义cancel回调执行parent的cancel方法
+          // 从而两次触发parent的cancel函数.
           var parent = this.parent_;
           delete this.parent_;
           // 深度取消, 则父亲也受牵连
@@ -214,12 +212,13 @@ define([
         } else {
           this.silentlyCanceled_ = true;
         }
-        if (!this.hasFired()) {
-          this.errback(new Deferred.CanceledError(this));
-        }
 
-        // 如果当前取消的对象是被阻塞的, 那对不起了, 让我阻塞的也一并取消吧~
-      } else if (this.result_ instanceof Deferred) {
+        if (!this.hasFired()) {
+          this.errback(new CanceledError(this));
+        }
+      }
+      // 如果当前取消的deferred对象是被阻塞的, 那对不起了, 阻塞我的也一并取消吧~
+      else if (this.result_ instanceof Deferred) {
         this.result_.cancel();
       }
     };
@@ -270,7 +269,7 @@ define([
       if (this.hasFired()) {
         // 调用了errback
         if (!this.silentlyCanceled_) {
-          throw new Deferred.AlreadyCalledError(this);
+          throw new AlreadyCalledError(this);
         }
         // 这个代表没有传入errback， 但这里为什么置为false??
         this.silentlyCanceled_ = false;
@@ -431,7 +430,6 @@ define([
       return this.addCallback(util.bind(otherDeferred.branch, otherDeferred));
     };
 
-
     /**
      * 在当前Deferred对象的执行队列上创建一个分支, 并返回新的Deferred对象.
      * Creates a branch off this Deferred's execution sequence, and returns it as a
@@ -579,7 +577,7 @@ define([
       }
       // 出错了(但并非取消)
       else if (Deferred.STRICT_ERRORS && this.isError(res) &&
-        !(res instanceof Deferred.CanceledError)) {
+        !(res instanceof CanceledError)) {
         this.hadError_ = true;
         unhandledException = true;
       }
@@ -594,7 +592,6 @@ define([
       }
     };
 
-
     /**
      * 静态方法: 创建一个Deferred对象并且给一个初始值.
      * 其实返回的d没有任何的执行队列.
@@ -607,7 +604,6 @@ define([
       return d;
     };
 
-
     /**
      * 静态方法: 创建一个Deferred对象并初始化一个错误结果.
      * @param {*} res The error result.
@@ -618,7 +614,6 @@ define([
       d.errback(res);
       return d;
     };
-
 
     /**
      * 静态方法: 创建一个Deferred对象后取消并返回它.
@@ -672,63 +667,6 @@ define([
         return Deferred.succeed(value).addCallback(callback, opt_scope);
       }
     };
-
-
-    /**
-     * 一个自定义错误类用于当Deferred对象已经被触发called时抛出.
-     * @param {!Deferred} deferred The Deferred.
-     * @constructor
-     * @extends {DebugError}
-     */
-    Deferred.AlreadyCalledError = function(deferred) {
-      DebugError.call(this);
-
-      /**
-       * The Deferred that raised this error.
-       * @type {Deferred}
-       */
-      this.deferred = deferred;
-    };
-
-
-    util.inherits(Deferred.AlreadyCalledError, DebugError);
-
-
-    /** @override */
-    Deferred.AlreadyCalledError.prototype.message = 'Deferred has already fired';
-
-
-    /** @override */
-    Deferred.AlreadyCalledError.prototype.name = 'AlreadyCalledError';
-
-
-    /**
-     * 一个自定义的错误类用于当Deferred对象取消时出错.
-     * @param {!Deferred} deferred Deferred对象.
-     * @constructor
-     * @extends {DebugError}
-     */
-    Deferred.CanceledError = function(deferred) {
-      DebugError.call(this);
-
-      /**
-       * The Deferred that raised this error.
-       * @type {Deferred}
-       */
-      this.deferred = deferred;
-    };
-
-
-    util.inherits(Deferred.CanceledError, DebugError);
-
-
-    /** @override */
-    Deferred.CanceledError.prototype.message = 'Deferred was canceled';
-
-
-    /** @override */
-    Deferred.CanceledError.prototype.name = 'CanceledError';
-
 
     return Deferred;
   }
