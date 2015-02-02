@@ -216,6 +216,16 @@ define(['../util/util'], function(util) {
       return returnString + splitParts.join('%s'); // 连接未用的'%s'
     }
 
+    /**
+     * 将一个驼峰式字符串转化为选择符式的 (比如. from "multiPartString" to "multi-part-string"),
+     * 在将js style 和 dataset属性转化成相同的CSS selectors and HTML keys时很有用.
+     * @param {string} str 驼峰式字符串.
+     * @return {string} The string in selector-case form.
+     */
+    function toSelectorCase(str) {
+      return String(str).replace(/([A-Z])/g, '-$1').toLowerCase();
+    }
+
     // exports
     return {
       /**
@@ -257,6 +267,7 @@ define(['../util/util'], function(util) {
       },
       caseInsensitiveEquals: caseInsensitiveEquals,
       caseInsensitiveContains: caseInsensitiveContains,
+      toSelectorCase: toSelectorCase,
       /**
        * 用unix的换行符\n代替Windows和Mac上的换行符: \r or \r\n.
        * @param {string} str 需要标准化的字符串.
