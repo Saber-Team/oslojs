@@ -432,7 +432,6 @@ define([
     };
 
     /**
-     * todo by zmike86
      * 使一个Deferred变为blocked等待另一个Deferred的执行队列执行完毕.
      * Makes this Deferred wait for another Deferred's execution sequence to
      * complete before continuing.
@@ -488,17 +487,16 @@ define([
     Deferred.prototype.fire_ = function() {
       // 在Deferred触发后添加失败回调, 添加的时机正好在有未处理异常并且
       // 异常被再次抛出前, 那么就取消重新抛出异常的动作.
-      if (this.unhandledExceptionTimeoutId_ && this.hasFired() &&
+      if (this.unhandledExceptionTimeoutId_ &&
+        this.hasFired() &&
         this.hasErrback_()) {
-        // It is possible to add errbacks after the Deferred has fired. If a new
-        // errback is added immediately after the Deferred encountered an unhandled
-        // error, but before that error is rethrown, cancel the rethrow.
+        // 当Deferred对象触发后也有可能为其添加错误回调. 如错误没被处理且处在再次抛出错误前添加了错误回调
+        // 则取消重新抛出异常.
         util.global.clearTimeout(this.unhandledExceptionTimeoutId_);
         delete this.unhandledExceptionTimeoutId_;
       }
 
       // 断掉后代关系~
-      // 为什么delete？todo
       if (this.parent_) {
         this.parent_.branches_--;
         delete this.parent_;
@@ -509,12 +507,11 @@ define([
       var isNewlyBlocked = false;
 
       // 遍历执行队列
-      // (两个条件:
+      // 两个条件:
       // 1. 队列里有函数
-      // 2. 当前没被阻塞)
+      // 2. 当前没被阻塞
       while (this.sequence_.length && !this.blocked_) {
         var sequenceEntry = this.sequence_.shift();
-
         var callback = sequenceEntry[0];
         var errback = sequenceEntry[1];
         var scope = sequenceEntry[2];
@@ -536,7 +533,6 @@ define([
               isNewlyBlocked = true;
               this.blocked_ = true;
             }
-
           } catch (ex) {
             res = ex;
             this.hadError_ = true;
@@ -554,7 +550,7 @@ define([
       this.result_ = res;
 
       // 由于执行队列的函数有返回Deferred对象的情况, 导致当前对象被阻塞了
-      // 为返回的Deferred对象res添加回调, 在回调中执行当前对象的continue_
+      // 为返回的Deferred对象添加回调, 在回调中执行当前对象的continue_
       if (isNewlyBlocked) {
         res.addCallbacks(
           util.bind(this.continue_, this, true /* isSuccess */),
@@ -569,12 +565,10 @@ define([
       }
 
       if (unhandledException) {
-        // Rethrow the unhandled error after a timeout. Execution will continue, but
-        // the error will be seen by global handlers and the user. The throw will
-        // be canceled if another errback is appended before the timeout executes.
-        // The error's original stack trace is preserved where available.
-        this.unhandledExceptionTimeoutId_ = util.global.setTimeout(
-          functions.fail(res), 0);
+        // 一段时间后再次抛出此异常. 执行仍然会继续, 但到时这个异常会被全局捕获. 如果再次抛出前有新的errback添加
+        // 则会取消抛出异常的动作. 异常的原始调用堆栈会被保留下来.
+        this.unhandledExceptionTimeoutId_ =
+          util.global.setTimeout(functions.fail(res), 0);
       }
     };
 
@@ -613,34 +607,25 @@ define([
 
     /**
      * 不管给的value是否是Deferred对象, 都会对他进行标准化. 并且返回这个标准化Deferred.
+     * 如果是一个Deferred对象, 则为其衍生分支并把回调函数作为分支的成功回调函数. 返回分支对象.
      *
-     * If the input value is a Deferred, the Deferred is branched (so the original
-     * execution sequence is not modified) and the input callback added to the new
-     * branch. The branch is returned to the caller.
-     *
-     * 如果value不是一个Deferred对象, callback会立即执行 and an already firing Deferred
-     * will be returned to the caller.
-     *
-     * In the following (contrived) example, if <code>isImmediate</code> is true
-     * then 3 is alerted immediately, otherwise 6 is alerted after a 2-second delay.
-     *
+     * 如果value不是一个Deferred对象, callback会立即执行并返回一个fire过的Deferred对象.
+     * 以下例子中, 如果isImmediate为true则立马会alert 3, 否则两秒后alert 6.
      * <pre>
      *   var value;
      *   if (isImmediate) {
-         *     value = 3;
-         *   } else {
-         *     value = new Deferred();
-         *     setTimeout(function() { value.callback(6); }, 2000);
-         *   }
-     *
+     *     value = 3;
+     *   } else {
+     *     value = new Deferred();
+     *     setTimeout(function() { value.callback(6); }, 2000);
+     *   }
      *   var d = Deferred.when(value, alert);
      * </pre>
      *
-     * @param {*} value Deferred or normal value to pass to the callback.
-     * @param {!function(this:T, ?):?} callback The callback to execute.
-     * @param {T=} opt_scope An optional scope to call the callback in.
-     * @return {!Deferred} A new Deferred that will call the input
-     *     callback with the input value.
+     * @param {*} value Deferred对象或一个其他值.
+     * @param {!function(this:T, ?):?} callback 回调函数.
+     * @param {T=} opt_scope 回调上下文.
+     * @return {!Deferred} 返回一个新的Deferred对象并用回调函数作为其成功回调.
      * @template T
      */
     Deferred.when = function(value, callback, opt_scope) {

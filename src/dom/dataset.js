@@ -34,8 +34,8 @@ define([
     if (element.dataset) {
       element.dataset[key] = value;
     } else {
-      element.setAttribute(PREFIX_ + string.toSelectorCase(key),
-        value);
+      element.setAttribute(
+          PREFIX_ + string.toSelectorCase(key), value);
     }
   };
 
