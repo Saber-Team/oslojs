@@ -26,7 +26,7 @@
   "use strict";
 
 
-// store useful props
+  // store useful props
   var OP = Object.prototype,
     AP = Array.prototype,
     native_forEach = AP.forEach,
@@ -35,11 +35,11 @@
     toString = OP.toString;
 
 
-// use such an object to determine cut down a forEach loop;
+  // use such an object to determine cut down a forEach loop;
   var break_obj = {};
 
 
-// initialize a module
+  // initialize a module
   var empty_mod = {
     id: null,
     uid: null,
@@ -49,7 +49,7 @@
   };
 
 
-// for no-op function, used for a default callback function
+  // for no-op function, used for a default callback function
   function noop() {}
 
 
@@ -566,8 +566,8 @@
    * var mod = require("module");
    * or
    * require(["module"], function(module){
- *
- * });
+   *
+   * });
    * @param {!Array|String} deps
    * @param {Function?} cb
    */
@@ -752,23 +752,23 @@
   }
 
 
-// @global
+  // @global
   var kernel = {};
 
 
-// preserve existed kernel object;
+  // preserve existed kernel object;
   if (global.kernel) {
     kernel._kernel = global.kernel;
   }
 
 
-// universal global module id
+  // universal global module id
   kernel.uid = 0;
   kernel.uidprefix = "AceMood@kernel_";
 
 
-// All modules being fetched means the module's dependencies
-// is now fetching, and the key is mod's uid, value is mod itself;
+  // All modules being fetched means the module's dependencies
+  // is now fetching, and the key is mod's uid, value is mod itself;
   var fetchingList = {
     mods: {},
     add: function(mod) {
@@ -789,19 +789,19 @@
   };
 
 
-// If requiring a module, then record it here. So that once the
-// module complete, notify all its dependants.
-// Due to add module dependency when resolve id->path, we can not use
-// module's uid as the key of dependencyList, so we use url here,
-// the hash will be path -> [mod] constructor.
+  // If requiring a module, then record it here. So that once the
+  // module complete, notify all its dependants.
+  // Due to add module dependency when resolve id->path, we can not use
+  // module's uid as the key of dependencyList, so we use url here,
+  // the hash will be path -> [mod] constructor.
   var dependencyList = {};
 
 
-// If a module a fetching now means the corresponding script is loading now,
-// before it complete loaded, we should not fetch it twice, but only when
-// define the module it would record in the 'cache.path2uid', so here we just
-// record here to avoid fetch twice.
-// the hash will be path -> bool constructor.
+  // If a module a fetching now means the corresponding script is loading now,
+  // before it complete loaded, we should not fetch it twice, but only when
+  // define the module it would record in the 'cache.path2uid', so here we just
+  // record here to avoid fetch twice.
+  // the hash will be path -> bool constructor.
   var sendingList = {};
 
 
@@ -830,7 +830,7 @@
   };
 
 
-// Global cache.
+  // Global cache.
   kernel.cache = {
     // use a global cache to store uid-module pairs.
     // each uid mapping to a unique module, so it's a
@@ -849,8 +849,8 @@
   };
 
 
-// default built-in modules
-// map the short name and relative path?
+  // default built-in modules
+  // map the short name and relative path?
   kernel.config({
     baseUrl: "",
     debug: true,
@@ -872,21 +872,21 @@
   };
 
 
-// exports APIs functions
+  // exports APIs functions
   global.require = require;
   global.define = define;
   global.kernel = kernel;
 
 
-// and a directory file path must be ends with a slash (back slash in window)
+  // and a directory file path must be ends with a slash (back slash in window)
   var dirRegExp = /\/$/g,
-// whether a path to a file with extension
+  // whether a path to a file with extension
     fileExtRegExp = /\.(js|css|tpl|txt)$/;
 
 
-// retrieve current doc's absolute path
-// It may be a file system path, http path
-// or other protocol path
+  // retrieve current doc's absolute path
+  // It may be a file system path, http path
+  // or other protocol path
   var loc = global.location;
 
 
@@ -999,7 +999,7 @@
   *   module's absolute file path.
   * @return {!(string|object)} exports object or absolute file path from Internet
   */
- function resolveId(id, base) {
+  function resolveId(id, base) {
     // var _mod = kernel.cache.mods[id];
     if (id == "require" || id == "module" ||
       id == "exports" /*|| (_mod &&  _mod != empty_mod)*/)
@@ -1149,11 +1149,11 @@
   }
 
 
-// Four states of module.
-// 'uninit' module is only inited but without fetching its deps.
-// 'fetching' is fetching its deps now but not execute its factory yet.
-// 'loaded' is specificated in IE means a js file is loaded.
-// 'complete' is module finished resolve and has cached its exports object.
+  // Four states of module.
+  // 'uninit' module is only inited but without fetching its deps.
+  // 'fetching' is fetching its deps now but not execute its factory yet.
+  // 'loaded' is specificated in IE means a js file is loaded.
+  // 'complete' is module finished resolve and has cached its exports object.
   Module.STATUS = {
     "uninit"    : 0,
     "fetching"  : 1,
@@ -1206,9 +1206,27 @@
     return ok;
   };
 
+
+  /**
+   * Used to Load module after page loaded.
+   * @param {!String} id Identifier or path to module.
+   * @param {!Function} callback Factory function.
+   */
   require.async = function(id, callback) {
     require([id], callback);
   };
+
+
+  /**
+   * For build tool to compile it.
+   * Without checking the type of arguments.
+   * @param {!String} url
+   * @returns {!String}
+   */
+  require.url = function(url) {
+    return url;
+  };
+
 
   global._req = require;
   global._def = define;
