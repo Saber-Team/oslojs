@@ -160,20 +160,20 @@
   }
 
 
-// current adding script node
+  // current adding script node
   var currentAddingScript,
-// In older FF, do not support script.readyState, so we only use this prop in IEs.
-// Although 'onload' in IE9 & IE10 have problems, but I do not
-// care the issure, and whatever async is true or false. We just
-// remove node in document as the callback of javascript loaded.
-// Read more about the bug:
-// 'https://connect.microsoft.com/IE/feedback/details/729164/'
-// + 'ie10-dynamic-script-element-fires-loaded-readystate-prematurely'
-// 'https://connect.microsoft.com/IE/feedback/details/648057/'
-// + 'script-onload-event-is-not-fired-immediately-after-script-execution'
+  // In older FF, do not support script.readyState, so we only use this prop in IEs.
+  // Although 'onload' in IE9 & IE10 have problems, but I do not
+  // care the issure, and whatever async is true or false. We just
+  // remove node in document as the callback of javascript loaded.
+  // Read more about the bug:
+  // 'https://connect.microsoft.com/IE/feedback/details/729164/'
+  // + 'ie10-dynamic-script-element-fires-loaded-readystate-prematurely'
+  // 'https://connect.microsoft.com/IE/feedback/details/648057/'
+  // + 'script-onload-event-is-not-fired-immediately-after-script-execution'
     useInteractive = ('readyState' in doc.createElement("script")),
-// loop all script nodes in doc, if one's readyState is 'interactive'
-// means it's now executing;
+  // loop all script nodes in doc, if one's readyState is 'interactive'
+  // means it's now executing;
     interactiveScript;
 
 
@@ -344,9 +344,9 @@
   }
 
 
-// A regexp to filter `require('xxx')`
+  // A regexp to filter `require('xxx')`
   var cjsRequireRegExp = /\brequire\s*\(\s*(["'])([^'"\s]+)\1\s*\)/g,
-// A regexp to drop comments in source code
+  // A regexp to drop comments in source code
     commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg;
 
 
@@ -381,10 +381,17 @@
       deps = null;
     }
 
-    // only when user-defined id presents, we record it
-    // in id2path cache. First check module with the same id.
+    // Only when user-defined id presents, we record it in id2path cache.
+    // First check module with the same id.
+    // Note: after build, in require.async conditions, we could not
+    // know which module will be loaded first if more than two modules
+    // need a non-registered 3rd module. So the 3rd will be compiled
+    // into package 2 and package 3 together, which means define with same
+    // identifier will be called twice.
     if (id) {
-      if (cache.id2path[id]) return exist_id_error(id);
+      if (cache.id2path[id] && kernel.debug) {
+        return exist_id_error(id);
+      }
       cache.id2path[id] = base;
       cache.mods[id] = empty_mod;
     }
