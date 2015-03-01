@@ -1,20 +1,20 @@
 /**
- * @fileoverview 处理XHR(XmlHttpRequests)的一个包装类.
+ * @fileoverview 处理xhr的包装类.
  * 一次性的ajax请求可以调用XhrIo.send(), 也可以生成一个XhrIo的实例, 发送多次请求.
  * 每个实例有其自己的XmlHttpRequest对象并在请求完成后解绑事件保证没有内存泄露.
  *
  * XhrIo对象完全基于事件, 会在请求完成、失败、成功、状态发生变化时分发事件. 首先会触发
  * ready-state或者timeout事件, 然后是completed. 还有abort, error, success事件会在
- * 特定的条件触发. 最后是ready事件,表示xhrio对象已经可以准备发送另外一个请求.
+ * 特定的条件触发. 最后是ready事件, 表示xhrio对象已经可以准备发送另外一个请求.
  *
- * XmlHttpRequest.open() 和 .send()方法可能抛出异常这时候error事件会在complete和
+ * XmlHttpRequest.open() 和 send()方法可能抛出异常这时候error事件会在complete和
  * ready-state-change之前先触发.
  *
- * 这个类并不支持多次请求, 队列请求, or 优先级队列请求.
+ * 这个类并不支持多次请求, 队列请求, 优先级队列请求.
  * Tested = IE6, FF1.5, Safari, Opera 8.5
  *
- * TODO: Error cases aren't playing nicely in Safari. 本模块要在严格测试后去掉所有log
- * 和对log模块的引用
+ * TODO: Error cases aren't playing nicely in Safari.
+ * 本模块要在严格测试后去掉所有log和对log模块的引用
  */
 
 define([
@@ -63,6 +63,41 @@ define([
      */
     var sendInstances_ = [];
 
+    /**
+     * The Content-Type HTTP header name
+     * @type {string}
+     */
+    var CONTENT_TYPE_HEADER = 'Content-Type',
+      /**
+       * The pattern matching the 'http' and 'https' URI schemes
+       * @type {!RegExp}
+       */
+      HTTP_SCHEME_PATTERN = /^https?$/i,
+      /**
+       * 表单数据提交的时候用到的方法. We set different
+       * headers depending on whether the HTTP action is one of these.
+       */
+      METHODS_WITH_FORM_DATA = ['POST', 'PUT'],
+      /**
+       * url编码的表单的Content-Type HTTP header.
+       * @type {string}
+       */
+      FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded;charset=utf-8',
+      /**
+       * xhr2支持timeout作为超时属性.
+       * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
+       * @private {string}
+       * @const
+       */
+      XHR2_TIMEOUT_ = 'timeout',
+      /**
+       * 设置xhr2对象的ontimeout事件处理器.
+       * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
+       * @private {string}
+       * @const
+       */
+      XHR2_ON_TIMEOUT_ = 'ontimeout';
+
 
     /**
      * XMLHttpRequests处理类.
@@ -90,6 +125,7 @@ define([
       /**
        * XMLHttpRequest是否处于活动状态.
        * 从send()开始直到onReadyStateChange()完成, 或者触发error()和abort().
+       * 这个值会被一直设置成true.
        * @private {boolean}
        */
       this.active_ = false;
@@ -132,9 +168,9 @@ define([
       this.lastError_ = '';
 
       /**
-       * 用来确保不会多次触发ERROR事件. This can
+       * 一个布尔值开关, 用来确保不会多次触发error事件. This can
        * happen in IE when it does a synchronous load and one error is handled in
-       * the ready statte change and one is handled due to send() throwing an
+       * the ready state change and one is handled due to send() throwing an
        * exception.
        * @private {boolean}
        */
@@ -160,19 +196,19 @@ define([
 
       /**
        * 超时的毫秒数.
-       * 到达这个时限会触发TIMEOUT事件; 0是不设置超时.
+       * 到达这个时限会触发timeout事件; 0是不设置超时.
        * @private {number}
        */
       this.timeoutInterval_ = 0;
 
       /**
-       * Timer to track request timeout.
+       * 记录请求超时的timer id.
        * @private {?number}
        */
       this.timeoutId_ = null;
 
       /**
-       * 响应返回类型. 空字符串表示用默认XHR行为.
+       * 响应返回类型. 空字符串表示用默认xhr行为.
        * @private {XhrIo.ResponseType}
        */
       this.responseType_ = XhrIo.ResponseType.DEFAULT;
@@ -188,7 +224,7 @@ define([
       this.withCredentials_ = false;
 
       /**
-       * 是否可以配置XMLHttpRequest对象的timeout属性.这个只在xhr2中会有
+       * 是否可以配置xhr对象的timeout属性. 这个只在xhr 2.0中会有
        * @private {boolean}
        */
       this.useXhr2Timeout_ = false;
@@ -219,46 +255,6 @@ define([
     XhrIo.prototype.logger_ = log.getLogger('Oslo.net.XhrIo');
 
     /**
-     * The Content-Type HTTP header name
-     * @type {string}
-     */
-    XhrIo.CONTENT_TYPE_HEADER = 'Content-Type';
-
-    /**
-     * The pattern matching the 'http' and 'https' URI schemes
-     * @type {!RegExp}
-     */
-    XhrIo.HTTP_SCHEME_PATTERN = /^https?$/i;
-
-    /**
-     * 表单数据提交的时候用到的方法. We set different
-     * headers depending on whether the HTTP action is one of these.
-     */
-    XhrIo.METHODS_WITH_FORM_DATA = ['POST', 'PUT'];
-
-    /**
-     * url编码的表单的Content-Type HTTP header.
-     * @type {string}
-     */
-    XhrIo.FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded;charset=utf-8';
-
-    /**
-     * xhr2支持timeout作为延时的属性.
-     * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
-     * @private {string}
-     * @const
-     */
-    XhrIo.XHR2_TIMEOUT_ = 'timeout';
-
-    /**
-     * 设置xhr2对象的ontimeout属性可以添加事件句柄.
-     * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
-     * @private {string}
-     * @const
-     */
-    XhrIo.XHR2_ON_TIMEOUT_ = 'ontimeout';
-
-    /**
      * 这个静态方法创建一个短生命周期的XhrIo对象发送请求.
      * @see XhrIo.cleanup
      * @param {string|Uri} url 请求地址.
@@ -287,7 +283,6 @@ define([
       }
       x.send(url, opt_method, opt_content, opt_headers);
     };
-
 
     /**
      * 释放所有没被释放的XhrIo实例. 这些实例都是XhrIo.send创建的.
@@ -333,7 +328,6 @@ define([
       array.remove(sendInstances_, this);
     };
 
-
     /**
      * 获取超时时限.
      * @return {number} Timeout interval in milliseconds.
@@ -341,7 +335,6 @@ define([
     XhrIo.prototype.getTimeoutInterval = function() {
       return this.timeoutInterval_;
     };
-
 
     /**
      * 设置超时时限.
@@ -461,13 +454,13 @@ define([
         (content instanceof util.global.FormData));
 
       // 是GET或POST请求 且 Content-Type没有被设置 且 不是FormData数据(todo)
-      if (array.contains(XhrIo.METHODS_WITH_FORM_DATA, method) &&
+      if (array.contains(METHODS_WITH_FORM_DATA, method) &&
         !contentTypeKey && !contentIsFormData) {
         // 如果请求用的表单数据, 默认是url-encoded form content type.
         // 除非是FormData request. 对于FormData请求,
         // 浏览器自动加上multipart/form-data的content type,
         // with an appropriate multipart boundary.
-        headers.set(XhrIo.CONTENT_TYPE_HEADER, XhrIo.FORM_CONTENT_TYPE);
+        headers.set(CONTENT_TYPE_HEADER, FORM_CONTENT_TYPE);
       }
 
       // 增加请求头
@@ -496,8 +489,8 @@ define([
             this.useXhr2Timeout_));
           // 可用timeout属性
           if (this.useXhr2Timeout_) {
-            this.xhr_[XhrIo.XHR2_TIMEOUT_] = this.timeoutInterval_;
-            this.xhr_[XhrIo.XHR2_ON_TIMEOUT_] = util.bind(this.timeout_, this);
+            this.xhr_[XHR2_TIMEOUT_] = this.timeoutInterval_;
+            this.xhr_[XHR2_ON_TIMEOUT_] = util.bind(this.timeout_, this);
             // 规定时间执行this.timeout_
           } else {
             this.timeoutId_ = Timer.callOnce(this.timeout_,
@@ -533,8 +526,8 @@ define([
      */
     XhrIo.shouldUseXhr2Timeout_ = function(xhr) {
       return ua.isIE && ua.isVersionOrHigher(9) &&
-        util.isNumber(xhr[XhrIo.XHR2_TIMEOUT_]) &&
-        util.isDef(xhr[XhrIo.XHR2_ON_TIMEOUT_]);
+        util.isNumber(xhr[XHR2_TIMEOUT_]) &&
+        util.isDef(xhr[XHR2_ON_TIMEOUT_]);
     };
 
     /**
@@ -544,11 +537,11 @@ define([
      * @private
      */
     XhrIo.isContentTypeHeader_ = function(header) {
-      return string.caseInsensitiveEquals(XhrIo.CONTENT_TYPE_HEADER, header);
+      return string.caseInsensitiveEquals(CONTENT_TYPE_HEADER, header);
     };
 
     /**
-     * 创建新的XHR对象.
+     * 创建新的xhr对象.
      * @return {XMLHttpRequest|GearsHttpRequest} 返回新创建的XHR对象.
      * @protected
      */
@@ -801,7 +794,7 @@ define([
      */
     XhrIo.prototype.cleanUpTimeoutTimer_ = function() {
       if (this.xhr_ && this.useXhr2Timeout_) {
-        this.xhr_[XhrIo.XHR2_ON_TIMEOUT_] = null;
+        this.xhr_[XHR2_ON_TIMEOUT_] = null;
       }
       if (util.isNumber(this.timeoutId_)) {
         Timer.clear(this.timeoutId_);
@@ -843,7 +836,7 @@ define([
      */
     XhrIo.prototype.isLastUriEffectiveSchemeHttp_ = function() {
       var scheme = uri.getEffectiveScheme(String(this.lastUri_));
-      return XhrIo.HTTP_SCHEME_PATTERN.test(scheme);
+      return HTTP_SCHEME_PATTERN.test(scheme);
     };
 
     /**
