@@ -1,14 +1,11 @@
 /**
- * @fileoverview Utilities for adding, removing and setting values in
- * an Element's dataset.
- * See {@link http://www.w3.org/TR/html5/Overview.html#dom-dataset}.
+ * @fileoverview 操作dom元素的dataset.
+ * 见 {@link http://www.w3.org/TR/html5/Overview.html#dom-dataset}.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
 
-define([
-  '../string/util'
-], function(string) {
+define(['../string/util'], function(string) {
 
   'use strict';
 
