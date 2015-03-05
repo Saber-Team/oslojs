@@ -1,8 +1,8 @@
 /**
  * @fileoverview 此模块为客户端程序提供全局的注册器, 所有的entry point都
- * 可被instrumented. 需要添加错误监控的模块要通过本模块来注册它们的entry points.
- * 本模块考虑到entry points可能随时添加但monitorAll的调用时机并不确定. 用私有变量
- * monitorsMayExist_做开关如果entry point后注册则立即instrument此entry point.
+ *   可被instrumented. 需要添加错误监控的模块要通过本模块来注册它们的entry points.
+ *   本模块考虑到entry points可能随时添加但monitorAll的调用时机并不确定. 用私有变量
+ *   monitorsMayExist_做开关如果entry point后注册则立即instrument此entry point.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */
@@ -18,7 +18,6 @@ define([
    * @interface
    */
   var EntryPointMonitor = function() {};
-
 
   /**
    * Try to remove an instrumentation wrapper created by this monitor.
@@ -38,14 +37,12 @@ define([
    */
   EntryPointMonitor.prototype.unwrap;
 
-
   /**
    * 数组保存所有的entry point回调函数.
    * @type {!Array.<function(!Function)>}
    * @private
    */
   var refList_ = [];
-
 
   /**
    * 存储包裹所有entry points的Monitors.
@@ -54,14 +51,12 @@ define([
    */
   var monitors_ = [];
 
-
   /**
    * 是否曾经调用过entryPointRegistry.monitorAll.
    * @type {boolean}
    * @private
    */
   var monitorsMayExist_ = false;
-
 
   return {
     /**
