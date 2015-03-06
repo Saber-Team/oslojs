@@ -1,0 +1,2 @@
+/** Oslo JavaScript Framework. */
+define(["../debug/error"],function(a){"use strict";var b=function(b){a.call(this),this.deferred=b};return util.inherits(b,a),b.prototype.message="Deferred has already fired",b.prototype.name="AlreadyCalledError",b});
