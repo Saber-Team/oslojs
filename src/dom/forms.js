@@ -69,7 +69,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
    * 将表单中的name/value对添加到map对象中.
    * @param {Map} map map对象.
@@ -86,41 +85,37 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     array.push(value);
   }
 
-
   /**
    * 将name/value对以'name=value'形式加到string buffer array.
    * @param {Array} sb The string buffer array for storing data.
-   * @param {string} name The name.
-   * @param {string} value The value.
+   * @param {string} name 参数名.
+   * @param {string} value 参数值.
    * @private
    */
   function addFormDataToStringBuffer_(sb, name, value) {
     sb.push(encodeURIComponent(name) + '=' + encodeURIComponent(value));
   }
 
-
   /**
-   * 可勾选的元素值.
-   * @param {Element} el The element.
-   * @return {?string} The value of the form element (or null).
+   * 获取可勾选的元素值.
+   * @param {Element} el dom元素.
+   * @return {?string} 表单元素的值, 若没有则返回null.
    * @private
    */
   function getInputChecked_(el) {
     return el.checked ? el.value : null;
   }
 
-
   /**
-   * 单选select元素的值.
+   * 获取单选select元素的值.
    * @param {Element} el The element.
-   * @return {?string} The value of the form element (or null).
+   * @return {?string} 表单元素的值, 若没有则返回null.
    * @private
    */
   function getSelectSingle_(el) {
     var selectedIndex = el.selectedIndex;
     return selectedIndex >= 0 ? el.options[selectedIndex].value : null;
   }
-
 
   /**
    * 返回多选select元素的多个值.
@@ -138,9 +133,8 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     return values.length ? values : null;
   }
 
-
   /**
-   * 设置checkable input元素的checked属性. 目前最重要的使用场景就是设置
+   * 设置可勾选元素的checked属性. 目前最重要的使用场景就是设置
    * checkbox的check属性而不是重置它的value值.
    * @param {Element} el 元素.
    * @param {string|boolean=} opt_value The value, sets the element checked if
@@ -151,9 +145,8 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     el.checked = (opt_value ? 'checked' : null);
   }
 
-
   /**
-   * 设置单选元素select-one element的值.
+   * 切换单选元素select-one的选中值.
    * @param {Element} el 元素.
    * @param {string=} opt_value The value of the selected option element.
    * @private
@@ -171,12 +164,10 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
-   * 设置多选元素select-multiple的值. 复杂度N^2
+   * 设置多选元素select-multiple的选中值. 复杂度N^2
    * @param {Element} el 元素.
-   * @param {Array.<string>|string=} opt_value The value of the selected option
-   *     element(s).
+   * @param {Array.<string>|string=} opt_value 要选中的值.
    * @private
    */
   function setSelectMultiple_(el, opt_value) {
@@ -197,7 +188,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
    * 将表单数据整合到一个map对象中, map对象key是表单控件名, value是数组.
    * 不支持file inputs.
@@ -210,7 +200,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     return map;
   }
 
-
   /**
    * 将表单数据整合到一个 application/x-www-url-encoded 字符串.
    * 不支持file inputs.
@@ -222,7 +211,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     getFormDataHelper_(form, sb, addFormDataToStringBuffer_);
     return sb.join('&');
   }
-
 
   /**
    * 是否表单中有file input.
@@ -238,7 +226,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
     return false;
   }
-
 
   /**
    * 启用或禁止表单元素.
@@ -262,7 +249,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
    * 聚焦或者selects表单元素的内容.
    * @param {Element} el 某个表单元素.
@@ -274,7 +260,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
    * 是否元素有值.
    * @param {Element} el 元素.
@@ -285,18 +270,16 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     return !!value;
   }
 
-
   /**
    * 是否元素有值.
-   * @param {HTMLFormElement} form The form element.
-   * @param {string} name Name of an input to the form.
-   * @return {boolean} Whether the form has a value.
+   * @param {HTMLFormElement} form 表单.
+   * @param {string} name 表单输入元素的名字.
+   * @return {boolean} 返回是否有值.
    */
   function hasValueByName(form, name) {
     var value = getValueByName(form, name);
     return !!value;
   }
-
 
   /**
    * 获取元素的值.
@@ -322,17 +305,14 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
   }
 
-
   /**
    * 返回表单字段值. 如果是radio组,返回被选中的按钮的value.
    * @param {HTMLFormElement} form 表单.
-   * @param {string} name Name of an input to the form.
-   * @return {Array.<string>|string|null} The value of the form element, or
-   *     null if the form element does not exist or has no value.
+   * @param {string} name 表单的一个输入元素名称.
+   * @return {Array.<string>|string|null} 返回表单元素的值, 如果不存在或者没有值返回null.
    */
   function getValueByName(form, name) {
     var els = form.elements[name];
-
     if (els) {
       if (els.type) {
         return getValue(els);
@@ -347,7 +327,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
     }
     return null;
   }
-
 
   /**
    * 设置元素的value值.
@@ -374,7 +353,6 @@ define(['../util/util', '../ds/map'], function(util, Map) {
       }
     }
   }
-
 
   return {
     getFormDataMap: getFormDataMap,
