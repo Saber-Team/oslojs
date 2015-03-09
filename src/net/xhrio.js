@@ -68,20 +68,24 @@ define([
      * @type {string}
      */
     var CONTENT_TYPE_HEADER = 'Content-Type',
+
       /**
        * 正则匹配 'http' and 'https'
        * @type {!RegExp}
        */
       HTTP_SCHEME_PATTERN = /^https?$/i,
+
       /**
        * 表单数据提交的时候用到的方法. 据此设置header.
        */
       METHODS_WITH_FORM_DATA = ['POST', 'PUT'],
+
       /**
        * url编码的表单的Content-Type HTTP header.
        * @type {string}
        */
       FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded;charset=utf-8',
+
       /**
        * xhr2支持timeout作为超时属性.
        * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
@@ -89,6 +93,7 @@ define([
        * @const
        */
       XHR2_TIMEOUT_ = 'timeout',
+
       /**
        * 设置xhr2对象的ontimeout事件处理器.
        * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
@@ -466,7 +471,7 @@ define([
         this.xhr_.responseType = this.responseType_;
       }
 
-      if (object.containsKey(this.xhr_, 'withCredentials')) {
+      if ('withCredentials' in this.xhr_) {
         this.xhr_.withCredentials = this.withCredentials_;
       }
 
@@ -478,9 +483,11 @@ define([
         this.cleanUpTimeoutTimer_(); // Paranoid, should never be running.
         if (this.timeoutInterval_ > 0) {
           this.useXhr2Timeout_ = XhrIo.shouldUseXhr2Timeout_(this.xhr_);
+
           log.fine(this.logger_, this.formatMsg_('Will abort after ' +
             this.timeoutInterval_ + 'ms if incomplete, xhr2 ' +
             this.useXhr2Timeout_));
+
           // 可用timeout属性
           if (this.useXhr2Timeout_) {
             this.xhr_[XHR2_TIMEOUT_] = this.timeoutInterval_;
@@ -492,12 +499,14 @@ define([
           }
         }
         log.fine(this.logger_, this.formatMsg_('Sending request'));
+
         this.inSend_ = true;
         this.xhr_.send(content);
         this.inSend_ = false;
 
       } catch (err) {
         log.fine(this.logger_, this.formatMsg_('Send error: ' + err.message));
+
         this.error_(ErrorCode.EXCEPTION, err);
       }
     };
