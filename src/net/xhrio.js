@@ -64,18 +64,17 @@ define([
     var sendInstances_ = [];
 
     /**
-     * The Content-Type HTTP header name
+     * HTTP Content-Type头名称
      * @type {string}
      */
     var CONTENT_TYPE_HEADER = 'Content-Type',
       /**
-       * The pattern matching the 'http' and 'https' URI schemes
+       * 正则匹配 'http' and 'https'
        * @type {!RegExp}
        */
       HTTP_SCHEME_PATTERN = /^https?$/i,
       /**
-       * 表单数据提交的时候用到的方法. We set different
-       * headers depending on whether the HTTP action is one of these.
+       * 表单数据提交的时候用到的方法. 据此设置header.
        */
       METHODS_WITH_FORM_DATA = ['POST', 'PUT'],
       /**
@@ -215,10 +214,9 @@ define([
 
       /**
        * 在一些现代浏览器中原生支持了跨域ajax请求, 发送这种请求时可以使用withCredential
-       * 属性. 详见:
-       * http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-attribute.
-       * Whether a "credentialed" request is to be sent (one that is aware of
-       * cookies and authentication).
+       * 属性. 详见: http://www.w3.org/TR/XMLHttpRequest/#the-withcredentials-
+       * attribute. Whether a "credentialed" request is to be sent (one that
+       * is aware of cookies and authentication).
        * @private {boolean}
        */
       this.withCredentials_ = false;
@@ -261,20 +259,23 @@ define([
      * @param {Function=} opt_callback 完成时的回调函数.
      * @param {string=} opt_method 请求方法, 默认 GET.
      * @param {ArrayBuffer|Blob|Document|FormData|GearsBlob|string=} opt_content
-     *     发送的数据body data.
+     *     发送的数据体.
      * @param {Object|Map=} opt_headers 需要加到请求头参数的对象.
      * @param {number=} opt_timeoutInterval 超时毫秒数.过时将会aborted; 0表示不设置超时.
-     * @param {boolean=} opt_withCredentials Whether to send credentials with the
-     *     request. 默认false. 见setWithCredentials方法.
+     * @param {boolean=} opt_withCredentials 是否请求需要发送认证. 默认false.
+     *     见setWithCredentials方法.
      */
     XhrIo.send = function(url, opt_callback, opt_method, opt_content,
                           opt_headers, opt_timeoutInterval, opt_withCredentials) {
       var x = new XhrIo();
+      // 保存对象
       sendInstances_.push(x);
       if (opt_callback) {
         x.listen(EventType.COMPLETE, opt_callback);
       }
+      // 解绑析构
       x.listenOnce(EventType.READY, x.cleanupSend_);
+      // 设置参数
       if (opt_timeoutInterval) {
         x.setTimeoutInterval(opt_timeoutInterval);
       }
@@ -286,17 +287,12 @@ define([
 
     /**
      * 释放所有没被释放的XhrIo实例. 这些实例都是XhrIo.send创建的.
-     * XhrIo.send会在请求complete或者fail的时候析构使用的XhrIo实例.
-     * 但如果请求没有结束never completes, XhrIo实例就不会被析构.
+     * XhrIo.send会在请求完成complete或者失败fail时析构使用的XhrIo实例.
+     * 但如果请求没有结束, XhrIo实例就不会被析构.
      * 没有结束可能是因为window卸载但请求还未完成.
-     * We could have {@link XhrIo.send} return the net.XhrIo
-     * it creates and make the client of {@link XhrIo.send} be
-     * responsible for disposing it in this case.  However, this makes things
-     * significantly more complicated for the client, and the whole point
-     * of {@link XhrIo.send} is that it's simple and easy to use.
-     * Clients of {@link XhrIo.send} should call
-     * {@link XhrIo.cleanup} when doing final
-     * cleanup on window unload.
+     * 我们在XhrIo.send方法返回创建的XhrIo对象, 并让客户端程序管理对象的析构. 但是这样做的话
+     * 会让事情变得复杂, 我们只想让客户端程序简单的使用XhrIo.send接口, 然后客户端程序在window
+     * 卸载时调用XhrIo.cleanup即可析构.
      */
     XhrIo.cleanup = function() {
       var instances = sendInstances_;
@@ -345,12 +341,8 @@ define([
     };
 
     /**
-     * 设置响应类型. At time of writing, this is only
-     * supported in very recent versions of WebKit (10.0.612.1 dev and later).
-     *
-     * If this is used, the response may only be accessed via {@link #getResponse}.
-     *
-     * @param {XhrIo.ResponseType} type The desired type for the response.
+     * 设置响应类型. 目前只在较新版本的WebKit (10.0.612.1 dev and later)支持.
+     * @param {XhrIo.ResponseType} type 返回类型.
      */
     XhrIo.prototype.setResponseType = function(type) {
       this.responseType_ = type;
@@ -396,6 +388,7 @@ define([
           this.lastUri_ + '; newUri=' + url);
       }
 
+      // 默认GET方法
       var method = opt_method ? opt_method.toUpperCase() : 'GET';
 
       this.lastUri_ = url;
@@ -415,25 +408,26 @@ define([
       this.xhr_.onreadystatechange = util.bind(this.onReadyStateChange_, this);
 
       /**
-       * Try to open the XMLHttpRequest (always async), if an error occurs here it
-       * is generally permission denied
+       * 异步设置调用open方法, 访问受限时会抛出异常.
        * @preserveTry
        */
       try {
         log.fine(this.logger_, this.formatMsg_('Opening Xhr'));
+
         this.inOpen_ = true;
         this.xhr_.open(method, url, true);  // Always async!
         this.inOpen_ = false;
       } catch (err) {
         log.fine(this.logger_,
           this.formatMsg_('Error opening Xhr: ' + err.message));
+
         this.error_(ErrorCode.EXCEPTION, err);
         return;
       }
 
-      // We can't use null since this won't allow requests with form data to have a
-      // content length specified which will cause some proxies to return a 411
-      // error.
+      // 不能直接对发送内容设置成null, 因为这样就不能使带有表单数据的请求含有content length字段,
+      // 从而导致某些代理返回411错误. 详见:
+      // https://tools.ietf.org/html/rfc2616#section-10.4.12
       var content = opt_content || '';
 
       var headers = this.headers.clone();
@@ -445,15 +439,15 @@ define([
         });
       }
 
-      // 是否设置了content type头, ignoring case.
-      // HTTP header names are case-insensitive.  See:
-      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
+      // 是否设置了content type头, 忽略大小写. HTTP header names 对大小写不敏感.
+      // 详见: http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
       var contentTypeKey = array.find(headers.getKeys(), XhrIo.isContentTypeHeader_);
 
+      // 是否发送FormData类型的数据
       var contentIsFormData = (util.global.FormData &&
         (content instanceof util.global.FormData));
 
-      // 是GET或POST请求 且 Content-Type没有被设置 且 不是FormData数据(todo)
+      // 是 GET 或 POST 请求且 Content-Type 没有被设置且不是FormData数据
       if (array.contains(METHODS_WITH_FORM_DATA, method) &&
         !contentTypeKey && !contentIsFormData) {
         // 如果请求用的表单数据, 默认是url-encoded form content type.
