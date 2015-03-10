@@ -141,7 +141,7 @@ define([
        * @param {boolean} isRtl 是否RTL模式.
        */
       setPosition: function(elem, left, top, isRtl) {
-        if (!util.isNull(top)) {
+        if (util.isDefAndNotNull(top)) {
           elem.style.top = top + 'px';
         }
         if (isRtl) {

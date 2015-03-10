@@ -430,7 +430,7 @@ define([
         return;
       }
 
-      // 不能直接对发送内容设置成null, 因为这样就不能使带有表单数据的请求含有content length字段,
+      // 不能直接对发送内容设置成null, 因为这样就不能使带有表单数据的请求含有Content-Length字段,
       // 从而导致某些代理返回411错误. 详见:
       // https://tools.ietf.org/html/rfc2616#section-10.4.12
       var content = opt_content || '';
@@ -444,7 +444,7 @@ define([
         });
       }
 
-      // 是否设置了content type头, 忽略大小写. HTTP header names 对大小写不敏感.
+      // 是否自己设置了Content-Type头, 忽略大小写. HTTP header names 对大小写不敏感.
       // 详见: http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
       var contentTypeKey = array.find(headers.getKeys(), XhrIo.isContentTypeHeader_);
 
@@ -455,10 +455,9 @@ define([
       // 是 GET 或 POST 请求且 Content-Type 没有被设置且不是FormData数据
       if (array.contains(METHODS_WITH_FORM_DATA, method) &&
         !contentTypeKey && !contentIsFormData) {
-        // 如果请求用的表单数据, 默认是url-encoded form content type.
-        // 除非是FormData request. 对于FormData请求,
-        // 浏览器自动加上multipart/form-data的content type,
-        // with an appropriate multipart boundary.
+        // 如果请求用的表单数据, 默认是url-encoded form类型.
+        // 对于FormData请求, 浏览器自动加上multipart/form-data的Content-Type,
+        // 和一个合适的multipart boundary.
         headers.set(CONTENT_TYPE_HEADER, FORM_CONTENT_TYPE);
       }
 
@@ -480,7 +479,8 @@ define([
        * @preserveTry
        */
       try {
-        this.cleanUpTimeoutTimer_(); // Paranoid, should never be running.
+        this.cleanUpTimeoutTimer_();
+        // Paranoid, should never be running.
         if (this.timeoutInterval_ > 0) {
           this.useXhr2Timeout_ = XhrIo.shouldUseXhr2Timeout_(this.xhr_);
 
@@ -498,6 +498,7 @@ define([
               this.timeoutInterval_, this);
           }
         }
+
         log.fine(this.logger_, this.formatMsg_('Sending request'));
 
         this.inSend_ = true;
@@ -512,19 +513,16 @@ define([
     };
 
     /**
-     * timeout属性对于早先版本的xhr不适用, 这个方法用于检测xhr是否支持2级原生的
-     * timeout属性和ontimeout回调函数. todo 检测chrome和safari
-     * 搞来搞去只有IE9以上支持啊....代码虽然这么写但是chrome已经足够支持了……
+     * timeout属性对于早先版本的xhr不适用, 这个方法用于检测xhr是否支持xhr2原生的
+     * timeout属性和ontimeout回调函数. todo 检测chrome和safari支持此属性
      *
-     * Currently, FF 21.0 OS X has the fields but won't actually call the timeout
-     * handler.  Perhaps the confusion in the bug referenced below hasn't
-     * entirely been resolved.
+     * FF 21.0 OS X 有这个属性但是不会触发回调. 也许bug还未解决
      *
      * @see http://www.w3.org/TR/XMLHttpRequest/#the-timeout-attribute
      * @see https://bugzilla.mozilla.org/show_bug.cgi?id=525816
      *
      * @param {!XMLHttpRequest|!GearsHttpRequest} xhr The request.
-     * @return {boolean} True if the request supports level 2 timeout.
+     * @return {boolean} 返回xhr对象是否支持设置timeout属性.
      * @private
      */
     XhrIo.shouldUseXhr2Timeout_ = function(xhr) {
@@ -554,7 +552,7 @@ define([
     };
 
     /**
-     * 指定时间XhrIo#timeoutInterval_后请求还未完成则中断请求并触发timeout事件.
+     * 指定时间timeoutInterval_后请求还未完成则中断请求并触发timeout事件.
      * @private
      */
     XhrIo.prototype.timeout_ = function() {
@@ -697,7 +695,7 @@ define([
       }
 
       if (typeof define === 'undefined') {
-        // NOTE: 如果全局没有Oslo对象则说明回调发生在页面卸载时.
+        // NOTE: 如果全局没有define则说明回调发生在页面卸载时.
         // 静默失败.
 
       } else if (

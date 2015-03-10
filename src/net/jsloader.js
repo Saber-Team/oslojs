@@ -116,7 +116,7 @@ define([
 
       // 计算超时timeout, 如果不想有超时, 可以设置timeout = 0.
       var timeout = null;
-      var timeoutDuration = !util.isNull(options.timeout) ? options.timeout : DEFAULT_TIMEOUT;
+      var timeoutDuration = util.isDefAndNotNull(options.timeout) ? options.timeout : DEFAULT_TIMEOUT;
       if (timeoutDuration > 0) {
         timeout = window.setTimeout(function() {
           cleanup_(script, true);

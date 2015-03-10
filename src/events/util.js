@@ -138,7 +138,7 @@ define([
         }
       }
 
-      if (useReturnValue || /** @type {boolean|undefined} */ util.isNull(e.returnValue)) {
+      if (useReturnValue || /** @type {boolean|undefined} */ e.returnValue == undefined) {
         e.returnValue = true;
       }
     }

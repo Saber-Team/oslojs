@@ -241,6 +241,7 @@ define(function() {
     isNumber: function(val) {
       return typeof val === 'number';
     },
+
     /**
      * 返回是否一个字符串. 这里调用Object.prototype.toString比较多余.
      * @param {*} val 要测试的对象.
@@ -249,7 +250,9 @@ define(function() {
     isString: function(val) {
       return typeof val === 'string';
     },
+
     isObject: isObject,
+
     /**
      * 判断一个对象是否undefined或者null
      * @param val
@@ -258,6 +261,7 @@ define(function() {
     isNull: function(val) {
       return val === (void 0) || val === null;
     },
+
     /**
      * 测试对象是否一个undefined值.
      * Note: 如果只是比较obj === undefined不可靠. 特别是如果一个对象的属性设为undefined
@@ -268,6 +272,17 @@ define(function() {
     isDef: function(val) {
       return val !== (void 0);
     },
+
+    /**
+     * 如果对象不为空则返回true.
+     * @param {?} val 测试对象.
+     * @return {boolean} Whether variable is defined and not null.
+     */
+    isDefAndNotNull: function(val) {
+      // undefined == null.
+      return val != null;
+    },
+
     /**
      * 取得对象上的UID. 不同sessions间对象的UID会改变,因为是每次随机生成,不在当前JS
      * 生命周期了. 在函数的原型上生成UID不安全.
@@ -283,6 +298,7 @@ define(function() {
       // and SubClass.prototype will be the same.
       return obj[UID_PROP] || (obj[UID_PROP] = ++uidCounter_);
     },
+
     /**
      * 移除对象上的UID. 如果该对象之前用的getUid,此处相当于undo这个操作.
      * @param {Object} obj 要移除属性的对象.

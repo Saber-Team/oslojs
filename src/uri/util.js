@@ -554,7 +554,7 @@ define([
         }
       }
       // 跳过null和undefined
-      else if (!util.isNull(value)) {
+      else if (util.isDefAndNotNull(value)) {
         pairs.push('&', key,
           // 如果是空字符也不要加＝了, 与UriBuilder.java保持一致.
             value === '' ? '' : '=', string.urlEncode(value));

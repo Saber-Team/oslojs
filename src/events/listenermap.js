@@ -156,8 +156,8 @@ define([
        * @return {boolean} 是否存有可用的符合条件的处理器.
        */
       hasListener: function(opt_type, opt_capture) {
-        var hasType = !util.isNull(opt_type);
-        var hasCapture = !util.isNull(opt_capture);
+        var hasType = util.isDefAndNotNull(opt_type);
+        var hasCapture = util.isDefAndNotNull(opt_capture);
 
         return object.some(
           this.listeners, function(listenerArray, type) {

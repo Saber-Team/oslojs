@@ -136,7 +136,7 @@ define([
         }
 
         detail = smartScale_(-be.wheelDelta, wheelDeltaScaleFactor);
-        if (!util.isNull(be.wheelDeltaX)) {
+        if (util.isDefAndNotNull(be.wheelDeltaX)) {
           // Webkit有wheelDeltaX|wheelDeltaY两个属性指明滚动方向,且可以一次滚动两个方向.
           deltaX = smartScale_(-be.wheelDeltaX, wheelDeltaScaleFactor);
           deltaY = smartScale_(-be.wheelDeltaY, wheelDeltaScaleFactor);
@@ -159,7 +159,7 @@ define([
 
         // Firefox 3.1为事件加了一个axis字段指明滚动的方向.
         // 详见: https://developer.mozilla.org/en/Gecko-Specific_DOM_Events
-        if (!util.isNull(be.axis) && (be.axis === be.HORIZONTAL_AXIS)) {
+        if (util.isDefAndNotNull(be.axis) && (be.axis === be.HORIZONTAL_AXIS)) {
           deltaX = detail;
         } else {
           deltaY = detail;
