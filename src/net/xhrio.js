@@ -603,9 +603,8 @@ define([
     };
 
     /**
-     * 中断当前XMLHttpRequest
-     * @param {ErrorCode=} opt_failureCode Optional error code to use -
-     *     defaults to ABORT.
+     * 中断当前XMLHttpRequest后续动作
+     * @param {ErrorCode=} opt_failureCode 错误码 - 默认是ABORT.
      */
     XhrIo.prototype.abort = function(opt_failureCode) {
       if (this.xhr_ && this.active_) {
