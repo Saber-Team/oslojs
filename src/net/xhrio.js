@@ -1098,7 +1098,7 @@ define([
        * @param {function(!Function): !Function} transformer transformer是一个
        *     ErrorHandler实例(monitor)的wrap方法.
        */
-        function(transformer) {
+      function(transformer) {
         XhrIo.prototype.onReadyStateChangeEntryPoint_ =
           transformer(XhrIo.prototype.onReadyStateChangeEntryPoint_);
       });

@@ -1,6 +1,6 @@
 /**
  * @fileoverview 提供自定义的错误类确保stack能正确维护.
- * 不要直接抛出Sogou.Debug.Error(msg), Error(msg)更高效些.
+ *   不要直接抛出Debug.Error(msg), Error(msg)更高效些.
  * @author Leo.Zhang
  * @email zmike86@gmail.com
  */

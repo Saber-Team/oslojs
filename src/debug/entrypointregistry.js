@@ -1,6 +1,6 @@
 /**
  * @fileoverview 此模块为客户端程序提供全局的注册器, 所有的entry point都
- *   可被instrumented. 需要添加错误监控的模块要通过本模块来注册它们的entry points.
+ *   可被监听. 需要添加错误监控的模块要通过本模块来注册它们的方法监听逻辑.
  *   本模块考虑到entry points可能随时添加但monitorAll的调用时机并不确定. 用私有变量
  *   monitorsMayExist_做开关如果entry point后注册则立即instrument此entry point.
  * @author Leo.Zhang
@@ -18,6 +18,13 @@ define([
    * @interface
    */
   var EntryPointMonitor = function() {};
+
+  /**
+   * 监听一个函数.
+   * @param {!Function} fn 要监听的函数.
+   * @return {!Function} 返回监听后的函数.
+   */
+  EntryPointMonitor.prototype.wrap;
 
   /**
    * Try to remove an instrumentation wrapper created by this monitor.
@@ -52,7 +59,7 @@ define([
   var monitors_ = [];
 
   /**
-   * 是否曾经调用过entryPointRegistry.monitorAll.
+   * 是否调用过entryPointRegistry.monitorAll.
    * @type {boolean}
    * @private
    */
@@ -64,7 +71,8 @@ define([
      * 当调用entryPointRegistry.monitorAll方法时所有保存在refList的entry point
      * 会被instrumented. 如果之前调用过, 则会在本函数内立即instrumented.
      * @param {function(!Function)} callback 回调函数, 接收一个transformer的函数作为参数
-     * 而具体的instrument entry point的工作是transformer做的. callback只起到包裹作用.
+     *   而具体的instrument entry point的工作是transformer做的. callback只起到包裹作用, 通常
+     *   是个匿名函数.
      */
     register: function(callback) {
       // Don't use push(), so that this can be compiled out.
@@ -80,10 +88,10 @@ define([
     },
 
     /**
-     * 对所有的entry points配置添加monitor.
+     * 对所有的entry points配置添加错误监听函数errorhandler.
      * 注册过的entry points会立即被monitor包裹. 未来注册的entry point, 会在注册时
      * 自动被monitor wrapped.
-     * @param {!EntryPointMonitor} monitor entry point monitor一般是debug.ErrorHandler
+     * @param {!EntryPointMonitor} monitor entry point monitor一般是ErrorHandler
      *     的实例.
      */
     monitorAll: function(monitor) {
