@@ -113,8 +113,8 @@ define([
   /**
    * 对entry point函数植入异常处理保护措施. 当保护的函数抛出异常, 会有特定的
    * 异常处理器处理错误.
-   * @param {Function} fn 要被保护的entry point函数.
-   * @return {!Function} 返回一个包装函数, 内部其实还是调用entry point函数.
+   * @param {Function} fn 要被保护的函数.
+   * @return {!Function} 返回一个包装函数, 内部还是调用fn函数.
    */
   ErrorHandler.prototype.protectEntryPoint = function(fn) {
     // 获得保护方法名称
@@ -234,7 +234,6 @@ define([
     }
   };
 
-
   /**
    * 保护原生的setTimeout/setInterval.
    * @param {string} fnName 要保护的全局方法名. 就是内建的setTimeout和setInterval.
@@ -252,7 +251,7 @@ define([
       }
       fn = that.protectEntryPoint(fn);
 
-      // IE doesn't support .call for setInterval/setTimeout, but it
+      // IE不支持 setInterval/setTimeout.call, but it
       // also doesn't care what "this" is, so we can just call the
       // original function directly
       if (originalFn.call) {
@@ -264,7 +263,6 @@ define([
     win[fnName][this.getFunctionIndex_(false)] = originalFn;
   };
 
-
   /**
    * 设置是否要用ProtectedFunctionError对原生异常对象进行封装.
    * @param {boolean} wrapErrors 是否封装.
@@ -273,7 +271,6 @@ define([
     this.wrapErrors_ = wrapErrors;
   };
 
-
   /**
    * 设置收保护方法中抛出异常的错误消息的前缀.
    * @param {boolean} prefixErrorMessages 是否设置.
@@ -281,7 +278,6 @@ define([
   ErrorHandler.prototype.setPrefixErrorMessages = function(prefixErrorMessages) {
     this.prefixErrorMessages_ = prefixErrorMessages;
   };
-
 
   /** @override */
   ErrorHandler.prototype.disposeInternal = function() {
