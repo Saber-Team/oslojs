@@ -11,11 +11,13 @@ define([
   '../util/util',
   '../disposable/disposable',
   '../asserts/asserts',
-  '../debug/util',
-  '../debug/error',
-  '../debug/entrypointregistry',
-  '../debug/tracer'
-], function(util, Disposable, asserts, debug, DebugError, entryPointRegistry, Trace) {
+  './util',
+  './error',
+  './entrypointregistry',
+  './tracer',
+  './protectedfnerror'
+], function(util, Disposable, asserts, debug, DebugError, entryPointRegistry,
+            Trace, ProtectedFunctionError) {
 
   'use strict';
 
@@ -41,14 +43,14 @@ define([
     this.errorHandlerFn_ = handler;
 
     /**
-     * 是否异常对象再重新抛出前要封装成ErrorHandler.ProtectedFunctionError.
+     * 是否异常对象再重新抛出前要封装成ProtectedFunctionError.
      * @type {boolean}
      * @private
      */
     this.wrapErrors_ = true;
 
     /**
-     * 所有错误消息是否要加前缀ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX.
+     * 所有错误消息是否要加前缀ProtectedFunctionError.MESSAGE_PREFIX.
      * 这个配置属性只this.wrapErrors_设置为false时起作用.
      * @type {boolean}
      * @private
@@ -167,10 +169,10 @@ define([
           if (that.prefixErrorMessages_) {
             if (typeof e === 'object') {
               e.message =
-                ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX +
+                ProtectedFunctionError.MESSAGE_PREFIX +
                 e.message;
             } else {
-              e = ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX +
+              e = ProtectedFunctionError.MESSAGE_PREFIX +
                 e;
             }
           }
@@ -188,7 +190,7 @@ define([
           throw e;
         }
         // 包装后重新抛出.
-        throw new ErrorHandler.ProtectedFunctionError(e);
+        throw new ProtectedFunctionError(e);
 
       } finally {
         if (tracers) {
@@ -288,40 +290,6 @@ define([
 
     ErrorHandler.superClass_.disposeInternal.call(this);
   };
-
-
-  /**
-   * 受保护的entry point函数的调用者会接收到此异常对象.
-   * @param {*} cause entry point函数抛出的异常对象.
-   * @constructor
-   * @extends {DebugError}
-   */
-  ErrorHandler.ProtectedFunctionError = function(cause) {
-    var message = ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX +
-      (cause && cause.message ? String(cause.message) : String(cause));
-
-    DebugError.call(this, message);
-
-    /**
-     * entry point抛出的原始异常对象.
-     * @type {*}
-     */
-    this.cause = cause;
-
-    var stack = cause && cause.stack;
-    if (stack && util.isString(stack)) {
-      this.stack = /** @type {string} */ (stack);
-    }
-  };
-
-  util.inherits(ErrorHandler.ProtectedFunctionError, DebugError);
-
-  /**
-   * 错误消息前缀.
-   * @type {string}
-   */
-  ErrorHandler.ProtectedFunctionError.MESSAGE_PREFIX =
-    'Error in protected function: ';
 
   return ErrorHandler;
 
