@@ -618,7 +618,7 @@ define([
       if (!opt_includeNode) {
         element = element.parentNode;
       }
-      var ignoreSearchSteps = (opt_maxSearchSteps === null);
+      var ignoreSearchSteps = (opt_maxSearchSteps == null);
       var steps = 0;
       while (element && (ignoreSearchSteps || steps <= opt_maxSearchSteps)) {
         if (matcher(element)) {
