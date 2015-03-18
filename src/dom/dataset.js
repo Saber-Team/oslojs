@@ -10,8 +10,7 @@ define(['../string/util'], function(string) {
   'use strict';
 
   /**
-   * The DOM attribute name prefix that must be present for it to be considered
-   * for a dataset.
+   * 设置dom的dataset属性时需要加的前缀.
    * @type {string}
    * @const
    * @private
@@ -21,11 +20,11 @@ define(['../string/util'], function(string) {
   var ds = {};
 
   /**
-   * Sets a custom data attribute on an element. The key should be
-   * in camelCase format (e.g "keyName" for the "data-key-name" attribute).
-   * @param {Element} element DOM node to set the custom data attribute on.
-   * @param {string} key Key for the custom data attribute.
-   * @param {string} value Value for the custom data attribute.
+   * 设置元素自定义的data属性. 名称要是驼峰式的 (e.g "keyName" 对应于
+   * "data-key-name" 属性).
+   * @param {Element} element DOM元素.
+   * @param {string} key 属性名称.
+   * @param {string} value 属性值.
    */
   ds.set = function(element, key, value) {
     if (element.dataset) {
@@ -37,11 +36,10 @@ define(['../string/util'], function(string) {
   };
 
   /**
-   * Gets a custom data attribute from an element. The key should be
-   * in camelCase format (e.g "keyName" for the "data-key-name" attribute).
-   * @param {Element} element DOM node to get the custom data attribute from.
-   * @param {string} key Key for the custom data attribute.
-   * @return {?string} The attribute value, if it exists.
+   * 获取元素的自定义data属性. 名称应是驼峰写法 (e.g "keyName" for the "data-key-name").
+   * @param {Element} element DOM元素.
+   * @param {string} key 属性名.
+   * @return {?string} 属性值.
    */
   ds.get = function(element, key) {
     if (element.dataset) {
