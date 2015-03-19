@@ -404,7 +404,7 @@ define([
       // 初始化active_为true
       this.active_ = true;
 
-      // Use the factory to create the XHR object and options
+      // 创建xhr对象和选项
       this.xhr_ = this.createXhr();
       this.xhrOptions_ = this.xmlHttpFactory_ ?
         this.xmlHttpFactory_.getOptions() : xmlHttp.getOptions();
@@ -621,17 +621,15 @@ define([
     };
 
     /**
-     * Nullifies all callbacks.
+     * 析构解绑事件.
      * @override
      * @protected
      */
     XhrIo.prototype.disposeInternal = function() {
       if (this.xhr_) {
-        // We explicitly do not call xhr_.abort() unless active_ is still true.
-        // This is to avoid unnecessarily aborting a successful request when
-        // dispose() is called in a callback triggered by a complete response, but
-        // in which browser cleanup has not yet finished.
-        // (See http://b/issue?id=1684217.)
+        // 只有当active_为true的时候才显式调用xhr_.abort().
+        // 这是为了避免在请求成功后的回调 (complete) 里调用xhrio.dispose()而终止xhr对象, 但浏览器
+        // 对对象的清理还未完成. (See http://b/issue?id=1684217.)
         if (this.active_) {
           this.active_ = false;
           this.inAbort_ = true;
@@ -651,9 +649,7 @@ define([
      * xhr.HEADERS_RECEIVED === 2
      * xhr.LOADING === 3
      * xhr.DONE === 4
-     * This method checks the status and the readystate and fires the correct callbacks.
-     * If the request has ended, the handlers are cleaned up and the XHR object is
-     * nullified.
+     * 私有方法检查返回状态status, readystate并触发正确的回调, 如果请求完成回调会被清除xhr对象也会析构.
      * @private
      */
     XhrIo.prototype.onReadyStateChange_ = function() {
@@ -671,7 +667,7 @@ define([
     };
 
     /**
-     * 多了这个方法是为了保护onreadystatechange处理器作为entry point. 因为
+     * 多了这个方法是为了保护onreadystatechange作为entry point. 因为
      * onReadyStateChange_可能会在send或abort时触发调用, 所以很有必要. 这个
      * 方法只在onReadyStateChange_是一个entry point时才会调用.
      * {@see XhrIo.protectEntryPoints}
